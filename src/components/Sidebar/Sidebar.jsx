@@ -6,7 +6,8 @@ import { LuUsers } from "react-icons/lu";
 
 const Sidebar = () => {
   return (
-    <aside className="flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r dark:bg-gray-900 dark:border-gray-700">
+    <section className="flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-white border-r dark:bg-gray-900 dark:border-gray-700">
+    
       <Link href="/">
         <Image
           className="w-auto h-6 sm:h-7"
@@ -33,6 +34,13 @@ const Sidebar = () => {
           <LuUsers />
           Customer
         </Link>
+        <Link
+          href="/signup"
+          className="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-md dark:bg-gray-800 dark:text-gray-200 gap-1 uppercase"
+        >
+          <LuUsers />
+          registration
+        </Link>
       </nav>
 
       <div className="flex items-center px-4 mt-auto">
@@ -47,7 +55,7 @@ const Sidebar = () => {
           John Doe
         </span>
       </div>
-    </aside>
+    </section>
   );
 };
 
