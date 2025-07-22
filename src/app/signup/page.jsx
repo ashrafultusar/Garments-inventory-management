@@ -15,7 +15,6 @@ const SignIn = () => {
             alt="Meraki UI Logo"
           />
         </div>
-
         <h3 className="mt-3 text-xl font-medium text-center text-gray-600 dark:text-gray-200">
           Welcome Back
         </h3>
@@ -55,7 +54,7 @@ const SignIn = () => {
 
             <button
               type="submit"
-              className="px-6 py-2 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+              className="px-6 py-2 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50 cursor-pointer"
             >
               Sign In
             </button>
@@ -63,18 +62,6 @@ const SignIn = () => {
         </form>
       </div>
 
-      <div className="flex items-center justify-center py-4 text-center bg-gray-50 dark:bg-gray-700">
-        <span className="text-sm text-gray-600 dark:text-gray-200">
-          Don't have an account?
-        </span>
-
-        <a
-          href="#"
-          className="mx-2 text-sm font-bold text-blue-500 dark:text-blue-400 hover:underline"
-        >
-          Register
-        </a>
-      </div>
     </div>
    </div>
   );

@@ -2,116 +2,109 @@
 
 import React, { useState } from "react";
 
-const page = () => {
+const Page = () => {
   const [formData, setFormData] = useState({
-    username: "",
-    emailAddress: "",
-    password: "",
-    passwordConfirmation: "",
+    date: "",
+    customerName: "",
+    clotheType: "",
+    finishingWidth: "",
+    quality: "",
+    sillName: "",
+    colour: "",
+    finishingType: "",
+    totalGoj: "",
+    totalBundle: "",
+    dyeingName: "",
+    transporterName: "",
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    console.log("Submitted:", formData);
+    console.log("Submitted Order:", formData);
   };
 
   return (
-    <section className="max-w-4xl p-6 mx-auto bg-white rounded-md shadow-md dark:bg-gray-800">
-      <h2 className="text-lg font-semibold text-gray-700 capitalize dark:text-white">
-        Account settings
-      </h2>
+    <section className="max-w-4xl mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
+      <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">📝 Order Form</h2>
 
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-          <div>
-            <label
-              htmlFor="username"
-              className="text-gray-700 dark:text-gray-200"
-            >
-              Username
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">
+          {/* Each Input Group */}
+          {[
+            ["date", "Date", "date"],
+            ["customerName", "Customer Name", "text"],
+            ["finishingWidth", "Finishing প্রস্থ (inch)", "number"],
+            ["quality", "Quality", "number"],
+            ["sillName", "Sill Name", "text"],
+            ["colour", "Colour", "text"],
+            ["totalGoj", "Total Goj", "number"],
+            ["totalBundle", "Total Bundle", "number"],
+            ["dyeingName", "Dyeing Name", "text"],
+            ["transporterName", "Transporter Name", "text"],
+          ].map(([id, label, type]) => (
+            <div key={id} className="flex flex-col">
+              <label htmlFor={id} className="mb-1 font-medium text-sm">
+                {label}
+              </label>
+              <input
+                id={id}
+                type={type}
+                value={formData[id]}
+                onChange={handleChange}
+                className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          ))}
+
+          {/* Select: Clothe Type */}
+          <div className="flex flex-col">
+            <label htmlFor="clotheType" className="mb-1 font-medium text-sm">
+              Clothe Type
             </label>
-            <input
-              id="username"
-              type="text"
-              value={formData.username}
+            <select
+              id="clotheType"
+              value={formData.clotheType}
               onChange={handleChange}
-              className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md 
-                dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 
-                focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 
-                dark:focus:border-blue-300 focus:outline-none focus:ring"
-            />
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select Type</option>
+              <option value="Cotton">Cotton</option>
+              <option value="Polyester">Polyester</option>
+              <option value="Mixed">Mixed</option>
+            </select>
           </div>
 
-          <div>
-            <label
-              htmlFor="emailAddress"
-              className="text-gray-700 dark:text-gray-200"
-            >
-              Email Address
+          {/* Select: Finishing Type */}
+          <div className="flex flex-col">
+            <label htmlFor="finishingType" className="mb-1 font-medium text-sm">
+              Finishing Type
             </label>
-            <input
-              id="emailAddress"
-              type="email"
-              value={formData.emailAddress}
+            <select
+              id="finishingType"
+              value={formData.finishingType}
               onChange={handleChange}
-              className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md 
-                dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 
-                focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 
-                dark:focus:border-blue-300 focus:outline-none focus:ring"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="text-gray-700 dark:text-gray-200"
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md 
-                dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 
-                focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 
-                dark:focus:border-blue-300 focus:outline-none focus:ring"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="passwordConfirmation"
-              className="text-gray-700 dark:text-gray-200"
-            >
-              Password Confirmation
-            </label>
-            <input
-              id="passwordConfirmation"
-              type="password"
-              value={formData.passwordConfirmation}
-              onChange={handleChange}
-              className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md 
-                dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 
-                focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 
-                dark:focus:border-blue-300 focus:outline-none focus:ring"
-            />
+              <option value="">Select Finishing</option>
+              <option value="Soft">Soft</option>
+              <option value="Hard">Hard</option>
+              <option value="Normal">Normal</option>
+            </select>
           </div>
         </div>
 
-        <div className="flex justify-end mt-6">
+        {/* Submit Button */}
+        <div className="flex justify-end mt-8">
           <button
             type="submit"
-            className="px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform 
-              bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600 cursor-pointer"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
           >
-            Save
+            Submit Order
           </button>
         </div>
       </form>
@@ -119,4 +112,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
