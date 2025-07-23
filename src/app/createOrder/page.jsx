@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -23,9 +24,42 @@ const Page = () => {
     setFormData({ ...formData, [id]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitted Order:", formData);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success("Order created successfully!");
+        setFormData({
+          date: "",
+          customerName: "",
+          clotheType: "",
+          finishingWidth: "",
+          quality: "",
+          sillName: "",
+          colour: "",
+          finishingType: "",
+          totalGoj: "",
+          totalBundle: "",
+          dyeingName: "",
+          transporterName: "",
+        });
+      } else {
+        toast.error("Failed to save order");
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.error("Error:", error);
+    }
   };
 
   return (
@@ -34,7 +68,6 @@ const Page = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">
-          {/* Each Input Group */}
           {[
             ["date", "Date", "date"],
             ["customerName", "Customer Name", "text"],
@@ -61,7 +94,6 @@ const Page = () => {
             </div>
           ))}
 
-          {/* Select: Clothe Type */}
           <div className="flex flex-col">
             <label htmlFor="clotheType" className="mb-1 font-medium text-sm">
               Clothe Type
@@ -79,7 +111,6 @@ const Page = () => {
             </select>
           </div>
 
-          {/* Select: Finishing Type */}
           <div className="flex flex-col">
             <label htmlFor="finishingType" className="mb-1 font-medium text-sm">
               Finishing Type
@@ -98,11 +129,10 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="flex justify-end mt-8">
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
           >
             Submit Order
           </button>
