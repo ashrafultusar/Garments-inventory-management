@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const Page = () => {
+
   const [formData, setFormData] = useState({
     date: "",
     customerName: "",
@@ -28,7 +29,7 @@ const Page = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:5000/api/orders", {
+      const res = await fetch("/api/order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,9 +63,13 @@ const Page = () => {
     }
   };
 
+
+
   return (
     <section className="max-w-4xl mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
-      <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">📝 Order Form</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
+        📝 Order Form
+      </h2>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">

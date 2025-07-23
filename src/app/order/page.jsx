@@ -1,41 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaPencilAlt } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
 import { IoClose } from "react-icons/io5";
 import Link from "next/link";
 
-const orders = [
-  {
-    id: "ORD-2025-011",
-    product: "Ocean Blue (Polyester)",
-    customer: "ABC Textiles Ltd",
-    status: "Delivered",
-    quantity: "65",
-    payment: "Unpaid",
-    color: "Ocean Blue",
-    width: "65 inch",
-    quality: "2/10",
-    bundle: "67",
-    service: "Polyester",
-  },
-  {
-    id: "ORD-2025-010",
-    product: "Sunset Orange (Polyester)",
-    customer: "ABC Textiles Ltd",
-    status: "Billing",
-    quantity: "4",
-    payment: "Unpaid",
-  },
-  {
-    id: "ORD-2025-003",
-    product: "Sunset Orange (Silk)",
-    customer: "Global Fabrics Inc",
-    status: "Delivered",
-    quantity: "300 yards",
-    payment: "Paid",
-  },
-];
+
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -58,8 +28,25 @@ const getPaymentColor = (payment) => {
     : "bg-red-100 text-red-700";
 };
 
+
+
+
+
+
+
 const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/order")
+      .then((res) => res.json())
+      .then((data) => setOrders(data))
+      .catch((err) => console.error("error", err));
+  }, []);
+  console.log(orders);
+
+
 
   return (
     <div className="p-6 text-black relative">
@@ -125,7 +112,7 @@ const Orders = () => {
               >
                 <td className="p-4 whitespace-nowrap">{order.id}</td>
                 <td className="p-4 whitespace-nowrap">{order.product}</td>
-                <td className="p-4 whitespace-nowrap">{order.customer}</td>
+                <td className="p-4 whitespace-nowrap">{order.customerName}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
                     className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(order.status)}`}
@@ -133,7 +120,7 @@ const Orders = () => {
                     {order.status}
                   </span>
                 </td>
-                <td className="p-4 whitespace-nowrap">{order.quantity}</td>
+                <td className="p-4 whitespace-nowrap">{order.quality}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
                     className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(order.payment)}`}
