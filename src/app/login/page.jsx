@@ -1,25 +1,36 @@
 "use client";
 import React from "react";
 
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+
 const SignIn = () => {
+  const router = useRouter();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
-    const name = form.name.value;
     const email = form.email.value;
     const password = form.password.value;
 
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    const data = await res.json();
-    console.log(data);
-    
+    try {
+      const response = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl: "/",
+        redirect: false,
+      });
+      if (response.ok) {
+        router.push("/");
+        form.reset();
+        toast.success("login successfuly");
+      } else {
+        toast.error("Authintaction Faild");
+      }
+    } catch {
+      toast.error("Authintaction Faild");
+    }
   };
 
   return (
@@ -73,23 +84,6 @@ const SignIn = () => {
           <span className="w-1/5 border-b dark:border-gray-400 lg:w-1/4"></span>
         </div>
 
-        {/* Name Input */}
-        <div className="mt-4">
-          <label
-            htmlFor="name"
-            className="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200"
-          >
-            Name
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            className="block w-full px-4 py-2 text-gray-700 bg-white border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring focus:ring-blue-300"
-          />
-        </div>
-
         {/* Email Input */}
         <div className="mt-4">
           <label
@@ -135,7 +129,6 @@ const SignIn = () => {
             Sign In
           </button>
         </div>
-        
       </form>
     </div>
   );

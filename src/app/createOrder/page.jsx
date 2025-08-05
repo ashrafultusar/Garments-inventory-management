@@ -92,6 +92,7 @@ const Page = () => {
               <input
                 id={id}
                 type={type}
+                required
                 value={formData[id]}
                 onChange={handleChange}
                 className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -106,6 +107,7 @@ const Page = () => {
             <select
               id="clotheType"
               value={formData.clotheType}
+              required
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -124,6 +126,7 @@ const Page = () => {
               id="finishingType"
               value={formData.finishingType}
               onChange={handleChange}
+              required
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Finishing</option>

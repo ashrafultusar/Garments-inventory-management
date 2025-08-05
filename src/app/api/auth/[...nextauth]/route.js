@@ -1,34 +1,38 @@
+import connectDB from "@/lib/db";
+import User from "@/models/User";
 import NextAuth from "next-auth";
-import CredentialProvider from "next-auth/providers/credentials";
+import CredentialsProvider from "next-auth/providers/credentials";
 
-const handler = NextAuth({
-  session: {
-    strategy: "jwt",
-  },
+export const authOptions = {
   providers: [
-    CredentialProvider({
+    CredentialsProvider({
+      name: "Credentials",
+
       credentials: {
-        email: {
-          label: "Email",
-          type: "text",
-          required: true,
-          placeholder: "Your Email",
-        },
-        password: {
-          label: "Password",
-          type: "password",
-          required: true,
-          placeholder: "Enter Password",
-        },
+        email: { label: "Email", type: "text", placeholder: "enter email" },
+        password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        if (!credentials) {
-          return null;
+      async authorize(credentials, req) {
+        console.log(credentials);
+
+        await connectDB();
+        const user = await User.findOne({ email: credentials.email });
+
+
+        if (user) {
+          return user;
         }
-        return true;
+
+        return null;
       },
     }),
   ],
-});
+
+  pages: {
+    SignIn: "/login",
+  },
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
