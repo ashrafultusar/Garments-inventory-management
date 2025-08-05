@@ -1,4 +1,5 @@
 "use client";
+import { signIn } from "next-auth/react";
 import React from "react";
 
 const SignIn = () => {
@@ -21,6 +22,12 @@ const SignIn = () => {
     console.log(data);
     
   };
+
+
+  const handelGoogleLogin = async (providerName) => {
+      const result = await signIn(providerName, { redirect: false });
+      console.log(result);
+    };
 
   return (
     <div className="flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800 lg:max-w-4xl">
@@ -48,7 +55,7 @@ const SignIn = () => {
           Welcome back!
         </p>
 
-        <button
+        <button  onClick={() => handelGoogleLogin("google")}
           type="button"
           className="flex items-center justify-center mt-4 text-gray-600 w-full transition-colors duration-300 transform border rounded-lg dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
         >

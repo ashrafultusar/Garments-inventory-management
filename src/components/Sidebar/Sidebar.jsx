@@ -5,9 +5,13 @@ import { useState } from "react";
 import { FaBars, FaCartArrowDown } from "react-icons/fa";
 import { LuUsers } from "react-icons/lu";
 import { IoClose } from "react-icons/io5";
+import { signOut, useSession } from "next-auth/react";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: session, status } = useSession();
+
+  console.log(session?.user?.name);
 
   return (
     <>
@@ -81,7 +85,6 @@ const Sidebar = () => {
             <LuUsers />
             Registration
           </Link>
-         
         </nav>
 
         {/* User Info */}
@@ -94,9 +97,16 @@ const Sidebar = () => {
             height={36}
           />
           <span className="ml-2 font-medium text-gray-800 dark:text-gray-200">
-            John Doe
+            {session?.user?.name}
           </span>
         </div>
+        <button
+          onClick={() => signOut()}
+          type="submit"
+          className="w-full mt-4 px-6 py-3 text-sm font-medium tracking-wide text-white capitalize cursor-pointer transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50"
+        >
+          Log Out
+        </button>
       </section>
     </>
   );
