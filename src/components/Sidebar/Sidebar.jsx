@@ -11,7 +11,13 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
 
-  console.log(session?.user?.name);
+  const imageSrc =
+  session?.user?.image
+    ? session.user.image
+    : "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=634&q=80";
+
+
+  // console.log(session?.user?.image);
 
   return (
     <>

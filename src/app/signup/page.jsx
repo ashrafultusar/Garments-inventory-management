@@ -1,8 +1,10 @@
 "use client";
+
 import { signIn } from "next-auth/react";
 import React from "react";
+import { toast } from "react-toastify";
 
-const SignIn = () => {
+const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -10,24 +12,34 @@ const SignIn = () => {
     const email = form.email.value;
     const password = form.password.value;
 
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    const data = await res.json();
-    console.log(data);
-    
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("User Registration successful");
+        form.reset();
+      } else {
+        toast.error(data.error || "Registration failed");
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Something went wrong");
+    }
   };
 
-
   const handelGoogleLogin = async (providerName) => {
-      const result = await signIn(providerName, { redirect: false });
-      console.log(result);
-    };
+    await signIn(providerName, {
+      callbackUrl: "/",
+    });
+  };
 
   return (
     <div className="flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800 lg:max-w-4xl">
@@ -55,7 +67,8 @@ const SignIn = () => {
           Welcome back!
         </p>
 
-        <button  onClick={() => handelGoogleLogin("google")}
+        <button
+          onClick={() => handelGoogleLogin("google")}
           type="button"
           className="flex items-center justify-center mt-4 text-gray-600 w-full transition-colors duration-300 transform border rounded-lg dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
         >
@@ -64,7 +77,7 @@ const SignIn = () => {
               {/* SVG path here */}
             </svg>
           </div>
-          <span className="w-5/6 px-4 py-3 font-bold text-center">
+          <span className="w-5/6 px-4 py-3 font-bold text-center cursor-pointer">
             Sign in with Google
           </span>
         </button>
@@ -142,10 +155,9 @@ const SignIn = () => {
             Sign In
           </button>
         </div>
-        
       </form>
     </div>
   );
 };
 
-export default SignIn;
+export default SignUp;
