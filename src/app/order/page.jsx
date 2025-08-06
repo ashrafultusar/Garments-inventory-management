@@ -110,22 +110,22 @@ const Orders = () => {
                 className="border-b hover:bg-gray-50 cursor-pointer"
                 onClick={() => setSelectedOrder(order)}
               >
-                <td className="p-4 whitespace-nowrap">{order.id}</td>
-                <td className="p-4 whitespace-nowrap">{order.product}</td>
-                <td className="p-4 whitespace-nowrap">{order.customerName}</td>
+                <td className="p-4 whitespace-nowrap">{order?._id}</td>
+                <td className="p-4 whitespace-nowrap">{order.transporterName}</td>
+                <td className="p-4 whitespace-nowrap">{order?.customerName}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
-                    className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(order.status)}`}
+                    className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(order?.status)}`}
                   >
-                    {order.status}
+                    Deliverried
                   </span>
                 </td>
-                <td className="p-4 whitespace-nowrap">{order.quality}</td>
+                <td className="p-4 whitespace-nowrap">{order?.quality}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
-                    className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(order.payment)}`}
+                    className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(order?.payment)}`}
                   >
-                    {order.payment}
+                   Paid
                   </span>
                 </td>
                 <td className="p-4 whitespace-nowrap">
