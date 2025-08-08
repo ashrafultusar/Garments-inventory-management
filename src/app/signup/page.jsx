@@ -35,8 +35,8 @@ const SignUp = () => {
     }
   };
 
-  const handelGoogleLogin = async (providerName) => {
-    await signIn(providerName, {
+  const handelGoogleLogin =  (providerName) => {
+     signIn(providerName, {
       callbackUrl: "/",
     });
   };

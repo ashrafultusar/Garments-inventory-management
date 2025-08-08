@@ -11,17 +11,12 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
 
-  const imageSrc =
-  session?.user?.image
+  const imageSrc = session?.user?.image
     ? session.user.image
     : "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=634&q=80";
 
-
-  // console.log(session?.user?.image);
-
   return (
     <>
-      {/* Hamburger Icon - Only on Mobile/Tablet */}
       <button
         className="md:hidden fixed top-4 left-4 z-50 p-2 text-white bg-gray-800 rounded-md"
         onClick={() => setIsOpen(!isOpen)}
@@ -29,7 +24,6 @@ const Sidebar = () => {
         {isOpen ? <IoClose size={20} /> : <FaBars size={20} />}
       </button>
 
-      {/* Overlay Background - Only when Sidebar is Open on Mobile */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-opacity-40 z-30 md:hidden"
@@ -37,7 +31,6 @@ const Sidebar = () => {
         />
       )}
 
-      {/* Sidebar */}
       <section
         className={`
           fixed top-0 left-0 z-40 h-screen w-64 px-4 py-8 overflow-y-auto 
@@ -48,7 +41,6 @@ const Sidebar = () => {
           md:translate-x-0 md:static md:h-screen
         `}
       >
-        {/* Logo */}
         <Link href="/">
           <Image
             className="w-auto h-6 sm:h-7"
@@ -59,7 +51,6 @@ const Sidebar = () => {
           />
         </Link>
 
-        {/* Navigation */}
         <nav className="mt-6 space-y-2">
           <Link
             href="/order"
@@ -93,7 +84,6 @@ const Sidebar = () => {
           </Link>
         </nav>
 
-        {/* User Info */}
         <div className="flex items-center px-4 mt-auto">
           <Image
             className="object-cover rounded-full h-9 w-9"
