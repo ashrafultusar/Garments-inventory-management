@@ -1,8 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar/Sidebar";
 import { ToastContainer } from "react-toastify";
 import NextAuthProvider from "@/Providers/NextAuthProvider";
+import SessionWrapper from "@/components/SessionWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,17 +22,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <NextAuthProvider>
-          <div className="flex">
-            <Sidebar />
-            <main className="flex-1 p-4 bg-gray-100 min-h-screen">
-              {children}
-              <ToastContainer />
-            </main>
-          </div>
+          <SessionWrapper>
+            {children}
+            <ToastContainer />
+          </SessionWrapper>
         </NextAuthProvider>
       </body>
     </html>
