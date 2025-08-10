@@ -28,6 +28,7 @@ export default function SessionWrapper({ children }) {
   return (
     <div className="flex">
       {session && <Sidebar />}
+   
       <main className="flex-1 p-4 bg-gray-100 min-h-screen">{children}</main>
     </div>
   );
