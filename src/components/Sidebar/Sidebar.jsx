@@ -53,7 +53,7 @@ const Sidebar = () => {
 
         <nav className="mt-6 space-y-2">
           <Link
-            href="/order"
+            href="/dashboard/order"
             className="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-md dark:bg-gray-800 dark:text-gray-200 gap-1 uppercase"
           >
             <FaCartArrowDown />
@@ -61,14 +61,14 @@ const Sidebar = () => {
           </Link>
 
           <Link
-            href="/customer"
+            href="/dashboard/customer"
             className="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-md dark:bg-gray-800 dark:text-gray-200 gap-1 uppercase"
           >
             <LuUsers />
             Customer
           </Link>
           <Link
-            href="/customer"
+            href="/dashboard/customer"
             className="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-md dark:bg-gray-800 dark:text-gray-200 gap-1 uppercase"
           >
             <LuUsers />
@@ -76,7 +76,7 @@ const Sidebar = () => {
           </Link>
 
           <Link
-            href="/signup"
+            href="/dashboard/signup"
             className="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-md dark:bg-gray-800 dark:text-gray-200 gap-1 uppercase"
           >
             <LuUsers />
