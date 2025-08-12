@@ -16,4 +16,6 @@ const orderSchema = new mongoose.Schema({
     transporterName: String,
 }, { timestamps: true });
 
-module.exports = mongoose.model("Order", orderSchema);
+const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
+
+module.exports = Order;

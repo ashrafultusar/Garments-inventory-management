@@ -4,6 +4,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
 import { IoClose } from "react-icons/io5";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -31,10 +32,12 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loadingOrder, setLoadingOrder] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
-
-  // Modal animation control states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+
+  // Confirmation modal states
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState(null);
 
   useEffect(() => {
     fetch("/api/order")
@@ -56,7 +59,6 @@ const Orders = () => {
       setIsClosing(false);
       setIsOpening(true); // Start with modal off-screen
 
-      // After a short delay, remove isOpening to trigger slide-in animation
       setTimeout(() => setIsOpening(false), 20);
     } catch (err) {
       console.error("Error fetching single order:", err);
@@ -72,7 +74,37 @@ const Orders = () => {
       setIsModalOpen(false);
       setSelectedOrder(null);
       setIsClosing(false);
-    }, 300); // Match duration of transition
+    }, 300);
+  };
+
+  // Open confirm modal for deletion
+  const confirmDelete = (id) => {
+    setOrderToDelete(id);
+    setShowConfirmModal(true);
+  };
+
+  // Delete order function with confirmation modal
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`/api/order/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete order");
+      }
+
+      setOrders((prevOrders) => prevOrders.filter((order) => order._id !== id));
+
+      if (selectedOrder && selectedOrder._id === id) {
+        closeModal();
+      }
+
+      toast.success("Order deleted successfully.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error deleting order. Please try again.");
+    }
   };
 
   return (
@@ -141,12 +173,8 @@ const Orders = () => {
                 onClick={() => handleOrderClick(order._id)}
               >
                 <td className="p-4 whitespace-nowrap">{order?._id}</td>
-                <td className="p-4 whitespace-nowrap">
-                  {order?.dyeingName || "N/A"}
-                </td>
-                <td className="p-4 whitespace-nowrap">
-                  {order?.customerName || "N/A"}
-                </td>
+                <td className="p-4 whitespace-nowrap">{order?.dyeingName || "N/A"}</td>
+                <td className="p-4 whitespace-nowrap">{order?.customerName || "N/A"}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
                     className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(
@@ -156,9 +184,7 @@ const Orders = () => {
                     {order?.status || "N/A"}
                   </span>
                 </td>
-                <td className="p-4 whitespace-nowrap">
-                  {order?.quality || "N/A"}
-                </td>
+                <td className="p-4 whitespace-nowrap">{order?.quality || "N/A"}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
                     className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(
@@ -171,7 +197,13 @@ const Orders = () => {
                 <td className="p-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
                     <FaPencilAlt className="w-4 h-4 text-gray-500 hover:text-black cursor-pointer" />
-                    <LuTrash2 className="w-4 h-4 text-gray-500 hover:text-red-600 cursor-pointer" />
+                    <LuTrash2
+                      className="w-4 h-4 text-gray-500 hover:text-red-600 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confirmDelete(order._id);
+                      }}
+                    />
                   </div>
                 </td>
               </tr>
@@ -206,9 +238,7 @@ const Orders = () => {
             {/* Header */}
             <div className="flex justify-between items-center border-b pb-3 mb-4">
               <div>
-                <h2 className="text-xl font-semibold">
-                  Order #{selectedOrder._id}
-                </h2>
+                <h2 className="text-xl font-semibold">Order #{selectedOrder._id}</h2>
                 <p className="text-sm text-gray-500">
                   {selectedOrder.createdAt
                     ? new Date(selectedOrder.createdAt).toLocaleDateString()
@@ -232,16 +262,12 @@ const Orders = () => {
                 <div className="space-y-4">
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-500">Customer</p>
-                    <p className="text-base font-medium">
-                      {selectedOrder.customerName || "N/A"}
-                    </p>
+                    <p className="text-base font-medium">{selectedOrder.customerName || "N/A"}</p>
                   </div>
 
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-500">Product</p>
-                    <p className="text-base font-medium">
-                      {selectedOrder.dyeingName || "N/A"}
-                    </p>
+                    <p className="text-base font-medium">{selectedOrder.dyeingName || "N/A"}</p>
                   </div>
 
                   <div className="p-4 bg-gray-50 rounded-lg flex items-center justify-between">
@@ -269,23 +295,53 @@ const Orders = () => {
 
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-500">Quantity</p>
-                    <p className="text-base font-medium">
-                      {selectedOrder.quality || "N/A"}
-                    </p>
+                    <p className="text-base font-medium">{selectedOrder.quality || "N/A"}</p>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="mt-6 flex gap-3">
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer shadow hover:bg-blue-700 transition">
                     Edit Order
                   </button>
-                  <button className="px-4 py-2 bg-red-100 text-red-700 rounded-lg shadow hover:bg-red-200 transition">
+                  <button
+                    onClick={() => confirmDelete(selectedOrder._id)}
+                    className="px-4 py-2 bg-red-100 text-red-700 cursor-pointer rounded-lg shadow hover:bg-red-200 transition"
+                  >
                     Delete
                   </button>
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-60">
+          <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full text-center">
+            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+            <p className="mb-6">
+              Are you sure you want to delete this order? This action cannot be undone.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                className="px-4 py-2 bg-gray-300 cursor-pointer rounded hover:bg-gray-400"
+                onClick={() => setShowConfirmModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 cursor-pointer py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={() => {
+                  handleDelete(orderToDelete);
+                  setShowConfirmModal(false);
+                }}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
