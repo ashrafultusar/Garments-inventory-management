@@ -5,8 +5,6 @@ import { LuTrash2 } from "react-icons/lu";
 import { IoClose } from "react-icons/io5";
 import Link from "next/link";
 
-
-
 const getStatusColor = (status) => {
   switch (status) {
     case "Delivered":
@@ -28,12 +26,6 @@ const getPaymentColor = (payment) => {
     : "bg-red-100 text-red-700";
 };
 
-
-
-
-
-
-
 const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -44,15 +36,15 @@ const Orders = () => {
       .then((data) => setOrders(data))
       .catch((err) => console.error("error", err));
   }, []);
-  console.log(orders);
-
-
 
   return (
     <div className="p-6 text-black relative">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Orders</h1>
-        <Link href={'/createOrder'} className="bg-black text-white px-4 py-2 rounded hover:opacity-90 cursor-pointer">
+        <Link
+          href={"/createOrder"}
+          className="bg-black text-white px-4 py-2 rounded hover:opacity-90 cursor-pointer"
+        >
           + New Order
         </Link>
       </div>
@@ -106,26 +98,32 @@ const Orders = () => {
           <tbody>
             {orders.map((order) => (
               <tr
-                key={order.id}
+                key={order._id}
                 className="border-b hover:bg-gray-50 cursor-pointer"
                 onClick={() => setSelectedOrder(order)}
               >
-                <td className="p-4 whitespace-nowrap">{order?._id}</td>
-                <td className="p-4 whitespace-nowrap">{order.transporterName}</td>
-                <td className="p-4 whitespace-nowrap">{order?.customerName}</td>
+                <td className="p-4 whitespace-nowrap">{order._id}</td>
+                <td className="p-4 whitespace-nowrap">
+                  {order.transporterName}
+                </td>
+                <td className="p-4 whitespace-nowrap">{order.customerName}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
-                    className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(order?.status)}`}
+                    className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(
+                      order.status
+                    )}`}
                   >
                     Deliverried
                   </span>
                 </td>
-                <td className="p-4 whitespace-nowrap">{order?.quality}</td>
+                <td className="p-4 whitespace-nowrap">{order.quality}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
-                    className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(order?.payment)}`}
+                    className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(
+                      order.payment
+                    )}`}
                   >
-                   Paid
+                    Paid
                   </span>
                 </td>
                 <td className="p-4 whitespace-nowrap">
@@ -144,7 +142,7 @@ const Orders = () => {
       {selectedOrder && (
         <div className="fixed top-0 right-0 w-[350px] md:w-[450px] h-full bg-white shadow-lg z-50 border-l border-gray-200 overflow-y-auto p-6 transition-transform">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">#{selectedOrder.id}</h2>
+            <h2 className="text-lg font-semibold">#{selectedOrder._id}</h2>
             <IoClose
               className="w-6 h-6 cursor-pointer"
               onClick={() => setSelectedOrder(null)}
@@ -168,7 +166,11 @@ const Orders = () => {
           </p>
           <p className="text-sm mb-1">
             <strong>Payment:</strong>{" "}
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentColor(selectedOrder.payment)}`}>
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentColor(
+                selectedOrder.payment
+              )}`}
+            >
               {selectedOrder.payment}
             </span>
           </p>
