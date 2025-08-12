@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import OrderTable from "@/components/order/OrderTable";
 import OrderSideModal from "@/components/order/3. OrderSideModal";
 import ConfirmationModal from "@/components/order/ConfirmationModal";
-
+import PaginationControls from "@/components/order/PaginationControls"; // New import
 
 const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -16,17 +16,21 @@ const Orders = () => {
   const [isClosing, setIsClosing] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage]); 
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (page, limit) => {
     try {
-      const res = await fetch("/api/order");
+      const res = await fetch(`/api/order?page=${page}&limit=${limit}`);
       if (!res.ok) throw new Error("Failed to fetch orders");
-      const data = await res.json();
-      setOrders(data);
+      const { orders: fetchedOrders, totalCount } = await res.json();
+      setOrders(fetchedOrders);
+      setTotalPages(Math.ceil(totalCount / itemsPerPage));
     } catch (err) {
       console.error("Error fetching orders:", err);
       toast.error("Error fetching orders. Please try again.");
@@ -68,9 +72,12 @@ const Orders = () => {
 
   const handleDelete = async () => {
     try {
-      const res = await fetch(`/api/order/${orderToDelete}`, { method: "DELETE" });
+      const res = await fetch(`/api/order/${orderToDelete}`, {
+        method: "DELETE",
+      });
       if (!res.ok) throw new Error("Failed to delete order");
-      setOrders((prevOrders) => prevOrders.filter((order) => order._id !== orderToDelete));
+
+      await fetchOrders(currentPage, itemsPerPage);
       if (selectedOrder && selectedOrder._id === orderToDelete) {
         closeModal();
       }
@@ -84,17 +91,28 @@ const Orders = () => {
     }
   };
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="p-6 text-black relative">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Orders</h1>
-        <Link href={"/dashboard/createOrder"} className="bg-black text-white px-4 py-2 rounded hover:opacity-90 cursor-pointer">
+        <Link
+          href={"/dashboard/createOrder"}
+          className="bg-black text-white px-4 py-2 rounded hover:opacity-90 cursor-pointer"
+        >
           + New Order
         </Link>
       </div>
 
       <div className="flex flex-wrap justify-between gap-4 mb-6 items-center">
-        <input type="text" placeholder="Search anything..." className="w-full sm:w-96 border border-gray-300 rounded px-4 py-2" />
+        <input
+          type="text"
+          placeholder="Search anything..."
+          className="w-full sm:w-96 border border-gray-300 rounded px-4 py-2"
+        />
         <div className="space-x-3">
           <select className="border border-gray-300 rounded px-4 py-2">
             <option>Date range</option>
@@ -112,6 +130,12 @@ const Orders = () => {
         orders={orders}
         handleOrderClick={handleOrderClick}
         confirmDelete={confirmDelete}
+      />
+
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
       />
 
       <OrderSideModal
