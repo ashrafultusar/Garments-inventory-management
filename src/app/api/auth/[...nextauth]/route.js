@@ -19,7 +19,7 @@ export const authOptions = {
         if (!user) return null;
 
         
-        return { id: user._id, email: user.email, role: user.role };
+        return { id: user._id, email: user.email,name: user.name, role: user.role };
       },
     }),
 

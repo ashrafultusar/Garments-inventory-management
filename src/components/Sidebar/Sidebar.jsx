@@ -15,9 +15,13 @@ const Sidebar = () => {
     ? session.user.image
     : "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=634&q=80";
 
+
+console.log(session);
+
+
   return (
     <>
-      {/* Mobile Menu Toggle Button */}
+    
       <button
         className="md:hidden fixed top-4 left-4 z-50 p-2 text-white bg-gray-800 rounded-md"
         onClick={() => setIsOpen(!isOpen)}
@@ -25,7 +29,7 @@ const Sidebar = () => {
         {isOpen ? <IoClose size={20} /> : <FaBars size={20} />}
       </button>
 
-      {/* Overlay for Mobile */}
+      
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"
@@ -33,7 +37,6 @@ const Sidebar = () => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 z-40 h-screen w-64 px-4 py-8 overflow-y-auto 
           bg-white border-r dark:bg-gray-900 dark:border-gray-700 
@@ -110,7 +113,7 @@ const Sidebar = () => {
           <button
             onClick={() => signOut()}
             type="button"
-            className="w-full mt-4 px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50"
+            className="cursor-pointer w-full mt-4 px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50"
           >
             Log Out
           </button>
