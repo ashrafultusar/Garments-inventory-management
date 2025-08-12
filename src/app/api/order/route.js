@@ -15,6 +15,28 @@ export async function POST(req) {
   }
 }
 
+// export async function GET(req) {
+//   try {
+//     await connectDB();
+//     const { searchParams } = new URL(req.url);
+//     const page = parseInt(searchParams.get('page')) || 1;
+//     const limit = parseInt(searchParams.get('limit')) || 12;
+
+//     const skip = (page - 1) * limit;
+
+//     const totalCount = await Order.countDocuments();
+//     const orders = await Order.find().skip(skip).limit(limit);
+
+//     return NextResponse.json({ orders, totalCount });
+//   } catch (error) {
+//     console.error("Error fetching orders:", error);
+//     return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+//   }
+// }
+
+
+
+
 export async function GET(req) {
   try {
     await connectDB();
@@ -25,7 +47,11 @@ export async function GET(req) {
     const skip = (page - 1) * limit;
 
     const totalCount = await Order.countDocuments();
-    const orders = await Order.find().skip(skip).limit(limit);
+
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })  
+      .skip(skip)
+      .limit(limit);
 
     return NextResponse.json({ orders, totalCount });
   } catch (error) {

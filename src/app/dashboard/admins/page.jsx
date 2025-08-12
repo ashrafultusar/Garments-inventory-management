@@ -2,10 +2,38 @@
 
 import { useState, useEffect } from "react";
 
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">{message}</h2>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AdminPage = () => {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedAdminId, setSelectedAdminId] = useState(null);
 
   const fetchAdmins = async () => {
     try {
@@ -25,7 +53,33 @@ const AdminPage = () => {
     }
   };
 
-  // Load admins on component mount
+  const handleDeleteClick = (id) => {
+    setSelectedAdminId(id);
+    setModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      const res = await fetch(`/api/admins/${selectedAdminId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete admin");
+      }
+
+      setAdmins((prev) =>
+        prev.filter((admin) => admin._id !== selectedAdminId)
+      );
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Error deleting admin");
+    } finally {
+      setModalOpen(false);
+      setSelectedAdminId(null);
+    }
+  };
+
   useEffect(() => {
     fetchAdmins();
   }, []);
@@ -36,7 +90,9 @@ const AdminPage = () => {
         Admin List
       </h1>
 
-      {loading && <p className="text-center text-gray-600 text-lg">Loading admins...</p>}
+      {loading && (
+        <p className="text-center text-gray-600 text-lg">Loading admins...</p>
+      )}
 
       {error && <p className="text-center text-red-600 text-lg">{error}</p>}
 
@@ -73,13 +129,12 @@ const AdminPage = () => {
                     {admin.email}
                   </td>
                   <td className="border border-gray-300 px-6 py-4 flex gap-3">
-                    <button
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition"
-                    >
+                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">
                       Update
                     </button>
                     <button
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition"
+                      onClick={() => handleDeleteClick(admin?._id)}
+                      className="bg-red-600 cursor-pointer hover:bg-red-700 text-white px-3 py-1 rounded transition"
                     >
                       Delete
                     </button>
@@ -90,6 +145,14 @@ const AdminPage = () => {
           </table>
         </div>
       )}
+
+     
+      <ConfirmationModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={confirmDelete}
+        message="Are you sure you want to delete this admin?"
+      />
     </div>
   );
 };

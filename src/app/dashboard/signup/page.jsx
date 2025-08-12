@@ -1,10 +1,13 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "react-toastify";
 
 const SignUp = () => {
+const router=useRouter()
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -26,6 +29,7 @@ const SignUp = () => {
       if (res.ok) {
         toast.success("User Registration successful");
         form.reset();
+        router.push('/dashboard/admins')
       } else {
         toast.error(data.error || "Registration failed");
       }

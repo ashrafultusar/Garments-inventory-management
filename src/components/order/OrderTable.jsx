@@ -64,7 +64,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
                     className="w-4 h-4 text-gray-500 hover:text-red-600 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      confirmDelete(order._id);
+                      confirmDelete(order?._id);
                     }}
                   />
                 </div>

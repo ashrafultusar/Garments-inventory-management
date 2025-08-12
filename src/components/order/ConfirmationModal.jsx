@@ -8,7 +8,7 @@ const ConfirmationModal = ({ showConfirmModal, onCancel, onConfirm }) => {
       <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full text-center">
         <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
         <p className="mb-6">
-          Are you sure you want to delete this order? This action cannot be undone.
+          Are you sure you want to delete this? This action cannot be undone.
         </p>
         <div className="flex justify-center gap-4">
           <button
