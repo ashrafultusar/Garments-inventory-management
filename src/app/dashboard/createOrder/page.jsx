@@ -1,14 +1,15 @@
 "use client";
 
+import { useRouter } from 'next/navigation';
 import React, { useState } from "react";
 import { toast } from "react-toastify"; 
 
 const Page = () => {
-  // State to manage form data
+  const router = useRouter();
   const [formData, setFormData] = useState({
     date: "",
-    invoiceNumber: "", // Added Invoice Number
-    companyName: "", // Changed from customerName to companyName
+    invoiceNumber: "", 
+    companyName: "",
     clotheType: "",
     finishingWidth: "",
     quality: "",
@@ -21,31 +22,30 @@ const Page = () => {
     transporterName: "",
   });
 
-  // Handles changes to form input fields and updates the state
+ 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
   };
 
-  // Handles form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
 
     try {
-      // Send form data to the API endpoint
+     
       const res = await fetch("/api/order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData), // Convert formData object to JSON string
+        body: JSON.stringify(formData),
       });
 
-      // Check if the response was successful
       if (res.ok) {
-        const data = await res.json(); // Parse JSON response
-        toast.success("Order created successfully!"); // Show success notification
-        // Reset form fields after successful submission
+        const data = await res.json(); 
+        toast.success("Order created successfully!"); 
+  
+    
         setFormData({
           date: "",
           invoiceNumber: "",
@@ -61,12 +61,14 @@ const Page = () => {
           dyeingName: "",
           transporterName: "",
         });
+        router.push('/dashboard/order')
       } else {
-        toast.error("Failed to save order"); // Show error notification for failed save
+        toast.error("Failed to save order"); 
+        
       }
     } catch (error) {
-      toast.error("Something went wrong"); // Show generic error notification for network issues
-      console.error("Error:", error); // Log the error to console for debugging
+      toast.error("Something went wrong"); 
+      console.error("Error:", error); 
     }
   };
 
@@ -107,7 +109,7 @@ const Page = () => {
             </div>
           ))}
 
-          {/* Separate select input for Clothe Type */}
+        
           <div className="flex flex-col">
             <label htmlFor="clotheType" className="mb-1 font-medium text-sm">
               Clothe Type
@@ -126,7 +128,7 @@ const Page = () => {
             </select>
           </div>
 
-          {/* Separate select input for Finishing Type */}
+          
           <div className="flex flex-col">
             <label htmlFor="finishingType" className="mb-1 font-medium text-sm">
               Finishing Type
@@ -146,7 +148,7 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Submit button */}
+       
         <div className="flex justify-end mt-8">
           <button
             type="submit"
