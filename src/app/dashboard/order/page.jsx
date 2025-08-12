@@ -38,7 +38,7 @@ const Orders = () => {
   }, []);
 
 
-console.log(orders);
+// console.log(orders);
 
   return (
     <div className="p-6 text-black relative">
