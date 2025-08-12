@@ -15,6 +15,8 @@ export async function POST(req) {
   }
 }
 
+
+
 // export async function GET(req) {
 //   try {
 //     await connectDB();
@@ -25,7 +27,11 @@ export async function POST(req) {
 //     const skip = (page - 1) * limit;
 
 //     const totalCount = await Order.countDocuments();
-//     const orders = await Order.find().skip(skip).limit(limit);
+
+//     const orders = await Order.find()
+//       .sort({ createdAt: -1 })  
+//       .skip(skip)
+//       .limit(limit);
 
 //     return NextResponse.json({ orders, totalCount });
 //   } catch (error) {
@@ -36,26 +42,55 @@ export async function POST(req) {
 
 
 
-
 export async function GET(req) {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page')) || 1;
-    const limit = parseInt(searchParams.get('limit')) || 12;
+
+    const page = parseInt(searchParams.get("page")) || 1;
+    const limit = parseInt(searchParams.get("limit")) || 12;
+    const searchRaw = searchParams.get("search")?.trim() || "";
 
     const skip = (page - 1) * limit;
 
-    const totalCount = await Order.countDocuments();
+    const isNumber = !isNaN(searchRaw) && searchRaw !== "";
 
-    const orders = await Order.find()
-      .sort({ createdAt: -1 })  
+    const query = searchRaw
+      ? {
+          $or: [
+            { companyName: { $regex: searchRaw, $options: "i" } },
+            { orderId: { $regex: searchRaw, $options: "i" } },
+            { colour: { $regex: searchRaw, $options: "i" } },
+            { dyeingName: { $regex: searchRaw, $options: "i" } },
+            { transporterName: { $regex: searchRaw, $options: "i" } },
+            { clotheType: { $regex: searchRaw, $options: "i" } },
+            
+            ...(isNumber
+              ? [
+                  { finishingWidth: Number(searchRaw) },
+                  { totalGoj: Number(searchRaw) },
+                  { totalBundle: Number(searchRaw) },
+                  { quality: Number(searchRaw) },
+                ]
+              : []),
+          ],
+        }
+      : {};
+
+    const totalCount = await Order.countDocuments(query);
+
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     return NextResponse.json({ orders, totalCount });
   } catch (error) {
     console.error("Error fetching orders:", error);
-    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch orders" },
+      { status: 500 }
+    );
   }
 }
+
