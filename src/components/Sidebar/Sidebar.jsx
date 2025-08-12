@@ -78,7 +78,7 @@ const Sidebar = () => {
           </Link>
 
           <Link
-            href="/dashboard/admin"
+            href="/dashboard/admins"
             className="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-md dark:bg-gray-800 dark:text-gray-200 gap-2 uppercase hover:bg-gray-200 dark:hover:bg-gray-700 transition"
           >
             <LuUsers />

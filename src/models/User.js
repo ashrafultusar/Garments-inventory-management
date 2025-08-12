@@ -13,12 +13,12 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      // required: [true, "Password is required"],
+     
     },
     role: {
       type: String,
-      default: "admin",  // ডিফল্ট ভ্যালু admin
-      enum: ["admin", "user", "moderator"], // ইচ্ছেমতো রোল গুলোর লিস্ট (ঐচ্ছিক)
+      default: "admin",  
+      enum: ["admin", "user", "moderator"], 
     },
   },
   {
