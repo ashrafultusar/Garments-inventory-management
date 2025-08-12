@@ -56,3 +56,28 @@ export async function DELETE(request, { params }) {
     });
   }
 }
+
+
+
+
+
+export async function PUT(request, { params }) {
+  try {
+    await connectDB();
+    const { id } = params;
+    const body = await request.json();
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return new Response(JSON.stringify({ error: "Order not found" }), { status: 404 });
+    }
+
+    Object.assign(order, body);
+    await order.save();
+
+    return new Response(JSON.stringify({ message: "Order updated successfully", order }), { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
+  }
+}

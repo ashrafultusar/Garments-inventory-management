@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import OrderTable from "@/components/order/OrderTable";
 import OrderSideModal from "@/components/order/3. OrderSideModal";
 import ConfirmationModal from "@/components/order/ConfirmationModal";
-import PaginationControls from "@/components/order/PaginationControls"; // New import
+import PaginationControls from "@/components/order/PaginationControls"; 
 
 const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -23,8 +23,7 @@ const Orders = () => {
 
   useEffect(() => {
     fetchOrders(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage]); 
-
+  }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
     fetchOrders(currentPage, itemsPerPage, searchTerm);
@@ -32,7 +31,11 @@ const Orders = () => {
 
   const fetchOrders = async (page, limit, search = "") => {
     try {
-      const res = await fetch(`/api/order?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
+      const res = await fetch(
+        `/api/order?page=${page}&limit=${limit}&search=${encodeURIComponent(
+          search
+        )}`
+      );
       if (!res.ok) throw new Error("Failed to fetch orders");
       const { orders: fetchedOrders, totalCount } = await res.json();
       setOrders(fetchedOrders);
@@ -114,13 +117,13 @@ const Orders = () => {
       </div>
 
       <div className="flex flex-wrap justify-between gap-4 mb-6 items-center">
-      <input
-  type="text"
-  placeholder="Search anything..."
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  className="w-full sm:w-96 border border-gray-300 rounded px-4 py-2"
-/>
+        <input
+          type="text"
+          placeholder="Search anything..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full sm:w-96 border border-gray-300 rounded px-4 py-2"
+        />
 
         <div className="space-x-3">
           <select className="border border-gray-300 rounded px-4 py-2">
