@@ -16,7 +16,7 @@ const Sidebar = () => {
     : "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=634&q=80";
 
 
-console.log(session);
+// console.log(session);
 
 
   return (

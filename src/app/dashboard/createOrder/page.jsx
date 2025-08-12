@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "react-toastify"; 
 
 const Page = () => {
-
+  // State to manage form data
   const [formData, setFormData] = useState({
     date: "",
-    customerName: "",
+    invoiceNumber: "", // Added Invoice Number
+    companyName: "", // Changed from customerName to companyName
     clotheType: "",
     finishingWidth: "",
     quality: "",
@@ -20,29 +21,35 @@ const Page = () => {
     transporterName: "",
   });
 
+  // Handles changes to form input fields and updates the state
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
   };
 
+  // Handles form submission
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission behavior
 
     try {
+      // Send form data to the API endpoint
       const res = await fetch("/api/order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData), // Convert formData object to JSON string
       });
 
+      // Check if the response was successful
       if (res.ok) {
-        const data = await res.json();
-        toast.success("Order created successfully!");
+        const data = await res.json(); // Parse JSON response
+        toast.success("Order created successfully!"); // Show success notification
+        // Reset form fields after successful submission
         setFormData({
           date: "",
-          customerName: "",
+          invoiceNumber: "",
+          companyName: "",
           clotheType: "",
           finishingWidth: "",
           quality: "",
@@ -55,15 +62,13 @@ const Page = () => {
           transporterName: "",
         });
       } else {
-        toast.error("Failed to save order");
+        toast.error("Failed to save order"); // Show error notification for failed save
       }
     } catch (error) {
-      toast.error("Something went wrong");
-      console.error("Error:", error);
+      toast.error("Something went wrong"); // Show generic error notification for network issues
+      console.error("Error:", error); // Log the error to console for debugging
     }
   };
-
-
 
   return (
     <section className="max-w-4xl mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
@@ -73,9 +78,11 @@ const Page = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">
+          {/* Dynamically render input fields based on an array */}
           {[
             ["date", "Date", "date"],
-            ["customerName", "Customer Name", "text"],
+            ["invoiceNumber", "Invoice Number", "text"], // New Invoice Number field
+            ["companyName", "Company Name", "text"], // Updated label for customerName
             ["finishingWidth", "Finishing প্রস্থ (inch)", "number"],
             ["quality", "Quality", "number"],
             ["sillName", "Sill Name", "text"],
@@ -100,6 +107,7 @@ const Page = () => {
             </div>
           ))}
 
+          {/* Separate select input for Clothe Type */}
           <div className="flex flex-col">
             <label htmlFor="clotheType" className="mb-1 font-medium text-sm">
               Clothe Type
@@ -118,6 +126,7 @@ const Page = () => {
             </select>
           </div>
 
+          {/* Separate select input for Finishing Type */}
           <div className="flex flex-col">
             <label htmlFor="finishingType" className="mb-1 font-medium text-sm">
               Finishing Type
@@ -137,6 +146,7 @@ const Page = () => {
           </div>
         </div>
 
+        {/* Submit button */}
         <div className="flex justify-end mt-8">
           <button
             type="submit"

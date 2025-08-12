@@ -37,12 +37,15 @@ const Orders = () => {
       .catch((err) => console.error("error", err));
   }, []);
 
+
+console.log(orders);
+
   return (
     <div className="p-6 text-black relative">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Orders</h1>
         <Link
-          href={"/createOrder"}
+          href={"/dashboard/createOrder"}
           className="bg-black text-white px-4 py-2 rounded hover:opacity-90 cursor-pointer"
         >
           + New Order
@@ -98,29 +101,29 @@ const Orders = () => {
           <tbody>
             {orders.map((order) => (
               <tr
-                key={order._id}
+                key={order?._id}
                 className="border-b hover:bg-gray-50 cursor-pointer"
                 onClick={() => setSelectedOrder(order)}
               >
-                <td className="p-4 whitespace-nowrap">{order._id}</td>
+                <td className="p-4 whitespace-nowrap">{order?._id}</td>
                 <td className="p-4 whitespace-nowrap">
-                  {order.transporterName}
+                  {order?.dyeingName}
                 </td>
-                <td className="p-4 whitespace-nowrap">{order.customerName}</td>
+                <td className="p-4 whitespace-nowrap">{order?.customerName}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
                     className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(
-                      order.status
+                      order?.status
                     )}`}
                   >
                     Deliverried
                   </span>
                 </td>
-                <td className="p-4 whitespace-nowrap">{order.quality}</td>
+                <td className="p-4 whitespace-nowrap">{order?.quality}</td>
                 <td className="p-4 whitespace-nowrap">
                   <span
                     className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(
-                      order.payment
+                      order?.payment
                     )}`}
                   >
                     Paid
