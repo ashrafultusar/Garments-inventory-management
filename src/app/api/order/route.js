@@ -11,11 +11,12 @@ export async function POST(req) {
     return NextResponse.json(savedOrder, { status: 201 });
   } catch (error) {
     console.error("Error creating order:", error);
-    return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create order" },
+      { status: 500 }
+    );
   }
 }
-
-
 
 // export async function GET(req) {
 //   try {
@@ -29,7 +30,7 @@ export async function POST(req) {
 //     const totalCount = await Order.countDocuments();
 
 //     const orders = await Order.find()
-//       .sort({ createdAt: -1 })  
+//       .sort({ createdAt: -1 })
 //       .skip(skip)
 //       .limit(limit);
 
@@ -39,8 +40,6 @@ export async function POST(req) {
 //     return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
 //   }
 // }
-
-
 
 export async function GET(req) {
   try {
@@ -60,19 +59,6 @@ export async function GET(req) {
           $or: [
             { companyName: { $regex: searchRaw, $options: "i" } },
             { orderId: { $regex: searchRaw, $options: "i" } },
-            { colour: { $regex: searchRaw, $options: "i" } },
-            { dyeingName: { $regex: searchRaw, $options: "i" } },
-            { transporterName: { $regex: searchRaw, $options: "i" } },
-            { clotheType: { $regex: searchRaw, $options: "i" } },
-            
-            ...(isNumber
-              ? [
-                  { finishingWidth: Number(searchRaw) },
-                  { totalGoj: Number(searchRaw) },
-                  { totalBundle: Number(searchRaw) },
-                  { quality: Number(searchRaw) },
-                ]
-              : []),
           ],
         }
       : {};
@@ -93,4 +79,3 @@ export async function GET(req) {
     );
   }
 }
-
