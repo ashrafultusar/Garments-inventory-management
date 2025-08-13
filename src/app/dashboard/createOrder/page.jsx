@@ -1,14 +1,14 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
 
 const Page = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     date: "",
-    invoiceNumber: "", 
+    invoiceNumber: "",
     companyName: "",
     clotheType: "",
     finishingWidth: "",
@@ -22,7 +22,6 @@ const Page = () => {
     transporterName: "",
   });
 
- 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
@@ -32,7 +31,6 @@ const Page = () => {
     e.preventDefault();
 
     try {
-     
       const res = await fetch("/api/order", {
         method: "POST",
         headers: {
@@ -42,10 +40,9 @@ const Page = () => {
       });
 
       if (res.ok) {
-        const data = await res.json(); 
-        toast.success("Order created successfully!"); 
-  
-    
+        const data = await res.json();
+        toast.success("Order created successfully!");
+
         setFormData({
           date: "",
           invoiceNumber: "",
@@ -61,14 +58,13 @@ const Page = () => {
           dyeingName: "",
           transporterName: "",
         });
-        router.push('/dashboard/order')
+        router.push("/dashboard/order");
       } else {
-        toast.error("Failed to save order"); 
-        
+        toast.error("Failed to save order");
       }
     } catch (error) {
-      toast.error("Something went wrong"); 
-      console.error("Error:", error); 
+      toast.error("Something went wrong");
+      console.error("Error:", error);
     }
   };
 
@@ -109,7 +105,6 @@ const Page = () => {
             </div>
           ))}
 
-        
           <div className="flex flex-col">
             <label htmlFor="clotheType" className="mb-1 font-medium text-sm">
               Clothe Type
@@ -128,7 +123,6 @@ const Page = () => {
             </select>
           </div>
 
-          
           <div className="flex flex-col">
             <label htmlFor="finishingType" className="mb-1 font-medium text-sm">
               Finishing Type
@@ -148,7 +142,6 @@ const Page = () => {
           </div>
         </div>
 
-       
         <div className="flex justify-end mt-8">
           <button
             type="submit"

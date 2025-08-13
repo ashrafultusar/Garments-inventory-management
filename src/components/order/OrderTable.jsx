@@ -18,7 +18,9 @@ const getStatusColor = (status) => {
 };
 
 const getPaymentColor = (payment) => {
-  return payment === "Paid" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700";
+  return payment === "Paid"
+    ? "bg-green-100 text-green-700"
+    : "bg-red-100 text-red-700";
 };
 
 const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
@@ -44,22 +46,35 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
               onClick={() => handleOrderClick(order?._id)}
             >
               <td className="p-4 whitespace-nowrap">{order?.orderId}</td>
-              <td className="p-4 whitespace-nowrap">{order?.clotheType || "N/A"}</td>
-              <td className="p-4 whitespace-nowrap">{order?.companyName || "N/A"}</td>
               <td className="p-4 whitespace-nowrap">
-                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(order?.status)}`}>
+                {order?.clotheType || "N/A"}
+              </td>
+              <td className="p-4 whitespace-nowrap">
+                {order?.companyName || "N/A"}
+              </td>
+              <td className="p-4 whitespace-nowrap">
+                <span
+                  className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(
+                    order?.status
+                  )}`}
+                >
                   {order?.status || "N/A"}
                 </span>
               </td>
-              <td className="p-4 whitespace-nowrap">{order?.quality || "N/A"}</td>
               <td className="p-4 whitespace-nowrap">
-                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(order?.paymentMethod)}`}>
+                {order?.quality || "N/A"}
+              </td>
+              <td className="p-4 whitespace-nowrap">
+                <span
+                  className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(
+                    order?.paymentMethod
+                  )}`}
+                >
                   {order?.paymentMethod || "Unpaid"}
                 </span>
               </td>
               <td className="p-4 whitespace-nowrap">
-                <div className="flex items-center gap-3">
-                  <FaPencilAlt className="w-4 h-4 text-gray-500 hover:text-black cursor-pointer" />
+                <div className=" items-center gap-3">
                   <LuTrash2
                     className="w-4 h-4 text-gray-500 hover:text-red-600 cursor-pointer"
                     onClick={(e) => {

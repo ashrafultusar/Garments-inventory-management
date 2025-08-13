@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 export default function UpdateOrderPage() {
-  const router = useRouter();
   const { id } = useParams();
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     date: "",
@@ -24,15 +24,18 @@ export default function UpdateOrderPage() {
     transporterName: "",
   });
 
+  const [loading, setLoading] = useState(true);
+
+  // Fetch order details
   useEffect(() => {
-    if (!id) return;
-    (async () => {
+    const fetchOrder = async () => {
       try {
         const res = await fetch(`/api/order/${id}`);
         if (!res.ok) throw new Error("Failed to fetch order");
         const data = await res.json();
+
         setFormData({
-          date: data.date ? data.date.split("T")[0] : "",
+          date: data.date || "",
           invoiceNumber: data.invoiceNumber || "",
           companyName: data.companyName || "",
           clotheType: data.clotheType || "",
@@ -47,14 +50,18 @@ export default function UpdateOrderPage() {
           transporterName: data.transporterName || "",
         });
       } catch (err) {
+        console.error(err);
         toast.error("Error loading order");
+      } finally {
+        setLoading(false);
       }
-    })();
+    };
+    fetchOrder();
   }, [id]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    setFormData({ ...formData, [id]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -66,27 +73,33 @@ export default function UpdateOrderPage() {
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error("Failed to update order");
-
-      toast.success("Order updated successfully!");
-      router.push("/dashboard/order");
-    } catch (error) {
-      toast.error("Update failed. Try again.");
+      if (res.ok) {
+        toast.success("Order updated successfully!");
+        router.push("/dashboard/order");
+      } else {
+        toast.error("Failed to update order");
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+      toast.error("Something went wrong");
     }
   };
+
+  if (loading) return <p className="p-4">Loading...</p>;
 
   return (
     <section className="max-w-4xl mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
       <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
-        📝 Update Order
+        ✏ Edit Order
       </h2>
+
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">
           {[
             ["date", "Date", "date"],
             ["invoiceNumber", "Invoice Number", "text"],
             ["companyName", "Company Name", "text"],
-            ["finishingWidth", "Finishing Width (inch)", "number"],
+            ["finishingWidth", "Finishing প্রস্থ (inch)", "number"],
             ["quality", "Quality", "number"],
             ["sillName", "Sill Name", "text"],
             ["colour", "Colour", "text"],
@@ -102,10 +115,10 @@ export default function UpdateOrderPage() {
               <input
                 id={id}
                 type={type}
-                required
                 value={formData[id]}
                 onChange={handleChange}
-                className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+                className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           ))}
@@ -117,9 +130,9 @@ export default function UpdateOrderPage() {
             <select
               id="clotheType"
               value={formData.clotheType}
-              required
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Type</option>
               <option value="Cotton">Cotton</option>
@@ -137,7 +150,7 @@ export default function UpdateOrderPage() {
               value={formData.finishingType}
               onChange={handleChange}
               required
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Finishing</option>
               <option value="Soft">Soft</option>
@@ -150,7 +163,7 @@ export default function UpdateOrderPage() {
         <div className="flex justify-end mt-8">
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
           >
             Update Order
           </button>

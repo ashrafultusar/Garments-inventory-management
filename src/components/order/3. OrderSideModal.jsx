@@ -3,6 +3,7 @@ import { IoClose } from "react-icons/io5";
 import { FaPencilAlt } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
 import { CiGrid41 } from "react-icons/ci";
+import { useRouter } from "next/navigation";
 
 const getPaymentColor = (payment) => {
   return payment === "Paid"
@@ -20,6 +21,9 @@ const OrderSideModal = ({
   confirmDelete,
 }) => {
   if (!isModalOpen) return null;
+  const router = useRouter();
+
+
 
   return (
     <div className="fixed inset-0 flex justify-end z-50">
@@ -172,13 +176,15 @@ const OrderSideModal = ({
         )}
 
         <div className="p-6 border-t flex justify-between gap-4 sticky bottom-0 bg-white">
-        <button
-          onClick={() => router.push(`/dashboard/order/update/${selectedOrder?._id}`)}
-          className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg font-semibold cursor-pointer hover:bg-blue-700 transition"
-        >
-          <FaPencilAlt className="inline-block mr-2" />
-          Edit Order
-        </button>
+          <button
+            onClick={() =>
+              router.push(`/dashboard/order/update/${selectedOrder?._id}`)
+            }
+            className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg font-semibold cursor-pointer hover:bg-blue-700 transition"
+          >
+            <FaPencilAlt className="inline-block mr-2" />
+            Edit Order
+          </button>
           <button
             onClick={() => confirmDelete(selectedOrder?._id)}
             className="flex-1 py-3 px-4 cursor-pointer bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition"
