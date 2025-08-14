@@ -111,6 +111,7 @@ const Sidebar = () => {
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-2 cursor-pointer"
           >
+            <p>
             <Image
               className="object-cover rounded-full h-9 w-9"
               src={imageSrc}
@@ -118,6 +119,8 @@ const Sidebar = () => {
               width={36}
               height={36}
             />
+            </p>
+            <span>{session?.user?.name || "Guest"}</span>
           </div>
 
           {dropdownOpen && (

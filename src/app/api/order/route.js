@@ -18,8 +18,6 @@ export async function POST(req) {
   }
 }
 
-
-
 export async function GET(req) {
   try {
     await connectDB();
@@ -28,12 +26,12 @@ export async function GET(req) {
     const page = parseInt(searchParams.get("page")) || 1;
     const limit = parseInt(searchParams.get("limit")) || 12;
     const searchRaw = searchParams.get("search")?.trim() || "";
+    const startDate = searchParams.get("startDate") || "";
+    const endDate = searchParams.get("endDate") || "";
 
     const skip = (page - 1) * limit;
 
-    const isNumber = !isNaN(searchRaw) && searchRaw !== "";
-
-    const query = searchRaw
+    let query = searchRaw
       ? {
           $or: [
             { companyName: { $regex: searchRaw, $options: "i" } },
@@ -41,6 +39,12 @@ export async function GET(req) {
           ],
         }
       : {};
+    if (startDate && endDate) {
+      query.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
+      };
+    }
 
     const totalCount = await Order.countDocuments(query);
 

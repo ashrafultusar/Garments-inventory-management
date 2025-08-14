@@ -3,6 +3,7 @@ import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import NextAuthProvider from "@/Providers/NextAuthProvider";
 import SessionWrapper from "@/components/SessionWrapper";
+import "react-datepicker/dist/react-datepicker.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
