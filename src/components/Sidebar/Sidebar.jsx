@@ -1,27 +1,38 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaBars, FaCartArrowDown } from "react-icons/fa";
 import { LuUsers } from "react-icons/lu";
 import { IoClose } from "react-icons/io5";
 import { signOut, useSession } from "next-auth/react";
+import { IoMdArrowDropdown } from "react-icons/io";
+import { FiSettings, FiLogOut } from "react-icons/fi";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const { data: session } = useSession();
 
   const imageSrc = session?.user?.image
     ? session.user.image
     : "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=634&q=80";
 
-
-// console.log(session);
-
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <>
-    
+      {/* Mobile Menu Toggle */}
       <button
         className="md:hidden fixed top-4 left-4 z-50 p-2 text-white bg-gray-800 rounded-md"
         onClick={() => setIsOpen(!isOpen)}
@@ -29,7 +40,7 @@ const Sidebar = () => {
         {isOpen ? <IoClose size={20} /> : <FaBars size={20} />}
       </button>
 
-      
+      {/* Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"
@@ -94,30 +105,55 @@ const Sidebar = () => {
           </Link>
         </nav>
 
-        {/* User Info */}
-        <div className="mt-auto flex items-center px-4 gap-2">
-          <Image
-            className="object-cover rounded-full h-9 w-9"
-            src={imageSrc}
-            alt="avatar"
-            width={36}
-            height={36}
-          />
-          <span className="font-medium text-gray-800 dark:text-gray-200 truncate">
-            {session?.user?.name || "Guest"}
-          </span>
-        </div>
-
-        {/* Logout */}
-        {session && (
-          <button
-            onClick={() => signOut()}
-            type="button"
-            className="cursor-pointer w-full mt-4 px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50"
+        {/* User Info Dropdown */}
+        <div className="mt-auto relative" ref={dropdownRef}>
+          <div
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="flex items-center gap-2 cursor-pointer"
           >
-            Log Out
-          </button>
-        )}
+            <Image
+              className="object-cover rounded-full h-9 w-9"
+              src={imageSrc}
+              alt="avatar"
+              width={36}
+              height={36}
+            />
+          </div>
+
+          {dropdownOpen && (
+            <div className="absolute bottom-14  w-60 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
+              {/* Profile Info */}
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                <p className="font-medium text-gray-800 dark:text-gray-200">
+                  {session?.user?.name || "Guest"}
+                </p>
+                <p className="text-sm text-gray-500 truncate">
+                  {session?.user?.email || "No email"}
+                </p>
+              </div>
+
+              {/* Settings */}
+              <Link
+                href="/dashboard/settings"
+                className="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 gap-2"
+              >
+                <FiSettings size={18} />
+                Settings
+              </Link>
+
+              {/* Logout */}
+              {session && (
+                <button
+                  onClick={() => signOut()}
+                  className="flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 gap-2"
+                >
+                  <FiLogOut size={18} />
+                  Log Out
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </aside>
     </>
   );
