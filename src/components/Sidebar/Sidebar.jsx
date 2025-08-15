@@ -8,6 +8,7 @@ import { IoClose } from "react-icons/io5";
 import { signOut, useSession } from "next-auth/react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { FiSettings, FiLogOut } from "react-icons/fi";
+import { MenuIcon } from "lucide-react";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -137,11 +138,18 @@ const Sidebar = () => {
 
               {/* Settings */}
               <Link
-                href="/dashboard/settings"
+                href=""
                 className="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 gap-2"
               >
                 <FiSettings size={18} />
                 Settings
+              </Link>
+              <Link
+                href="/dashboard/menu"
+                className="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 gap-2"
+              >
+                <MenuIcon size={18} />
+                Menu
               </Link>
 
               {/* Logout */}
