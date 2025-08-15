@@ -1,10 +1,12 @@
 "use client";
 
+import useAppData from "@/hook/useAppData";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 
 const Page = () => {
+  const { data } = useAppData();
   const router = useRouter();
   const [formData, setFormData] = useState({
     date: "",
@@ -40,7 +42,6 @@ const Page = () => {
       });
 
       if (res.ok) {
-        const data = await res.json();
         toast.success("Order created successfully!");
 
         setFormData({
@@ -76,15 +77,12 @@ const Page = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">
-          {/* Dynamically render input fields based on an array */}
+          {/* Other input fields */}
           {[
             ["date", "Date", "date"],
-            ["invoiceNumber", "Invoice Number", "text"], // New Invoice Number field
-            ["companyName", "Company Name", "text"], // Updated label for customerName
+            ["invoiceNumber", "Invoice Number", "text"],
+            ["companyName", "Company Name", "text"],
             ["finishingWidth", "Finishing প্রস্থ (inch)", "number"],
-            ["quality", "Quality", "number"],
-            ["sillName", "Sill Name", "text"],
-            ["colour", "Colour", "text"],
             ["totalGoj", "Total Goj", "number"],
             ["totalBundle", "Total Bundle", "number"],
             ["dyeingName", "Dyeing Name", "text"],
@@ -105,24 +103,28 @@ const Page = () => {
             </div>
           ))}
 
+          {/* Clothe Type */}
           <div className="flex flex-col">
             <label htmlFor="clotheType" className="mb-1 font-medium text-sm">
               Clothe Type
             </label>
             <select
               id="clotheType"
-              value={formData.clotheType}
+              value={formData?.clotheType}
               required
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Type</option>
-              <option value="Cotton">Cotton</option>
-              <option value="Polyester">Polyester</option>
-              <option value="Mixed">Mixed</option>
+              {data?.clotheTypes?.map((item) => (
+                <option key={item.id || item.name} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
             </select>
           </div>
 
+          {/* Finishing Type */}
           <div className="flex flex-col">
             <label htmlFor="finishingType" className="mb-1 font-medium text-sm">
               Finishing Type
@@ -130,14 +132,79 @@ const Page = () => {
             <select
               id="finishingType"
               value={formData.finishingType}
-              onChange={handleChange}
               required
+              onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Finishing</option>
-              <option value="Soft">Soft</option>
-              <option value="Hard">Hard</option>
-              <option value="Normal">Normal</option>
+              {data?.finishingTypes?.map((item) => (
+                <option key={item.id || item.name} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Colour */}
+          <div className="flex flex-col">
+            <label htmlFor="colour" className="mb-1 font-medium text-sm">
+              Colour
+            </label>
+            <select
+              id="colour"
+              value={formData.colour}
+              required
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select Colour</option>
+              {data?.colours?.map((item) => (
+                <option key={item.id || item.name} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sill Name */}
+          <div className="flex flex-col">
+            <label htmlFor="sillName" className="mb-1 font-medium text-sm">
+              Sill Name
+            </label>
+            <select
+              id="sillName"
+              value={formData.sillName}
+              required
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select Sill Name</option>
+              {data?.sillNames?.map((item) => (
+                <option key={item.id || item.name} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Quality */}
+          <div className="flex flex-col">
+            <label htmlFor="quality" className="mb-1 font-medium text-sm">
+              Quality
+            </label>
+            <select
+              id="quality"
+              value={formData.quality}
+              required
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select Quality</option>
+              {data?.qualities?.map((item) => (
+                <option key={item.id || item.name} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>

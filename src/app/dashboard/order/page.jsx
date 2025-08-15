@@ -41,7 +41,7 @@ const Orders = () => {
   const [colour, setColour] = useState("");
   const [sillName, setSillName] = useState("");
   const [quality, setQuality] = useState("");
-console.log(data);
+  console.log(data);
   // Fetch orders whenever dependencies change
   useEffect(() => {
     fetchOrders(
@@ -134,7 +134,8 @@ console.log(data);
 
       if (statusFilter) params.append("status", statusFilter);
       if (clotheTypeFilter) params.append("clotheTypes", clotheTypeFilter);
-      if (finishingTypeFilter) params.append("finishingType", finishingTypeFilter);
+      if (finishingTypeFilter)
+        params.append("finishingType", finishingTypeFilter);
       if (colourFilter) params.append("colour", colourFilter);
       if (sillNameFilter) params.append("sillName", sillNameFilter);
       if (qualityFilter) params.append("quality", qualityFilter);
@@ -237,7 +238,6 @@ console.log(data);
       toast.error("Please select both start and end date");
       return;
     }
-  
   };
 
   return (
@@ -264,7 +264,6 @@ console.log(data);
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 items-center flex-grow min-w-[300px]">
-
           {/* Date Range */}
           <select
             className="border border-gray-300 rounded px-4 py-2 min-w-[150px]"
