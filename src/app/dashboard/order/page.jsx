@@ -9,9 +9,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import OrderTable from "@/components/order/OrderTable";
 import OrderSideModal from "@/components/order/3. OrderSideModal";
 import ConfirmationModal from "@/components/order/ConfirmationModal";
-import PaginationControls from "@/components/order/PaginationControls"; 
+import PaginationControls from "@/components/order/PaginationControls";
+import useAppData from "@/hook/useAppData";
 
 const Orders = () => {
+  const { data } = useAppData();
+
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loadingOrder, setLoadingOrder] = useState(false);
@@ -23,12 +26,23 @@ const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Filters state
   const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState("");
   const [customStartDate, setCustomStartDate] = useState(null);
   const [customEndDate, setCustomEndDate] = useState(null);
+  const [status, setStatus] = useState("");
+  const [clotheType, setClotheType] = useState("");
 
-  // Fetch orders on dependencies change
+  // Hidden filters (initially hidden)
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const [finishingType, setFinishingType] = useState("");
+  const [colour, setColour] = useState("");
+  const [sillName, setSillName] = useState("");
+  const [quality, setQuality] = useState("");
+console.log(data);
+  // Fetch orders whenever dependencies change
   useEffect(() => {
     fetchOrders(
       currentPage,
@@ -36,11 +50,43 @@ const Orders = () => {
       searchTerm,
       dateRange,
       customStartDate,
-      customEndDate
+      customEndDate,
+      status,
+      clotheType,
+      finishingType,
+      colour,
+      sillName,
+      quality
     );
-  }, [currentPage, itemsPerPage, searchTerm, dateRange, customStartDate, customEndDate]);
+  }, [
+    currentPage,
+    itemsPerPage,
+    searchTerm,
+    dateRange,
+    customStartDate,
+    customEndDate,
+    status,
+    clotheType,
+    finishingType,
+    colour,
+    sillName,
+    quality,
+  ]);
 
-  const fetchOrders = async (page, limit, search = "", dateRangeValue = "", start = null, end = null) => {
+  const fetchOrders = async (
+    page,
+    limit,
+    search = "",
+    dateRangeValue = "",
+    start = null,
+    end = null,
+    statusFilter = "",
+    clotheTypeFilter = "",
+    finishingTypeFilter = "",
+    colourFilter = "",
+    sillNameFilter = "",
+    qualityFilter = ""
+  ) => {
     let startDate = "";
     let endDate = "";
     const today = dayjs();
@@ -77,12 +123,26 @@ const Orders = () => {
     }
 
     try {
-      const res = await fetch(
-        `/api/order?page=${page}&limit=${limit}&search=${encodeURIComponent(
-          search
-        )}&startDate=${startDate}&endDate=${endDate}`
-      );
+      // Build query params
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        search,
+        startDate,
+        endDate,
+      });
+
+      if (statusFilter) params.append("status", statusFilter);
+      if (clotheTypeFilter) params.append("clotheTypes", clotheTypeFilter);
+      if (finishingTypeFilter) params.append("finishingType", finishingTypeFilter);
+      if (colourFilter) params.append("colour", colourFilter);
+      if (sillNameFilter) params.append("sillName", sillNameFilter);
+      if (qualityFilter) params.append("quality", qualityFilter);
+
+      const res = await fetch(`/api/order?${params.toString()}`);
+
       if (!res.ok) throw new Error("Failed to fetch orders");
+
       const { orders: fetchedOrders, totalCount } = await res.json();
       setOrders(fetchedOrders);
       setTotalPages(Math.ceil(totalCount / itemsPerPage));
@@ -133,7 +193,20 @@ const Orders = () => {
       });
       if (!res.ok) throw new Error("Failed to delete order");
 
-      await fetchOrders(currentPage, itemsPerPage, searchTerm, dateRange, customStartDate, customEndDate);
+      await fetchOrders(
+        currentPage,
+        itemsPerPage,
+        searchTerm,
+        dateRange,
+        customStartDate,
+        customEndDate,
+        status,
+        clotheType,
+        finishingType,
+        colour,
+        sillName,
+        quality
+      );
       if (selectedOrder && selectedOrder._id === orderToDelete) {
         closeModal();
       }
@@ -149,13 +222,12 @@ const Orders = () => {
 
   const handlePageChange = (page) => setCurrentPage(page);
 
-  // Handle dropdown change
+  // Handle dropdown change for dateRange (clear custom dates if not custom)
   const handleDateRangeChange = (value) => {
     setDateRange(value);
     if (value !== "custom") {
       setCustomStartDate(null);
       setCustomEndDate(null);
-      fetchOrders(currentPage, itemsPerPage, searchTerm, value);
     }
   };
 
@@ -166,19 +238,7 @@ const Orders = () => {
       return;
     }
   
-    const start = dayjs(customStartDate).startOf("day").toDate();
-    const end = dayjs(customEndDate).endOf("day").toDate();
-  
-    fetchOrders(
-      currentPage,
-      itemsPerPage,
-      searchTerm,
-      "custom",
-      start,
-      end
-    );
   };
-  
 
   return (
     <div className="p-6 text-black relative">
@@ -193,6 +253,7 @@ const Orders = () => {
       </div>
 
       <div className="flex flex-wrap justify-between gap-4 mb-6 items-center">
+        {/* Search */}
         <input
           type="text"
           placeholder="Search anything..."
@@ -201,21 +262,25 @@ const Orders = () => {
           className="w-full sm:w-96 border border-gray-300 rounded px-4 py-2"
         />
 
-        <div className="flex flex-wrap gap-3 items-center">
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3 items-center flex-grow min-w-[300px]">
+
+          {/* Date Range */}
           <select
-            className="border border-gray-300 rounded px-4 py-2"
+            className="border border-gray-300 rounded px-4 py-2 min-w-[150px]"
             value={dateRange}
             onChange={(e) => handleDateRangeChange(e.target.value)}
           >
             <option value="">Date range</option>
-            <option value="last_week">Last week</option>
-            <option value="last_month">Last month</option>
             <option value="this_week">This week</option>
             <option value="this_month">This month</option>
+            <option value="last_week">Last week</option>
+            <option value="last_month">Last month</option>
             <option value="last_3_days">Last 3 days</option>
             <option value="custom">Custom</option>
           </select>
 
+          {/* Custom date pickers */}
           {dateRange === "custom" && (
             <div className="flex items-center gap-2">
               <DatePicker
@@ -239,12 +304,97 @@ const Orders = () => {
             </div>
           )}
 
-          <select className="border border-gray-300 rounded px-4 py-2">
-            <option>Status</option>
+          {/* Status */}
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="border border-gray-300 rounded px-4 py-2 min-w-[150px]"
+          >
+            <option value="">Status</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
           </select>
-          <select className="border border-gray-300 rounded px-4 py-2">
-            <option>Address</option>
+
+          {/* Clothe Type */}
+          <select
+            value={clotheType}
+            onChange={(e) => setClotheType(e.target.value)}
+            className="border border-gray-300 rounded px-4 py-2 min-w-[150px]"
+          >
+            <option value="">Clothe Type</option>
+            {data?.clotheTypes?.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
           </select>
+
+          {/* Hidden filters */}
+          {showMoreFilters && (
+            <>
+              <select
+                value={finishingType}
+                onChange={(e) => setFinishingType(e.target.value)}
+                className="border border-gray-300 rounded px-4 py-2 min-w-[150px]"
+              >
+                <option value="">Finishing Type</option>
+                {data?.finishingTypes?.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={colour}
+                onChange={(e) => setColour(e.target.value)}
+                className="border border-gray-300 rounded px-4 py-2 min-w-[150px]"
+              >
+                <option value="">Colour</option>
+                {data?.colours?.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={sillName}
+                onChange={(e) => setSillName(e.target.value)}
+                className="border border-gray-300 rounded px-4 py-2 min-w-[150px]"
+              >
+                <option value="">Sill Name</option>
+                {data?.sillNames?.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={quality}
+                onChange={(e) => setQuality(e.target.value)}
+                className="border border-gray-300 rounded px-4 py-2 min-w-[150px]"
+              >
+                <option value="">Quality</option>
+                {data?.qualities?.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+
+          {/* More Filters Button always last */}
+          <button
+            onClick={() => setShowMoreFilters(!showMoreFilters)}
+            className="text-blue-600 border border-gray-300 rounded px-4 py-2 min-w-[150px] ml-auto"
+            type="button"
+          >
+            {showMoreFilters ? "Hide Filters" : "More Filters"}
+          </button>
         </div>
       </div>
 
