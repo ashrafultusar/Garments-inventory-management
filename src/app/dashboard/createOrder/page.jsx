@@ -70,7 +70,7 @@ const Page = () => {
   };
 
   return (
-    <section className="max-w-4xl mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
+    <section className="max-w-4xl mt-14 md:mt-2 mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
       <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
         📝 Order Form
       </h2>

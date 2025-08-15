@@ -18,11 +18,11 @@ const SignIn = () => {
       const response = await signIn("credentials", {
         email,
         password,
-        callbackUrl: "/",
+        callbackUrl: "/dashboard/order",
         redirect: false,
       });
       if (response.ok) {
-        router.push("/");
+        router.push("/dashboard/order");
         form.reset();
         toast.success("login successfuly");
       } else {

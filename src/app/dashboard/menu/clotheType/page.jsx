@@ -109,7 +109,7 @@ const Page = () => {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="py-6 max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">
         {editingId ? "Update Cloth Type" : "Upload Cloth Type"}
       </h2>

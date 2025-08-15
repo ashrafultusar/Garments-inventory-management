@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
   if (!isOpen) return null;
@@ -71,9 +72,10 @@ const AdminPage = () => {
       setAdmins((prev) =>
         prev.filter((admin) => admin._id !== selectedAdminId)
       );
+      
     } catch (error) {
       console.error("Delete error:", error);
-      alert("Error deleting admin");
+      toast.error("Error deleting admin");
     } finally {
       setModalOpen(false);
       setSelectedAdminId(null);
@@ -85,7 +87,7 @@ const AdminPage = () => {
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="max-w-5xl mx-auto py-16">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">
         Admin List
       </h1>
@@ -129,9 +131,7 @@ const AdminPage = () => {
                     {admin.email}
                   </td>
                   <td className="border border-gray-300 px-6 py-4 flex gap-3">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">
-                      Update
-                    </button>
+                    
                     <button
                       onClick={() => handleDeleteClick(admin?._id)}
                       className="bg-red-600 cursor-pointer hover:bg-red-700 text-white px-3 py-1 rounded transition"

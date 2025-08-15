@@ -93,7 +93,7 @@ const CustomerPage = () => {
   };
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="py-6 mt-10 md:-mt-4 space-y-8">
       {/* Form */}
       <section className="bg-white p-6 rounded-2xl shadow-md max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">
