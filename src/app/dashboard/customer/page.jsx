@@ -107,7 +107,9 @@ const CustomerPage = () => {
             ["phoneNumber", "Phone Number", "tel"],
           ].map(([id, label, type]) => (
             <div key={id} className="flex flex-col">
-              <label htmlFor={id} className="mb-1 font-medium">{label}</label>
+              <label htmlFor={id} className="mb-1 font-medium">
+                {label}
+              </label>
               <input
                 id={id}
                 type={type}
@@ -119,7 +121,9 @@ const CustomerPage = () => {
             </div>
           ))}
           <div className="flex flex-col">
-            <label htmlFor="employeeList" className="mb-1 font-medium">Employee List</label>
+            <label htmlFor="employeeList" className="mb-1 font-medium">
+              Employee List
+            </label>
             <textarea
               id="employeeList"
               value={formData.employeeList}
@@ -155,22 +159,39 @@ const CustomerPage = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">#</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Company</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Owner</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Phone</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Employees</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                #
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Company
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Owner
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Phone
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Employees
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {customers?.slice().map((c, index) => (
-              <tr key={c._id} className={editingId === c._id ? "bg-yellow-50" : ""}>
+              <tr
+                key={c._id}
+                className={editingId === c._id ? "bg-yellow-50" : ""}
+              >
                 <td className="px-4 py-2 text-sm">{index + 1}</td>
                 <td className="px-4 py-2 text-sm">{c.companyName}</td>
                 <td className="px-4 py-2 text-sm">{c.ownerName}</td>
                 <td className="px-4 py-2 text-sm">{c.phoneNumber}</td>
-                <td className="px-4 py-2 text-sm">{c.employeeList.join(", ") || "N/A"}</td>
+                <td className="px-4 py-2 text-sm">
+                  {c.employeeList.join(", ") || "N/A"}
+                </td>
                 <td className="px-4 py-2 text-sm flex gap-2">
                   <button
                     onClick={() => handleEdit(c)}

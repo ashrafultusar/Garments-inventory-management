@@ -11,13 +11,22 @@ export async function POST(req) {
     return NextResponse.json(savedOrder, { status: 201 });
   } catch (error) {
     console.error("Error creating order:", error);
+    
+    // Check if this is a duplicate key error (code 11000)
+    if (error.name === 'MongoServerError' && error.code === 11000) {
+      return NextResponse.json(
+        { error: "Duplicate order ID. Please try again." },
+        { status: 409 } 
+      );
+    }
+    
     return NextResponse.json(
       { error: "Failed to create order" },
       { status: 500 }
     );
   }
 }
-
+ 
 
 
 export async function GET(req) {

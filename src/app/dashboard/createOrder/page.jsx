@@ -1,6 +1,7 @@
 "use client";
 
 import useAppData from "@/hook/useAppData";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
@@ -77,31 +78,56 @@ const Page = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">
-          {/* Other input fields */}
-          {[
-            ["date", "Date", "date"],
-            ["invoiceNumber", "Invoice Number", "text"],
-            ["companyName", "Company Name", "text"],
-            ["finishingWidth", "Finishing প্রস্থ (inch)", "number"],
-            ["totalGoj", "Total Goj", "number"],
-            ["totalBundle", "Total Bundle", "number"],
-            ["dyeingName", "Dyeing Name", "text"],
-            ["transporterName", "Transporter Name", "text"],
-          ].map(([id, label, type]) => (
-            <div key={id} className="flex flex-col">
-              <label htmlFor={id} className="mb-1 font-medium text-sm">
-                {label}
-              </label>
-              <input
-                id={id}
-                type={type}
-                required
-                value={formData[id]}
-                onChange={handleChange}
-                className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          ))}
+          {/* Date */}
+          <div className="flex flex-col">
+            <label htmlFor="date" className="mb-1 font-medium text-sm">
+              Date
+            </label>
+            <input
+              id="date"
+              type="date"
+              required
+              value={formData.date}
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Invoice Number */}
+          <div className="flex flex-col">
+            <label htmlFor="invoiceNumber" className="mb-1 font-medium text-sm">
+              Invoice Number
+            </label>
+            <input
+              id="invoiceNumber"
+              type="text"
+              required
+              value={formData?.invoiceNumber}
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Company Name - Dynamic */}
+          <div className="flex flex-col">
+            <label htmlFor="clotheType" className="mb-1 font-medium text-sm">
+              Company Name
+            </label>
+            <select
+              id="companyName"
+              value={formData?.companyName}
+              required
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select Company</option>
+              {data?.customers?.map((item) => (
+                <option key={item._id} value={item.companyName}>
+                  {item.companyName}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Clothe Type */}
           <div className="flex flex-col">
@@ -110,7 +136,7 @@ const Page = () => {
             </label>
             <select
               id="clotheType"
-              value={formData?.clotheType}
+              value={formData.clotheType}
               required
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -124,41 +150,38 @@ const Page = () => {
             </select>
           </div>
 
-          {/* Finishing Type */}
+          {/* Finishing Width */}
           <div className="flex flex-col">
-            <label htmlFor="finishingType" className="mb-1 font-medium text-sm">
-              Finishing Type
+            <label
+              htmlFor="finishingWidth"
+              className="mb-1 font-medium text-sm"
+            >
+              Finishing প্রস্থ (inch)
             </label>
-            <select
-              id="finishingType"
-              value={formData.finishingType}
+            <input
+              id="finishingWidth"
+              type="number"
               required
+              value={formData.finishingWidth}
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Select Finishing</option>
-              {data?.finishingTypes?.map((item) => (
-                <option key={item.id || item.name} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
-          {/* Colour */}
+          {/* Quality */}
           <div className="flex flex-col">
-            <label htmlFor="colour" className="mb-1 font-medium text-sm">
-              Colour
+            <label htmlFor="quality" className="mb-1 font-medium text-sm">
+              Quality
             </label>
             <select
-              id="colour"
-              value={formData.colour}
+              id="quality"
+              value={formData.quality}
               required
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select Colour</option>
-              {data?.colours?.map((item) => (
+              <option value="">Select Quality</option>
+              {data?.qualities?.map((item) => (
                 <option key={item.id || item.name} value={item.name}>
                   {item.name}
                 </option>
@@ -187,29 +210,119 @@ const Page = () => {
             </select>
           </div>
 
-          {/* Quality */}
+          {/* Colour */}
           <div className="flex flex-col">
-            <label htmlFor="quality" className="mb-1 font-medium text-sm">
-              Quality
+            <label htmlFor="colour" className="mb-1 font-medium text-sm">
+              Colour
             </label>
             <select
-              id="quality"
-              value={formData.quality}
+              id="colour"
+              value={formData.colour}
               required
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select Quality</option>
-              {data?.qualities?.map((item) => (
+              <option value="">Select Colour</option>
+              {data?.colours?.map((item) => (
                 <option key={item.id || item.name} value={item.name}>
                   {item.name}
                 </option>
               ))}
             </select>
           </div>
+
+          {/* Finishing Type */}
+          <div className="flex flex-col">
+            <label htmlFor="finishingType" className="mb-1 font-medium text-sm">
+              Finishing Type
+            </label>
+            <select
+              id="finishingType"
+              value={formData.finishingType}
+              required
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select Finishing</option>
+              {data?.finishingTypes?.map((item) => (
+                <option key={item.id || item.name} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Total Goj */}
+          <div className="flex flex-col">
+            <label htmlFor="totalGoj" className="mb-1 font-medium text-sm">
+              Total Goj
+            </label>
+            <input
+              id="totalGoj"
+              type="number"
+              required
+              value={formData.totalGoj}
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Total Bundle */}
+          <div className="flex flex-col">
+            <label htmlFor="totalBundle" className="mb-1 font-medium text-sm">
+              Total Bundle
+            </label>
+            <input
+              id="totalBundle"
+              type="number"
+              required
+              value={formData.totalBundle}
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Dyeing Name */}
+          <div className="flex flex-col">
+            <label htmlFor="dyeingName" className="mb-1 font-medium text-sm">
+              Dyeing Name
+            </label>
+            <input
+              id="dyeingName"
+              type="text"
+              required
+              value={formData.dyeingName}
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Transporter Name */}
+          <div className="flex flex-col">
+            <label
+              htmlFor="transporterName"
+              className="mb-1 font-medium text-sm"
+            >
+              Transporter Name
+            </label>
+            <input
+              id="transporterName"
+              type="text"
+              required
+              value={formData.transporterName}
+              onChange={handleChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
         </div>
 
-        <div className="flex justify-end mt-8">
+        <div className="flex justify-end mt-8 gap-2">
+       <Link href={'/dashboard/order'}> <button
+            type="submit"
+            className="bg-red-500 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
+          >
+            Cancel Order
+          </button></Link>
           <button
             type="submit"
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function useAppData() {
   const [data, setData] = useState({
@@ -8,6 +8,7 @@ export default function useAppData() {
     colours: [],
     sillNames: [],
     qualities: [],
+    customers: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,14 +17,16 @@ export default function useAppData() {
     async function fetchData() {
       try {
         setLoading(true);
-        const [finishingRes, clothRes, colourRes, sillRes, qualityRes] = await Promise.all([
-            axios.get('/api/menu/finishing-type'),
-          axios.get('/api/menu/cloth-type'),
-          axios.get('/api/menu/colour'),
-         
-          axios.get('/api/menu/sill-name'),
-          axios.get('/api/menu/quality'),
-        ]);
+        const [finishingRes, clothRes, colourRes, sillRes, qualityRes,customersRes] =
+          await Promise.all([
+            axios.get("/api/menu/finishing-type"),
+            axios.get("/api/menu/cloth-type"),
+            axios.get("/api/menu/colour"),
+
+            axios.get("/api/menu/sill-name"),
+            axios.get("/api/menu/quality"),
+            axios.get("/api/customers"),
+          ]);
 
         setData({
           finishingTypes: finishingRes.data,
@@ -31,6 +34,7 @@ export default function useAppData() {
           colours: colourRes.data,
           sillNames: sillRes.data,
           qualities: qualityRes.data,
+          customers: customersRes.data,
         });
       } catch (err) {
         setError(err);

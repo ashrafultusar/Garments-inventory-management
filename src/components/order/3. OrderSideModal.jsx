@@ -23,7 +23,7 @@ const OrderSideModal = ({
   if (!isModalOpen) return null;
   const router = useRouter();
 
-
+console.log(selectedOrder);
 
   return (
     <div className="fixed inset-0 flex justify-end z-50">
@@ -41,7 +41,7 @@ const OrderSideModal = ({
       >
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h2 className="text-xl font-bold">
-            #{selectedOrder?.orderId || "N/A"}
+            {selectedOrder?.orderId || "N/A"}
           </h2>
           <IoClose
             className="w-6 h-6 text-gray-500 hover:text-black cursor-pointer"
@@ -60,7 +60,7 @@ const OrderSideModal = ({
                 <CiGrid41 className="text-2xl" />
               </div>
               <div>
-                <p className="text-base font-medium">
+                <p className="text-base uppercase font-medium">
                   {selectedOrder?.clotheType || "N/A"}
                 </p>
               </div>
@@ -125,8 +125,8 @@ const OrderSideModal = ({
                   <p className="text-sm text-gray-500">Color Profile</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="w-5 h-5 rounded-full bg-blue-600 border border-gray-300"></div>
-                    <p className="font-semibold text-gray-700">
-                      {selectedOrder?.colorProfile || "N/A"}
+                    <p className="font-semibold text-gray-700 uppercase">
+                      {selectedOrder?.colour || "N/A"}
                     </p>
                   </div>
                 </div>

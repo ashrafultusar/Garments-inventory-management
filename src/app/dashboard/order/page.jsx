@@ -223,7 +223,6 @@ const Orders = () => {
 
   const handlePageChange = (page) => setCurrentPage(page);
 
-  // Handle dropdown change for dateRange (clear custom dates if not custom)
   const handleDateRangeChange = (value) => {
     setDateRange(value);
     if (value !== "custom") {

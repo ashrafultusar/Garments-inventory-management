@@ -1,5 +1,4 @@
 import React from "react";
-import { FaPencilAlt } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
 
 const getStatusColor = (status) => {
@@ -24,17 +23,20 @@ const getPaymentColor = (payment) => {
 };
 
 const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
+
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">
       <table className="min-w-full text-sm table-auto">
         <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
           <tr>
-            <th className="p-4 text-left whitespace-nowrap">ID NO.</th>
+            <th className="p-4 text-left whitespace-nowrap">Order Id</th>
+            <th className="p-4 text-left whitespace-nowrap">Customer</th>
+            <th className="p-4 text-left whitespace-nowrap">Colour</th>
             <th className="p-4 text-left whitespace-nowrap">Clothe Type</th>
-            <th className="p-4 text-left whitespace-nowrap">Company Name</th>
+            <th className="p-4 text-left whitespace-nowrap">Quality</th>
             <th className="p-4 text-left whitespace-nowrap">Status</th>
             <th className="p-4 text-left whitespace-nowrap">Quantity</th>
-            <th className="p-4 text-left whitespace-nowrap">Payment</th>
+            <th className="p-4 text-left whitespace-nowrap">Billing</th>
             <th className="p-4 text-left whitespace-nowrap">Actions</th>
           </tr>
         </thead>
@@ -47,10 +49,16 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
             >
               <td className="p-4 whitespace-nowrap">{order?.orderId}</td>
               <td className="p-4 whitespace-nowrap">
+                {order?.companyName || "N/A"}
+              </td>
+              <td className="p-4 whitespace-nowrap">
+                {order?.colour || "N/A"}
+              </td>
+              <td className="p-4 whitespace-nowrap">
                 {order?.clotheType || "N/A"}
               </td>
               <td className="p-4 whitespace-nowrap">
-                {order?.companyName || "N/A"}
+                {order?.quality || "N/A"}
               </td>
               <td className="p-4 whitespace-nowrap">
                 <span
@@ -62,7 +70,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
                 </span>
               </td>
               <td className="p-4 whitespace-nowrap">
-                {order?.quality || "N/A"}
+                {order?.totalBundle || "N/A"}
               </td>
               <td className="p-4 whitespace-nowrap">
                 <span
