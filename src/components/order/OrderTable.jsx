@@ -23,9 +23,7 @@ const getPaymentColor = (payment) => {
 };
 
 const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
-
-console.log(orders);
-
+  console.log(orders);
 
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">
@@ -34,9 +32,8 @@ console.log(orders);
           <tr>
             <th className="p-4 text-left whitespace-nowrap">Order Id</th>
             <th className="p-4 text-left whitespace-nowrap">Customer</th>
-            <th className="p-4 text-left whitespace-nowrap">Colour</th>
-            <th className="p-4 text-left whitespace-nowrap">Clothe Type</th>
-            <th className="p-4 text-left whitespace-nowrap">Quality</th>
+            <th className="p-4 text-left whitespace-nowrap">Product</th>
+           
             <th className="p-4 text-left whitespace-nowrap">Status</th>
             <th className="p-4 text-left whitespace-nowrap">Quantity</th>
             <th className="p-4 text-left whitespace-nowrap">Billing</th>
@@ -55,14 +52,18 @@ console.log(orders);
                 {order?.companyName || "N/A"}
               </td>
               <td className="p-4 whitespace-nowrap">
-                {order?.colour || "N/A"}
+                <div className="flex flex-col">
+                  <span className="font-medium text-gray-900">
+                    {order?.clotheType || "N/A"}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {order?.quality || "N/A"}
+                  </span>
+                </div>
               </td>
-              <td className="p-4 whitespace-nowrap">
-                {order?.clotheType || "N/A"}
-              </td>
-              <td className="p-4 whitespace-nowrap">
-                {order?.quality || "N/A"}
-              </td>
+
+           
+            
               <td className="p-4 whitespace-nowrap">
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(
