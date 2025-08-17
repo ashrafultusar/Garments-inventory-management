@@ -35,7 +35,7 @@ export default function UpdateOrderPage() {
         const data = await res.json();
 
         setFormData({
-          date: data.date || "",
+          date: data.date ? data.date.split("T")[0] : "", // ✅ fix for date input
           invoiceNumber: data.invoiceNumber || "",
           companyName: data.companyName || "",
           clotheType: data.clotheType || "",
