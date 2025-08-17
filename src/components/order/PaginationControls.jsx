@@ -1,11 +1,13 @@
 import React from "react";
 
-const PaginationControls = ({ currentPage, totalPages, onPageChange }) => {
-  if (totalPages <= 1) {
-    return null;
-  }
 
-  const pages = [...Array(totalPages).keys()].map((i) => i + 1);
+
+  const PaginationControls = ({ currentPage, totalPages, onPageChange, itemsPerPage, onItemsPerPageChange }) => {
+    if (totalPages <= 1) {
+      return null;
+    }
+  
+    const pages = [...Array(totalPages).keys()].map((i) => i + 1);
 
   return (
     <div className="flex justify-center items-center gap-2 mt-6">
@@ -34,6 +36,16 @@ const PaginationControls = ({ currentPage, totalPages, onPageChange }) => {
       >
         Next
       </button>
+      <select
+        value={itemsPerPage}
+        onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+        className="border border-gray-300 rounded py-2 min-w-[80px]"
+      >
+        <option value={12}>12</option>
+        <option value={25}>25</option>
+        <option value={50}>50</option>
+        <option value={100}>100</option>
+      </select>
     </div>
   );
 };
