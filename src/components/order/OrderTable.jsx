@@ -24,6 +24,9 @@ const getPaymentColor = (payment) => {
 
 const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
 
+console.log(orders);
+
+
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">
       <table className="min-w-full text-sm table-auto">
@@ -70,7 +73,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
                 </span>
               </td>
               <td className="p-4 whitespace-nowrap">
-                {order?.totalBundle || "N/A"}
+                {order?.totalGoj || "N/A"}
               </td>
               <td className="p-4 whitespace-nowrap">
                 <span
