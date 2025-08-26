@@ -88,7 +88,7 @@ const useOrders = (filters) => {
     }
   };
 
-  // ---------------- Fetch Single Order ----------------
+ 
   const fetchSingleOrder = async (id) => {
     setLoadingOrder(true);
     try {
@@ -105,7 +105,7 @@ const useOrders = (filters) => {
     }
   };
 
-  // ---------------- Delete Order ----------------
+ 
   const deleteOrder = async (id) => {
     try {
       const res = await fetch(`/api/order/${id}`, { method: "DELETE" });

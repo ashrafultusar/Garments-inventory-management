@@ -23,7 +23,7 @@ const getPaymentColor = (payment) => {
 };
 
 const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
-  console.log(orders);
+
 
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">

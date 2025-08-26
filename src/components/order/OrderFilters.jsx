@@ -100,7 +100,7 @@ const OrderFilters = ({
         >
           <option value="">Clothe Type</option>
           {data?.clotheTypes?.map((item) => (
-            <option key={item.id} value={item.id}>
+            <option key={item?._id} value={item.id}>
               {item.name}
             </option>
           ))}

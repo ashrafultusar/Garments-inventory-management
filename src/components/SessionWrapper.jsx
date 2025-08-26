@@ -2,25 +2,35 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar/Sidebar";
+import Loading from "@/app/loading";
+
 
 export default function SessionWrapper({ children }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [showLoader, setShowLoader] = useState(true);
 
+  // ✅ Always show loader for 3 seconds on page load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoader(false);
+    }, 1000); // 3 seconds → change to 5000 for 5 sec
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // ✅ Redirect if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     }
   }, [status, router]);
 
-  if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    );
+  // ✅ Show loader if session is loading OR timer active
+  if (status === "loading" || showLoader) {
+    return <Loading></Loading>
   }
 
   return (

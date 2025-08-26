@@ -18,8 +18,12 @@ export const authOptions = {
 
         if (!user) return null;
 
-        
-        return { id: user._id, email: user.email,name: user.name, role: user.role };
+        return {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        };
       },
     }),
 
@@ -34,6 +38,7 @@ export const authOptions = {
   },
 
   callbacks: {
+
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
@@ -47,7 +52,7 @@ export const authOptions = {
       return session;
     },
     async redirect({ baseUrl }) {
-      return baseUrl; 
+      return baseUrl;
     },
   },
 
