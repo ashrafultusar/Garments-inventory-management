@@ -31,6 +31,13 @@ const orderSchema = new mongoose.Schema(
     totalBundle: { type: Number },
     dyeingName: { type: String },
     transporterName: { type: String },
+    // নতুন ফিল্ড: টেবিল ডাটা
+    tableData: [
+      {
+        rollNo: Number,
+        goj: Number,
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 const Page = () => {
   const { data } = useAppData();
   const router = useRouter();
+  const [tableData, setTableData] = useState([{ rollNo: "", goj: "" }]);
   const [formData, setFormData] = useState({
     date: "",
     invoiceNumber: "",
@@ -30,21 +31,39 @@ const Page = () => {
     setFormData({ ...formData, [id]: value });
   };
 
+  const handleTableChange = (index, e) => {
+    const { name, value } = e.target;
+    const updated = [...tableData];
+    updated[index][name] = value === "" ? null : Number(value); // ✅ convert to Number
+    setTableData(updated);
+  };
+
+  const addRow = () => {
+    setTableData([...tableData, { rollNo: "", goj: "" }]);
+  };
+
+  const removeRow = (index) => {
+    const updated = [...tableData];
+    updated.splice(index, 1);
+    setTableData(updated);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      const payload = { ...formData, tableData };
+
       const res = await fetch("/api/order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         toast.success("Order created successfully!");
-
         setFormData({
           date: "",
           invoiceNumber: "",
@@ -60,6 +79,7 @@ const Page = () => {
           dyeingName: "",
           transporterName: "",
         });
+        setTableData([{ rollNo: "", goj: "" }]);
         router.push("/dashboard/order");
       } else {
         toast.error("Failed to save order");
@@ -102,20 +122,20 @@ const Page = () => {
               id="invoiceNumber"
               type="text"
               required
-              value={formData?.invoiceNumber}
+              value={formData.invoiceNumber}
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
-          {/* Company Name - Dynamic */}
+          {/* Company Name */}
           <div className="flex flex-col">
-            <label htmlFor="clotheType" className="mb-1 font-medium text-sm">
+            <label htmlFor="companyName" className="mb-1 font-medium text-sm">
               Company Name
             </label>
             <select
               id="companyName"
-              value={formData?.companyName}
+              value={formData.companyName}
               required
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -152,10 +172,7 @@ const Page = () => {
 
           {/* Finishing Width */}
           <div className="flex flex-col">
-            <label
-              htmlFor="finishingWidth"
-              className="mb-1 font-medium text-sm"
-            >
+            <label htmlFor="finishingWidth" className="mb-1 font-medium text-sm">
               Finishing প্রস্থ (inch)
             </label>
             <input
@@ -299,10 +316,7 @@ const Page = () => {
 
           {/* Transporter Name */}
           <div className="flex flex-col">
-            <label
-              htmlFor="transporterName"
-              className="mb-1 font-medium text-sm"
-            >
+            <label htmlFor="transporterName" className="mb-1 font-medium text-sm">
               Transporter Name
             </label>
             <input
@@ -316,13 +330,68 @@ const Page = () => {
           </div>
         </div>
 
+        {/* Table */}
+        <h3 className="text-xl font-semibold mt-6 mb-2">Roll & Goj Table</h3>
+        <table className="w-full border border-gray-300 mb-4">
+          <thead>
+            <tr>
+              <th className="border px-2 py-1">Roll</th>
+              <th className="border px-2 py-1">Goj</th>
+              <th className="border px-2 py-1">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tableData.map((row, idx) => (
+              <tr key={idx}>
+                <td className="border px-2 py-1">
+                  <input
+                    type="number"
+                    name="rollNo"
+                    value={row.rollNo ?? ""}
+                    onChange={(e) => handleTableChange(idx, e)}
+                    className="w-full border px-2 py-1"
+                  />
+                </td>
+                <td className="border px-2 py-1">
+                  <input
+                    type="number"
+                    name="goj"
+                    value={row.goj ?? ""}
+                    onChange={(e) => handleTableChange(idx, e)}
+                    className="w-full border px-2 py-1"
+                  />
+                </td>
+                <td className="border px-2 py-1 text-center">
+                  <button
+                    type="button"
+                    onClick={() => removeRow(idx)}
+                    className="bg-red-500 text-white px-2"
+                  >
+                    X
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button
+          type="button"
+          onClick={addRow}
+          className="bg-green-500 text-white px-3 py-1 rounded"
+        >
+          + Add Row
+        </button>
+
+        {/* Buttons */}
         <div className="flex justify-end mt-8 gap-2">
-       <Link href={'/dashboard/order'}> <button
-            type="submit"
-            className="bg-red-500 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
-          >
-            Cancel Order
-          </button></Link>
+          <Link href={"/dashboard/order"}>
+            <button
+              type="button"
+              className="bg-red-500 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
+            >
+              Cancel Order
+            </button>
+          </Link>
           <button
             type="submit"
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
