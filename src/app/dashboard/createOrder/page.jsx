@@ -3,7 +3,7 @@
 import useAppData from "@/hook/useAppData";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 const Page = () => {
@@ -11,6 +11,7 @@ const Page = () => {
   const router = useRouter();
 
   const [tableData, setTableData] = useState([{ goj: "" }]);
+  const inputRefs = useRef([]);
   const [formData, setFormData] = useState({
     date: "",
     invoiceNumber: "",
@@ -27,6 +28,18 @@ const Page = () => {
     transporterName: "",
   });
 
+  // আজকের তারিখ সেট করা
+  const [today, setToday] = useState("");
+  useEffect(() => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const formatted = `${year}-${month}-${day}`;
+    setToday(formatted);
+    setFormData((prev) => ({ ...prev, date: formatted }));
+  }, []);
+
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
@@ -39,8 +52,13 @@ const Page = () => {
     setTableData(updated);
   };
 
+  // Row যোগ করা
   const addRow = () => {
-    setTableData([...tableData, { goj: "" }]);
+    setTableData((prev) => [...prev, { goj: "" }]);
+    setTimeout(() => {
+      const lastIndex = tableData.length;
+      inputRefs.current[lastIndex]?.focus();
+    }, 50);
   };
 
   const removeRow = (index) => {
@@ -49,21 +67,39 @@ const Page = () => {
     setTableData(updated);
   };
 
-  // disable লজিক চেক করার জন্য হেল্পার
+  const handleKeyDown = (e, idx) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (idx === tableData.length - 1) {
+        addRow();
+      }
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (idx + 1 < tableData.length) {
+        inputRefs.current[idx + 1]?.focus();
+      }
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (idx - 1 >= 0) {
+        inputRefs.current[idx - 1]?.focus();
+      }
+    }
+  };
+
   const isFormTotalsFilled = formData.totalGoj || formData.totalBundle;
-  const isTableGojFilled = tableData.some((row) => row.goj !== "" && row.goj !== null);
+  const isTableGojFilled = tableData.some(
+    (row) => row.goj !== "" && row.goj !== null
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const payload = { ...formData, tableData };
-
       const res = await fetch("/api/order", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -95,7 +131,6 @@ const Page = () => {
     }
   };
 
-
   return (
     <section className="max-w-4xl mt-14 md:mt-2 mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
       <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
@@ -110,12 +145,13 @@ const Page = () => {
               Date
             </label>
             <input
-              id="date"
               type="date"
-              required
+              id="date"
               value={formData.date}
-              onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              onChange={(e) =>
+                setFormData({ ...formData, date: e.target.value })
+              }
+              className="border px-2 py-1"
             />
           </div>
 
@@ -130,7 +166,7 @@ const Page = () => {
               required
               value={formData.invoiceNumber}
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             />
           </div>
 
@@ -144,7 +180,7 @@ const Page = () => {
               value={formData.companyName}
               required
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             >
               <option value="">Select Company</option>
               {data?.customers?.map((item) => (
@@ -165,7 +201,7 @@ const Page = () => {
               value={formData.clotheType}
               required
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             >
               <option value="">Select Type</option>
               {data?.clotheTypes?.map((item) => (
@@ -182,7 +218,7 @@ const Page = () => {
               htmlFor="finishingWidth"
               className="mb-1 font-medium text-sm"
             >
-              Finishing প্রস্থ (inch)
+              Finishing Width (inch)
             </label>
             <input
               id="finishingWidth"
@@ -190,7 +226,7 @@ const Page = () => {
               required
               value={formData.finishingWidth}
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             />
           </div>
 
@@ -204,7 +240,7 @@ const Page = () => {
               value={formData.quality}
               required
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             >
               <option value="">Select Quality</option>
               {data?.qualities?.map((item) => (
@@ -225,7 +261,7 @@ const Page = () => {
               value={formData.sillName}
               required
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             >
               <option value="">Select Sill Name</option>
               {data?.sillNames?.map((item) => (
@@ -246,7 +282,7 @@ const Page = () => {
               value={formData.colour}
               required
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             >
               <option value="">Select Colour</option>
               {data?.colours?.map((item) => (
@@ -267,7 +303,7 @@ const Page = () => {
               value={formData.finishingType}
               required
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             >
               <option value="">Select Finishing</option>
               {data?.finishingTypes?.map((item) => (
@@ -286,11 +322,11 @@ const Page = () => {
             <input
               id="totalGoj"
               type="number"
-              required={!isTableGojFilled} 
+              required={!isTableGojFilled}
               disabled={isTableGojFilled}
               value={formData.totalGoj}
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             />
           </div>
 
@@ -302,11 +338,11 @@ const Page = () => {
             <input
               id="totalBundle"
               type="number"
-              required={!isTableGojFilled} 
+              required={!isTableGojFilled}
               disabled={isTableGojFilled}
               value={formData.totalBundle}
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             />
           </div>
 
@@ -321,7 +357,7 @@ const Page = () => {
               required
               value={formData.dyeingName}
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             />
           </div>
 
@@ -339,7 +375,7 @@ const Page = () => {
               required
               value={formData.transporterName}
               onChange={handleChange}
-              className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border px-4 py-2"
             />
           </div>
         </div>
@@ -349,6 +385,7 @@ const Page = () => {
         <table className="w-full border border-gray-300 mb-4">
           <thead>
             <tr>
+              <th className="border px-2 py-1">Than</th>
               <th className="border px-2 py-1">Goj</th>
               <th className="border px-2 py-1">Action</th>
             </tr>
@@ -356,12 +393,15 @@ const Page = () => {
           <tbody>
             {tableData.map((row, idx) => (
               <tr key={idx}>
+                <td className="border px-2 py-1 text-center">{idx + 1}</td>
                 <td className="border px-2 py-1">
                   <input
                     type="number"
                     name="goj"
+                    ref={(el) => (inputRefs.current[idx] = el)}
                     value={row.goj ?? ""}
                     onChange={(e) => handleTableChange(idx, e)}
+                    onKeyDown={(e) => handleKeyDown(e, idx)}
                     disabled={isFormTotalsFilled}
                     className="w-full border px-2 py-1"
                     required={!isFormTotalsFilled}
@@ -380,28 +420,31 @@ const Page = () => {
             ))}
           </tbody>
         </table>
-        <button
-          type="button"
-          onClick={addRow}
-          disabled={isFormTotalsFilled} 
-          className="bg-green-500 text-white px-3 py-1 rounded disabled:opacity-50"
-        >
-          + Add Row
-        </button>
+
+        {/* Sum Section */}
+        <div className="flex justify-between bg-gray-100 p-2 rounded mb-4">
+          <p className="font-semibold text-gray-700">
+            Total Than: {tableData.length}
+          </p>
+          <p className="font-semibold text-gray-700">
+            Total Goj:{" "}
+            {tableData.reduce((sum, row) => sum + (Number(row.goj) || 0), 0)}
+          </p>
+        </div>
 
         {/* Buttons */}
         <div className="flex justify-end mt-8 gap-2">
           <Link href={"/dashboard/order"}>
             <button
               type="button"
-              className="bg-red-500 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
+              className="bg-red-500 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg"
             >
               Cancel Order
             </button>
           </Link>
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg"
           >
             Submit Order
           </button>
