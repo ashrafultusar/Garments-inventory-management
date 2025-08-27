@@ -315,36 +315,36 @@ const Page = () => {
           </div>
 
           {/* Total Goj */}
-          <div className="flex flex-col">
-            <label htmlFor="totalGoj" className="mb-1 font-medium text-sm">
-              Total Goj
-            </label>
-            <input
-              id="totalGoj"
-              type="number"
-              required={!isTableGojFilled}
-              disabled={isTableGojFilled}
-              value={formData.totalGoj}
-              onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            />
-          </div>
+          {!isTableGojFilled && (
+            <div className="flex flex-col">
+              <label htmlFor="totalGoj" className="mb-1 font-medium text-sm">
+                Total Goj
+              </label>
+              <input
+                id="totalGoj"
+                type="number"
+                value={formData.totalGoj}
+                onChange={handleChange}
+                className="rounded-lg border px-4 py-2"
+              />
+            </div>
+          )}
 
           {/* Total Bundle */}
-          <div className="flex flex-col">
-            <label htmlFor="totalBundle" className="mb-1 font-medium text-sm">
-              Total Bundle
-            </label>
-            <input
-              id="totalBundle"
-              type="number"
-              required={!isTableGojFilled}
-              disabled={isTableGojFilled}
-              value={formData.totalBundle}
-              onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            />
-          </div>
+          {!isTableGojFilled && (
+            <div className="flex flex-col">
+              <label htmlFor="totalBundle" className="mb-1 font-medium text-sm">
+                Total Bundle
+              </label>
+              <input
+                id="totalBundle"
+                type="number"
+                value={formData.totalBundle}
+                onChange={handleChange}
+                className="rounded-lg border px-4 py-2"
+              />
+            </div>
+          )}
 
           {/* Dyeing Name */}
           <div className="flex flex-col">
@@ -381,70 +381,77 @@ const Page = () => {
         </div>
 
         {/* Table */}
-        <h3 className="text-xl font-semibold mt-6 mb-2">Roll & Goj Table</h3>
-        <table className="w-full border border-gray-300 mb-4">
-          <thead>
-            <tr>
-              <th className="border px-2 py-1">Than</th>
-              <th className="border px-2 py-1">Goj</th>
-              <th className="border px-2 py-1">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableData.map((row, idx) => (
-              <tr key={idx}>
-                <td className="border px-2 py-1 text-center">{idx + 1}</td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="number"
-                    name="goj"
-                    ref={(el) => (inputRefs.current[idx] = el)}
-                    value={row.goj ?? ""}
-                    onChange={(e) => handleTableChange(idx, e)}
-                    onKeyDown={(e) => handleKeyDown(e, idx)}
-                    disabled={isFormTotalsFilled}
-                    className="w-full border px-2 py-1"
-                    required={!isFormTotalsFilled}
-                  />
-                </td>
-                <td className="border px-2 py-1 text-center">
-                  <button
-                    type="button"
-                    onClick={() => removeRow(idx)}
-                    className="bg-red-500 text-white px-2"
-                  >
-                    X
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {!isFormTotalsFilled && (
+          <>
+            <h3 className="text-xl font-semibold mt-6 mb-2">
+              Roll & Goj Table
+            </h3>
+            <table className="w-full border border-gray-300 mb-4">
+              <thead>
+                <tr>
+                  <th className="border px-2 py-1">Than</th>
+                  <th className="border px-2 py-1">Goj</th>
+                  <th className="border px-2 py-1">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableData.map((row, idx) => (
+                  <tr key={idx}>
+                    <td className="border px-2 py-1 text-center">{idx + 1}</td>
+                    <td className="border px-2 py-1">
+                      <input
+                        type="number"
+                        name="goj"
+                        ref={(el) => (inputRefs.current[idx] = el)}
+                        value={row.goj ?? ""}
+                        onChange={(e) => handleTableChange(idx, e)}
+                        onKeyDown={(e) => handleKeyDown(e, idx)}
+                        className="w-full border px-2 py-1"
+                      />
+                    </td>
+                    <td className="border px-2 py-1 text-center">
+                      <button
+                        type="button"
+                        onClick={() => removeRow(idx)}
+                        className="bg-red-500 text-white px-2"
+                      >
+                        X
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-        {/* Sum Section */}
-        <div className="flex justify-between bg-gray-100 p-2 rounded mb-4">
-          <p className="font-semibold text-gray-700">
-            Total Than: {tableData.length}
-          </p>
-          <p className="font-semibold text-gray-700">
-            Total Goj:{" "}
-            {tableData.reduce((sum, row) => sum + (Number(row.goj) || 0), 0)}
-          </p>
-        </div>
+            {/* Sum Section */}
+            <div className="flex justify-between bg-gray-100 p-2 rounded mb-4">
+              <p className="font-semibold text-gray-700">
+                Total Than: {tableData.length}
+              </p>
+              <p className="font-semibold text-gray-700">
+                Total Goj:{" "}
+                {tableData.reduce(
+                  (sum, row) => sum + (Number(row.goj) || 0),
+                  0
+                )}
+              </p>
+            </div>
+          </>
+        )}
 
         {/* Buttons */}
         <div className="flex justify-end mt-8 gap-2">
           <Link href={"/dashboard/order"}>
             <button
               type="button"
-              className="bg-red-500 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg"
+              className="bg-red-500 hover:bg-red-700 text-white font-medium px-6 py-3 cursor-pointer rounded-lg"
             >
               Cancel Order
             </button>
           </Link>
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg"
+            className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg"
           >
             Submit Order
           </button>
