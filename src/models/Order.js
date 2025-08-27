@@ -8,30 +8,26 @@ const orderSchema = new mongoose.Schema(
       unique: true,
       default: function () {
         const now = new Date();
-
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, "0");
         const day = String(now.getDate()).padStart(2, "0");
-
         const random = Math.floor(Math.random() * 900) + 100;
-
         return `#ORD-${year}-${month}${day}-${random}`;
       },
     },
-    date: { type: String },
-    invoiceNumber: { type: String },
-    companyName: { type: String },
-    clotheType: { type: String },
-    finishingWidth: { type: Number },
-    quality: { type: String },
-    sillName: { type: String },
-    colour: { type: String },
-    finishingType: { type: String },
-    totalGoj: { type: Number },
-    totalBundle: { type: Number },
-    dyeingName: { type: String },
-    transporterName: { type: String },
-    // নতুন ফিল্ড: টেবিল ডাটা
+    date: String,
+    invoiceNumber: String,
+    companyName: String,
+    clotheType: String,
+    finishingWidth: Number,
+    quality: String,
+    sillName: String,
+    colour: String,
+    finishingType: String,
+    totalGoj: Number,
+    totalBundle: Number,
+    dyeingName: String,
+    transporterName: String,
     tableData: [
       {
         rollNo: Number,
@@ -43,5 +39,4 @@ const orderSchema = new mongoose.Schema(
 );
 
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
-
 module.exports = Order;

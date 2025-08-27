@@ -2,65 +2,32 @@ import connectDB from "@/lib/db";
 import Order from "@/models/Order";
 import { NextResponse } from "next/server";
 
-// export async function POST(req) {
-//   try {
-//     await connectDB();
-//     const data = await req.json();
-//     const order = new Order(data);
-//     const savedOrder = await order.save();
-//     return NextResponse.json(savedOrder, { status: 201 });
-//   } catch (error) {
-//     console.error("Error creating order:", error);
-    
-//     // Check if this is a duplicate key error (code 11000)
-//     if (error.name === 'MongoServerError' && error.code === 11000) {
-//       return NextResponse.json(
-//         { error: "Duplicate order ID. Please try again." },
-//         { status: 409 } 
-//       );
-//     }
-    
-//     return NextResponse.json(
-//       { error: "Failed to create order" },
-//       { status: 500 }
-//     );
-//   }
-// }
- 
 
 export async function POST(req) {
   try {
     await connectDB();
-    const data = await req.json();
+    const body = await req.json();
 
-    // ✅ Ensure tableData numbers
-    if (data.tableData && Array.isArray(data.tableData)) {
-      data.tableData = data.tableData.map((row) => ({
-        rollNo: row.rollNo ? Number(row.rollNo) : 0,
-        goj: row.goj ? Number(row.goj) : 0,
-      }));
-    }
+    const { tableData, ...rest } = body;
 
-    const order = new Order(data);
+    const updatedTableData = tableData.map((row, index) => ({
+      rollNo: index + 1,
+      goj: row.goj,
+    }));
+
+    const order = new Order({
+      ...rest,
+      tableData: updatedTableData,
+    });
+
     const savedOrder = await order.save();
+
     return NextResponse.json(savedOrder, { status: 201 });
   } catch (error) {
     console.error("Error creating order:", error);
-
-    if (error.name === "MongoServerError" && error.code === 11000) {
-      return NextResponse.json(
-        { error: "Duplicate order ID. Please try again." },
-        { status: 409 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Failed to create order" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
- 
 
 export async function GET(req) {
   try {

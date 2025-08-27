@@ -72,7 +72,6 @@ const AdminPage = () => {
       setAdmins((prev) =>
         prev.filter((admin) => admin._id !== selectedAdminId)
       );
-      
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Error deleting admin");
@@ -131,7 +130,6 @@ const AdminPage = () => {
                     {admin.email}
                   </td>
                   <td className="border border-gray-300 px-6 py-4 flex gap-3">
-                    
                     <button
                       onClick={() => handleDeleteClick(admin?._id)}
                       className="bg-red-600 cursor-pointer hover:bg-red-700 text-white px-3 py-1 rounded transition"
@@ -146,7 +144,6 @@ const AdminPage = () => {
         </div>
       )}
 
-     
       <ConfirmationModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

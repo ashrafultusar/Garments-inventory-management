@@ -9,7 +9,8 @@ import { toast } from "react-toastify";
 const Page = () => {
   const { data } = useAppData();
   const router = useRouter();
-  const [tableData, setTableData] = useState([{ rollNo: "", goj: "" }]);
+
+  const [tableData, setTableData] = useState([{ goj: "" }]);
   const [formData, setFormData] = useState({
     date: "",
     invoiceNumber: "",
@@ -34,12 +35,12 @@ const Page = () => {
   const handleTableChange = (index, e) => {
     const { name, value } = e.target;
     const updated = [...tableData];
-    updated[index][name] = value === "" ? null : Number(value); // ✅ convert to Number
+    updated[index][name] = value === "" ? "" : Number(value);
     setTableData(updated);
   };
 
   const addRow = () => {
-    setTableData([...tableData, { rollNo: "", goj: "" }]);
+    setTableData([...tableData, { goj: "" }]);
   };
 
   const removeRow = (index) => {
@@ -47,6 +48,10 @@ const Page = () => {
     updated.splice(index, 1);
     setTableData(updated);
   };
+
+  // disable লজিক চেক করার জন্য হেল্পার
+  const isFormTotalsFilled = formData.totalGoj || formData.totalBundle;
+  const isTableGojFilled = tableData.some((row) => row.goj !== "" && row.goj !== null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,7 +84,7 @@ const Page = () => {
           dyeingName: "",
           transporterName: "",
         });
-        setTableData([{ rollNo: "", goj: "" }]);
+        setTableData([{ goj: "" }]);
         router.push("/dashboard/order");
       } else {
         toast.error("Failed to save order");
@@ -89,6 +94,7 @@ const Page = () => {
       console.error("Error:", error);
     }
   };
+
 
   return (
     <section className="max-w-4xl mt-14 md:mt-2 mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
@@ -172,7 +178,10 @@ const Page = () => {
 
           {/* Finishing Width */}
           <div className="flex flex-col">
-            <label htmlFor="finishingWidth" className="mb-1 font-medium text-sm">
+            <label
+              htmlFor="finishingWidth"
+              className="mb-1 font-medium text-sm"
+            >
               Finishing প্রস্থ (inch)
             </label>
             <input
@@ -277,7 +286,8 @@ const Page = () => {
             <input
               id="totalGoj"
               type="number"
-              required
+              required={!isTableGojFilled} 
+              disabled={isTableGojFilled}
               value={formData.totalGoj}
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -292,7 +302,8 @@ const Page = () => {
             <input
               id="totalBundle"
               type="number"
-              required
+              required={!isTableGojFilled} 
+              disabled={isTableGojFilled}
               value={formData.totalBundle}
               onChange={handleChange}
               className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -316,7 +327,10 @@ const Page = () => {
 
           {/* Transporter Name */}
           <div className="flex flex-col">
-            <label htmlFor="transporterName" className="mb-1 font-medium text-sm">
+            <label
+              htmlFor="transporterName"
+              className="mb-1 font-medium text-sm"
+            >
               Transporter Name
             </label>
             <input
@@ -335,7 +349,6 @@ const Page = () => {
         <table className="w-full border border-gray-300 mb-4">
           <thead>
             <tr>
-              <th className="border px-2 py-1">Roll</th>
               <th className="border px-2 py-1">Goj</th>
               <th className="border px-2 py-1">Action</th>
             </tr>
@@ -346,19 +359,12 @@ const Page = () => {
                 <td className="border px-2 py-1">
                   <input
                     type="number"
-                    name="rollNo"
-                    value={row.rollNo ?? ""}
-                    onChange={(e) => handleTableChange(idx, e)}
-                    className="w-full border px-2 py-1"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="number"
                     name="goj"
                     value={row.goj ?? ""}
                     onChange={(e) => handleTableChange(idx, e)}
+                    disabled={isFormTotalsFilled}
                     className="w-full border px-2 py-1"
+                    required={!isFormTotalsFilled}
                   />
                 </td>
                 <td className="border px-2 py-1 text-center">
@@ -377,7 +383,8 @@ const Page = () => {
         <button
           type="button"
           onClick={addRow}
-          className="bg-green-500 text-white px-3 py-1 rounded"
+          disabled={isFormTotalsFilled} 
+          className="bg-green-500 text-white px-3 py-1 rounded disabled:opacity-50"
         >
           + Add Row
         </button>
