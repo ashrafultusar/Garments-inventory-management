@@ -4,6 +4,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
 import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
+import OrderStatus from "./OrderStatus";
 
 const getPaymentColor = (payment) => {
   return payment === "Paid"
@@ -96,6 +97,9 @@ console.log(selectedOrder);
                 </p>
               </div>
             </div>
+
+<OrderStatus></OrderStatus>
+
 
             <div className="border-t pt-6">
               <h3 className="font-semibold text-gray-700 mb-4">
