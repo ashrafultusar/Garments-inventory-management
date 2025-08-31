@@ -15,6 +15,11 @@ const orderSchema = new mongoose.Schema(
         return `#ORD-${year}-${month}${day}-${random}`;
       },
     },
+    status: {
+      type: String,
+      enum: ["Pending", "In Process", "Delivered", "Billing", "Completed"],
+      default: "Pending",
+    },
     date: String,
     invoiceNumber: String,
     companyName: String,

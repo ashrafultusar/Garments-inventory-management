@@ -119,3 +119,29 @@ export async function GET(req) {
   }
 }
 
+// Update order status
+export async function PATCH(req) {
+  try {
+    await connectDB();
+    const { orderId, status } = await req.json();
+
+    if (!orderId || !status) {
+      return NextResponse.json({ message: "Order ID and status required" }, { status: 400 });
+    }
+
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderId },
+      { status },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Order status updated", order: updatedOrder });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  }
+}

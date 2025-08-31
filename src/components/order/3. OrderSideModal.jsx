@@ -19,12 +19,12 @@ const OrderSideModal = ({
   loadingOrder,
   selectedOrder,
   closeModal,
-  confirmDelete,
+  confirmDelete, onStatusChange,
 }) => {
   if (!isModalOpen) return null;
   const router = useRouter();
 
-console.log(selectedOrder);
+  console.log(selectedOrder);
 
   return (
     <div className="fixed inset-0 flex justify-end z-50">
@@ -98,7 +98,15 @@ console.log(selectedOrder);
               </div>
             </div>
 
-<OrderStatus></OrderStatus>
+           {/* এখানে status কম্পোনেন্ট */}
+           <OrderStatus
+  orderId={selectedOrder?.orderId}
+  currentStatus={selectedOrder?.status || "Pending"}
+  onStatusChange={(newStatus) => {
+    // Parent component এ update হবার পর state সেট করতে পারো
+    selectedOrder.status = newStatus;
+  }}
+/>
 
 
             <div className="border-t pt-6">
