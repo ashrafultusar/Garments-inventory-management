@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 const steps = [
   { id: 1, title: "Pending", description: "Order is pending and waiting to be processed." },
@@ -34,13 +35,19 @@ export default function OrderStatus({ orderId, currentStatus, onStatusChange }) 
   });
 
   const handleStepClick = (step) => {
-    if (step.id > currentStep) {
+    // ✅ শুধু 1 step পরের status এ যেতে দেবে
+    if (step.id === currentStep + 1) {
       setSelectedStep(step);
       setShowModal(true);
-    } else {
+    } else if (step.id <= currentStep) {
+      // আগের step এ click করলে শুধু দেখাবে
       setCurrentStep(step.id);
+    } else {
+      // Skip করতে চাইলে কিছু হবে না
+      toast.error("You must complete the previous step first!");
     }
   };
+  
 
   // ✅ Toggle Selected/Unselected
   const toggleProcessing = (key) => {
