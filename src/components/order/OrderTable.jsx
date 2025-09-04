@@ -25,6 +25,8 @@ const getPaymentColor = (payment) => {
 const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
 
 
+
+
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">
       <table className="min-w-full text-sm table-auto">
@@ -33,7 +35,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
             <th className="p-4 text-left whitespace-nowrap">Order Id</th>
             <th className="p-4 text-left whitespace-nowrap">Customer</th>
             <th className="p-4 text-left whitespace-nowrap">Product</th>
-           
+
             <th className="p-4 text-left whitespace-nowrap">Status</th>
             <th className="p-4 text-left whitespace-nowrap">Quantity</th>
             <th className="p-4 text-left whitespace-nowrap">Billing</th>
@@ -62,8 +64,6 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
                 </div>
               </td>
 
-           
-            
               <td className="p-4 whitespace-nowrap">
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(

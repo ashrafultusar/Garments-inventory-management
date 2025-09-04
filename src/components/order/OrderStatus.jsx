@@ -153,7 +153,7 @@ export default function OrderStatus({ orderId, currentStatus, onStatusChange }) 
       <div>
         <h3 className="text-lg font-semibold mb-4">Change Order Status</h3>
         <p className="text-gray-600 mb-6">
-          The order will be moved to <b>{selectedStep.title}</b>.
+          The order will be moved to <b>{selectedStep?.title}</b>.
         </p>
         <div className="flex justify-end gap-3">
           <button
@@ -209,14 +209,14 @@ export default function OrderStatus({ orderId, currentStatus, onStatusChange }) 
                   currentStep >= step.id ? "text-blue-600" : "text-gray-500"
                 }`}
               >
-                {step.title}
+                {step?.title}
               </p>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="mt-8 p-4 bg-gray-100 rounded-lg text-gray-700 text-center shadow-sm">
+      <div className="mt-8 p-4 bg-green-100 rounded-lg text-gray-700 text-center shadow-sm">
         {steps.find((step) => step.id === currentStep)?.description}
       </div>
 

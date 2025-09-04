@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { FaPencilAlt } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
@@ -19,12 +19,13 @@ const OrderSideModal = ({
   loadingOrder,
   selectedOrder,
   closeModal,
-  confirmDelete, onStatusChange,
+  confirmDelete,
 }) => {
   if (!isModalOpen) return null;
   const router = useRouter();
 
-  console.log(selectedOrder);
+  // শুধু collapse এর জন্য state
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   return (
     <div className="fixed inset-0 flex justify-end z-50">
@@ -36,10 +37,11 @@ const OrderSideModal = ({
       ></div>
 
       <div
-        className={`relative w-[350px] md:w-[450px] h-full bg-white shadow-lg border-l border-gray-200 overflow-y-auto transform transition-transform duration-300 ${
+        className={`relative w-[350px] md:w-[450px] h-full bg-white shadow-lg border-l border-gray-200 flex flex-col transform transition-transform duration-300 ${
           isClosing || isOpening ? "translate-x-full" : "translate-x-0"
         }`}
       >
+        {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h2 className="text-xl font-bold">
             {selectedOrder?.orderId || "N/A"}
@@ -50,144 +52,104 @@ const OrderSideModal = ({
           />
         </div>
 
-        {loadingOrder ? (
-          <div className="flex justify-center items-center h-full">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-600"></div>
-          </div>
-        ) : (
-          <div className="p-6 space-y-6">
-            <div className="p-4 bg-gray-100 rounded-lg flex items-center gap-4">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <CiGrid41 className="text-2xl" />
-              </div>
-              <div>
-                <p className="text-base uppercase font-medium">
-                  {selectedOrder?.clotheType || "N/A"}
-                </p>
-              </div>
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {loadingOrder ? (
+            <div className="flex justify-center items-center h-full">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-600"></div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4 text-gray-700">
-              <div>
-                <p className="text-xs text-gray-500">Created at</p>
-                <p className="font-semibold">
-                  {selectedOrder?.createdAt
-                    ? new Date(selectedOrder.createdAt).toLocaleDateString()
-                    : "Invalid Date"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Due Date</p>
-                <p className="font-semibold">
-                  {selectedOrder?.dueDate
-                    ? new Date(selectedOrder.dueDate).toLocaleDateString()
-                    : "Invalid Date"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Bundle</p>
-                <p className="font-semibold">
-                  {selectedOrder?.bundle || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Quantity</p>
-                <p className="font-semibold">
-                  {selectedOrder?.quality || "N/A"}
-                </p>
-              </div>
-            </div>
-
-           {/* এখানে status কম্পোনেন্ট */}
-           <OrderStatus
-  orderId={selectedOrder?.orderId}
-  currentStatus={selectedOrder?.status || "Pending"}
-  onStatusChange={(newStatus) => {
-    // Parent component এ update হবার পর state সেট করতে পারো
-    selectedOrder.status = newStatus;
-  }}
-/>
-
-
-            <div className="border-t pt-6">
-              <h3 className="font-semibold text-gray-700 mb-4">
-                Payment Status
-              </h3>
-              <span
-                className={`text-sm font-semibold px-3 py-1 rounded-full ${getPaymentColor(
-                  selectedOrder?.paymentMethod
-                )}`}
+          ) : (
+            <>
+              {/* Header clickable */}
+              <div
+                className="p-4 bg-gray-100 rounded-lg flex items-center gap-4 cursor-pointer"
+                onClick={() => setIsDetailsOpen(!isDetailsOpen)}
               >
-                {selectedOrder?.paymentMethod || "Unpaid"}
-              </span>
-            </div>
-
-            <div className="border-t pt-6">
-              <h3 className="font-semibold text-gray-700 mb-4">
-                Customer Information
-              </h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-gray-500">Customer name</p>
-                  <p className="font-semibold text-gray-700">
-                    {selectedOrder?.companyName || "N/A"}
-                  </p>
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <CiGrid41 className="text-2xl" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Color Profile</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="w-5 h-5 rounded-full bg-blue-600 border border-gray-300"></div>
-                    <p className="font-semibold text-gray-700 uppercase">
-                      {selectedOrder?.colour || "N/A"}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Width</p>
-                  <p className="font-semibold text-gray-700">
-                    {selectedOrder?.width || "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Quality Grade</p>
-                  <p className="font-semibold text-gray-700">
-                    {selectedOrder?.qualityGrade || "N/A"}
+                  <p className="text-base uppercase font-medium">
+                    {selectedOrder?.clotheType || "N/A"}
                   </p>
                 </div>
               </div>
-            </div>
 
-            <div className="border-t pt-6">
-              <h3 className="font-semibold text-gray-700 mb-4">Timeline</h3>
-              <div className="relative pl-6">
-                <div className="absolute left-1.5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
-                <div className="relative mb-4">
-                  <div className="absolute left-0 -translate-x-1/2 w-3 h-3 bg-blue-600 rounded-full"></div>
-                  <div className="ml-4">
-                    <p className="font-semibold text-gray-700">Order Created</p>
-                    <p className="text-sm text-gray-500">
+              {/* Collapse হওয়া অংশ */}
+              {isDetailsOpen && (
+                <div className="grid grid-cols-2 gap-4 text-gray-700">
+                  <div>
+                    <p className="text-xs text-gray-500">Created at</p>
+                    <p className="font-semibold">
                       {selectedOrder?.createdAt
-                        ? new Date(selectedOrder.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              timeZoneName: "short",
-                            }
-                          )
-                        : "N/A"}
+                        ? new Date(selectedOrder.createdAt).toLocaleDateString()
+                        : "Invalid Date"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Due Date</p>
+                    <p className="font-semibold">
+                      {selectedOrder?.dueDate
+                        ? new Date(selectedOrder.dueDate).toLocaleDateString()
+                        : "Invalid Date"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Bundle</p>
+                    <p className="font-semibold">
+                      {selectedOrder?.bundle || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Quantity</p>
+                    <p className="font-semibold">
+                      {selectedOrder?.quality || "N/A"}
                     </p>
                   </div>
                 </div>
+              )}
+
+              {/* এখানে status কম্পোনেন্ট */}
+              <OrderStatus
+                orderId={selectedOrder?.orderId}
+                currentStatus={selectedOrder?.status || "Pending"}
+                onStatusChange={(newStatus) => {
+                  selectedOrder.status = newStatus;
+                }}
+              />
+            </>
+          )}
+        </div>
+        {/* Timeline */}
+        <div className="border-t pt-2 px-6 ">
+          <h3 className="font-semibold text-gray-700 mb-4">Timeline</h3>
+          <div className="relative pl-6">
+            <div className="absolute left-1.5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+            <div className="relative mb-4">
+              <div className="absolute left-0 -translate-x-1/2 w-3 h-3 bg-blue-600 rounded-full"></div>
+              <div className="ml-4">
+                <p className="font-semibold text-gray-700">Order Created</p>
+                <p className="text-sm text-gray-500">
+                  {selectedOrder?.createdAt
+                    ? new Date(selectedOrder.createdAt).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          timeZoneName: "short",
+                        }
+                      )
+                    : "N/A"}
+                </p>
               </div>
             </div>
           </div>
-        )}
-
-        <div className="p-6 border-t flex justify-between gap-4 sticky bottom-0 bg-white">
+        </div>
+        {/* Fixed bottom buttons */}
+        <div className="p-6 border-t flex justify-between gap-4 bg-white">
           <button
             onClick={() =>
               router.push(`/dashboard/order/update/${selectedOrder?._id}`)
