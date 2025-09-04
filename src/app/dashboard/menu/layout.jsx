@@ -10,6 +10,7 @@ const navItems = [
   { name: "Colour", href: "/dashboard/menu/colour" },
   { name: "Sill Name", href: "/dashboard/menu/sillName" },
   { name: "Quality", href: "/dashboard/menu/quality" },
+  { name: "Process List", href: "/dashboard/menu/pocess-list" },
 ];
 
 export default function MenuLayout({ children }) {
