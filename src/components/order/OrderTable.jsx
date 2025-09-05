@@ -23,9 +23,13 @@ const getPaymentColor = (payment) => {
 };
 
 const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
-
-
-
+  if (!orders || orders.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">
@@ -37,7 +41,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
             <th className="p-4 text-left whitespace-nowrap">Product</th>
 
             <th className="p-4 text-left whitespace-nowrap">Status</th>
-            <th className="p-4 text-left whitespace-nowrap">Quantity</th>
+            <th className="p-4 text-left whitespace-nowrap">Total Goj</th>
             <th className="p-4 text-left whitespace-nowrap">Billing</th>
             <th className="p-4 text-left whitespace-nowrap">Actions</th>
           </tr>
