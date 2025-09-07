@@ -107,7 +107,7 @@ export default function OrderStatus({
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div>
       <h2 className="text-lg font-semibold mb-6 text-gray-800">Status</h2>
 
       <Stepper
@@ -171,8 +171,7 @@ export default function OrderStatus({
             )}
 
             <p className="text-xs text-gray-400 mt-2">
-              Note: Processing list is optional. Selected items show which
-              processes the order has passed through.
+              Note: Processing list is required.
             </p>
           </div>
         </>

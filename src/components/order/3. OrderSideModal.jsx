@@ -80,7 +80,9 @@ const OrderSideModal = ({
                       <p className="text-xs text-gray-500">Created at</p>
                       <p className="font-semibold">
                         {selectedOrder?.createdAt
-                          ? new Date(selectedOrder.createdAt).toLocaleDateString()
+                          ? new Date(
+                              selectedOrder.createdAt
+                            ).toLocaleDateString()
                           : "Invalid Date"}
                       </p>
                     </div>
@@ -108,7 +110,9 @@ const OrderSideModal = ({
 
                   {/* Timeline */}
                   <div className="border-t pt-2">
-                    <h3 className="font-semibold text-gray-700 mb-4">Timeline</h3>
+                    <h3 className="font-semibold text-gray-700 mb-4">
+                      Timeline
+                    </h3>
                     <div className="relative pl-6">
                       <div className="absolute left-1.5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
 
@@ -116,20 +120,21 @@ const OrderSideModal = ({
                       <div className="relative mb-4">
                         <div className="absolute left-0 -translate-x-1/2 w-3 h-3 bg-blue-600 rounded-full"></div>
                         <div className="ml-4 space-y-1">
-                          <p className="font-semibold text-gray-700">Order Created</p>
+                          <p className="font-semibold text-gray-700">
+                            Order Created
+                          </p>
                           <p className="text-sm text-gray-500">
                             {selectedOrder?.createdAt
-                              ? new Date(selectedOrder.createdAt).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    timeZoneName: "short",
-                                  }
-                                )
+                              ? new Date(
+                                  selectedOrder.createdAt
+                                ).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  timeZoneName: "short",
+                                })
                               : "Invalid Date"}
                           </p>
                         </div>
