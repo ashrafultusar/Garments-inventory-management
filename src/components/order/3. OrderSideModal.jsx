@@ -5,8 +5,6 @@ import { LuTrash2 } from "react-icons/lu";
 import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import OrderStatus from "../OrderStatus/OrderStatus";
-import OrderTableData from "../OrderStatus/OrderTableData";
-
 
 const OrderSideModal = ({
   isModalOpen,
@@ -20,7 +18,7 @@ const OrderSideModal = ({
   if (!isModalOpen) return null;
   const router = useRouter();
 
-  // শুধু collapse এর জন্য state
+  // collapse state
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   return (
@@ -56,7 +54,7 @@ const OrderSideModal = ({
             </div>
           ) : (
             <>
-              {/* Header clickable */}
+              {/* Collapsible header */}
               <div
                 className="p-4 bg-gray-100 rounded-lg flex items-center gap-4 cursor-pointer"
                 onClick={() => setIsDetailsOpen(!isDetailsOpen)}
@@ -71,7 +69,7 @@ const OrderSideModal = ({
                 </div>
               </div>
 
-              {/* Collapse হওয়া অংশ */}
+              {/* Collapsible content */}
               {isDetailsOpen && (
                 <div className="grid grid-cols-2 gap-4 text-gray-700">
                   <div>
@@ -105,22 +103,19 @@ const OrderSideModal = ({
                 </div>
               )}
 
-              {/* এখানে status কম্পোনেন্ট */}
+              {/* Status Component */}
               <OrderStatus
                 orderId={selectedOrder?.orderId}
                 currentStatus={selectedOrder?.status || "Pending"}
+                tableData={selectedOrder?.tableData || []}
                 onStatusChange={(newStatus) => {
                   selectedOrder.status = newStatus;
                 }}
               />
-
-              
-
-
-              
             </>
           )}
         </div>
+
         {/* Timeline */}
         <div className="border-t pt-2 px-6 ">
           <h3 className="font-semibold text-gray-700 mb-4">Timeline</h3>
@@ -149,7 +144,8 @@ const OrderSideModal = ({
             </div>
           </div>
         </div>
-        {/* Fixed bottom buttons */}
+
+        {/* Bottom buttons */}
         <div className="p-6 border-t flex justify-between gap-4 bg-white">
           <button
             onClick={() =>

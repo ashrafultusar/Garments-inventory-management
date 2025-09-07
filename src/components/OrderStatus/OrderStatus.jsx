@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import Stepper from "./Stepper";
 import StatusDescription from "./StatusDescription";
 import StatusModal from "./StatusModal";
 import ProcessingModal from "./ProcessingModal";
+import OrderTableData from "./OrderTableData";
 
 const steps = [
   { id: 1, title: "Pending", description: "Order is pending and waiting to be processed." },
@@ -15,16 +16,37 @@ const steps = [
   { id: 6, title: "Completed", description: "Order is completed successfully." },
 ];
 
-
-
-export default function OrderStatus({ orderId, currentStatus, onStatusChange }) {
+export default function OrderStatus({ orderId, currentStatus, tableData, onStatusChange }) {
   const [currentStep, setCurrentStep] = useState(
     steps.find((s) => s.title === currentStatus)?.id || 1
   );
   const [selectedStep, setSelectedStep] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
- 
+  // 🔹 Processing List state
+  const [processes, setProcesses] = useState([]);
+  const [loadingProcesses, setLoadingProcesses] = useState(false);
+
+  // fetch processes list
+  useEffect(() => {
+    if (steps[currentStep - 1]?.title === "In Process") {
+      const fetchProcesses = async () => {
+        setLoadingProcesses(true);
+        try {
+          const res = await fetch("/api/menu/process");
+          if (!res.ok) throw new Error("Failed to fetch processes");
+          const data = await res.json();
+          setProcesses(data); // expect array [{name:"Dyeing", selected:true}, ...]
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to load processes");
+        } finally {
+          setLoadingProcesses(false);
+        }
+      };
+      fetchProcesses();
+    }
+  }, [currentStep]);
 
   const handleStepClick = (step) => {
     if (step.id === currentStep + 1) {
@@ -37,8 +59,6 @@ export default function OrderStatus({ orderId, currentStatus, onStatusChange }) 
     }
   };
 
- 
-
   const confirmChange = async () => {
     try {
       const res = await fetch("/api/order", {
@@ -47,7 +67,6 @@ export default function OrderStatus({ orderId, currentStatus, onStatusChange }) 
         body: JSON.stringify({
           orderId,
           status: selectedStep.title,
-          processing: processingList,
         }),
       });
 
@@ -64,30 +83,69 @@ export default function OrderStatus({ orderId, currentStatus, onStatusChange }) 
     }
   };
 
+
+  const toggleProcessSelection = (index) => {
+    setProcesses((prev) =>
+      prev.map((p, i) =>
+        i === index ? { ...p, selected: !p.selected } : p
+      )
+    );
+  };
+  
+
+
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h2 className="text-lg font-semibold mb-6 text-gray-800">Status</h2>
 
-      {/* ✅ Stepper */}
-      <Stepper
-        steps={steps}
-        currentStep={currentStep}
-        onStepClick={handleStepClick}
-      />
+      <Stepper steps={steps} currentStep={currentStep} onStepClick={handleStepClick} />
 
-      {/* ✅ নিচে description */}
       <StatusDescription steps={steps} currentStep={currentStep} />
 
-      {/* ✅ Modal Handling */}
+      {/* ✅ In Process হলে Order Data + Processes দেখাবে */}
+      {steps[currentStep - 1]?.title === "In Process" && (
+        <>
+          <OrderTableData orderId={orderId} tableData={tableData} />
+
+          {/* Processing List Table */}
+          <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+            <h3 className="text-md font-semibold mb-3">Current Processing List:</h3>
+            {loadingProcesses ? (
+              <p className="text-gray-500">Loading processes...</p>
+            ) : processes?.length > 0 ? (
+              <ul className="space-y-2">
+              {processes?.map((process, idx) => (
+                <li
+                  key={idx}
+                  className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded"
+                  onClick={() => toggleProcessSelection(idx)}
+                >
+                  <span>{process?.name}</span>
+                  {process?.selected ? (
+                    <span className="text-green-600 font-semibold">✅ Selected</span>
+                  ) : (
+                    <span className="text-red-500">⭕ Unselected</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+            
+            ) : (
+              <p className="text-gray-500">No processes available.</p>
+            )}
+            <p className="text-xs text-gray-400 mt-2">
+              Note: Processing list is optional. Selected items show which processes the order has passed through.
+            </p>
+          </div>
+        </>
+      )}
+
       {showModal && selectedStep && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
             {selectedStep.title === "Completed Process" ? (
               <ProcessingModal
                 orderId={orderId}
-                processingOptions={processingOptions}
-                processingList={processingList}
-                toggleProcessing={toggleProcessing}
                 confirmChange={confirmChange}
                 onClose={() => setShowModal(false)}
               />
