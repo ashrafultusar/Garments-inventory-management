@@ -104,41 +104,57 @@ export default function OrderStatus({ orderId, currentStatus, tableData, onStatu
 
       {/* ✅ In Process হলে Order Data + Processes দেখাবে */}
       {steps[currentStep - 1]?.title === "In Process" && (
-        <>
-          <OrderTableData orderId={orderId} tableData={tableData} />
+  <>
+    <OrderTableData orderId={orderId} tableData={tableData} />
 
-          {/* Processing List Table */}
-          <div className="mt-6 p-4 border rounded-lg bg-gray-50">
-            <h3 className="text-md font-semibold mb-3">Current Processing List:</h3>
-            {loadingProcesses ? (
-              <p className="text-gray-500">Loading processes...</p>
-            ) : processes?.length > 0 ? (
-              <ul className="space-y-2">
-              {processes?.map((process, idx) => (
-                <li
-                  key={idx}
-                  className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded"
-                  onClick={() => toggleProcessSelection(idx)}
-                >
-                  <span>{process?.name}</span>
-                  {process?.selected ? (
-                    <span className="text-green-600 font-semibold">✅ Selected</span>
-                  ) : (
-                    <span className="text-red-500">⭕ Unselected</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-            
-            ) : (
-              <p className="text-gray-500">No processes available.</p>
-            )}
-            <p className="text-xs text-gray-400 mt-2">
-              Note: Processing list is optional. Selected items show which processes the order has passed through.
-            </p>
-          </div>
+    {/* Processing List Table */}
+    <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+      <h3 className="text-md font-semibold mb-3">Current Processing List:</h3>
+
+      {loadingProcesses ? (
+        <p className="text-gray-500">Loading processes...</p>
+      ) : processes?.length > 0 ? (
+        <>
+          <ul className="space-y-2">
+            {processes.map((process, idx) => (
+              <li
+                key={idx}
+                className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded"
+                onClick={() => toggleProcessSelection(idx)}
+              >
+                <span>{process?.name}</span>
+                {process?.selected ? (
+                  <span className="text-green-600 font-semibold">✅ Selected</span>
+                ) : (
+                  <span className="text-red-500">⭕ Unselected</span>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          {/* ✅ Total Price Calculation */}
+          {processes?.some(p => p.selected) && (
+            <div className="mt-4 bg-white text-sm border-t p-1 text-gray-700 font-semibold">
+              Total Price={" "}
+              <span className="text-blue-600">
+                {processes?.filter(p => p.selected)
+                  .reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0)
+                  .toFixed(2)} ৳
+              </span>
+            </div>
+          )}
         </>
+      ) : (
+        <p className="text-gray-500">No processes available.</p>
       )}
+
+      <p className="text-xs text-gray-400 mt-2">
+        Note: Processing list is optional. Selected items show which processes the order has passed through.
+      </p>
+    </div>
+  </>
+)}
+
 
       {showModal && selectedStep && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

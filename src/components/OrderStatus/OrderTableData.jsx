@@ -12,7 +12,9 @@ export default function OrderTableData({ tableData = [] }) {
   }
 
   // প্রথম object থেকে id বাদ দিয়ে বাকি keys নেব
-  const keys = Object.keys(tableData[0]).filter((k) => k !== "id" && k !== "_id");
+  const keys = Object.keys(tableData[0]).filter(
+    (k) => k !== "id" && k !== "_id"
+  );
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -77,12 +79,33 @@ export default function OrderTableData({ tableData = [] }) {
         </table>
       </div>
 
-      {selectedRows.length > 0 && (
-        <div className="mt-4 text-sm text-gray-600">
-          <span className="font-medium">{selectedRows.length}</span> row
-          selected
-        </div>
-      )}
+      {selectedRows?.length > 0 &&
+        (() => {
+          let totalGoj = 0;
+          let totalRollNo = 0;
+
+          selectedRows?.forEach((idx) => {
+            const row = tableData[idx];
+            const goj = parseFloat(row.goj) || 0;
+            const rollNo = parseFloat(row.rollNo) || 0;
+
+            totalGoj += goj;
+            totalRollNo += rollNo;
+          });
+
+          return (
+            <div className="mt-4 text-sm text-gray-700 bg-gray-50 p-3 rounded border">
+              <div>
+                <span className="font-medium">Total Goj=</span>{" "}
+                <span className="text-blue-600">{totalGoj} </span>
+              </div>
+              <div>
+                <span className="font-medium">Total Roll No=</span>{" "}
+                <span className="text-blue-600">{totalRollNo} </span>
+              </div>
+            </div>
+          );
+        })()}
     </div>
   );
 }
