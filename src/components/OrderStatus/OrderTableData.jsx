@@ -83,7 +83,7 @@ export default function OrderTableData({ tableData = [] }) {
         (() => {
           let totalGoj = 0;
           let totalRollNo = selectedRows.length;
-          
+
           selectedRows?.forEach((idx) => {
             const row = tableData[idx];
             const goj = parseFloat(row.goj) || 0;

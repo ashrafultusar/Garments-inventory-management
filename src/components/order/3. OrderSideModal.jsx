@@ -23,6 +23,7 @@ const OrderSideModal = ({
 
   return (
     <div className="fixed inset-0 flex justify-end z-50">
+      {/* Overlay */}
       <div
         className={`absolute inset-0 bg-black/30 transition-opacity duration-300 ${
           isClosing ? "opacity-0" : "opacity-100"
@@ -30,8 +31,9 @@ const OrderSideModal = ({
         onClick={closeModal}
       ></div>
 
+      {/* Modal */}
       <div
-        className={`relative w-[350px] md:w-[450px] h-full bg-white shadow-lg border-l border-gray-200 flex flex-col transform transition-transform duration-300 ${
+        className={`relative w-full sm:w-[350px] md:w-[450px] h-full bg-white shadow-lg border-l border-gray-200 flex flex-col transform transition-transform duration-300 ${
           isClosing || isOpening ? "translate-x-full" : "translate-x-0"
         }`}
       >
@@ -71,34 +73,70 @@ const OrderSideModal = ({
 
               {/* Collapsible content */}
               {isDetailsOpen && (
-                <div className="grid grid-cols-2 gap-4 text-gray-700">
-                  <div>
-                    <p className="text-xs text-gray-500">Created at</p>
-                    <p className="font-semibold">
-                      {selectedOrder?.createdAt
-                        ? new Date(selectedOrder.createdAt).toLocaleDateString()
-                        : "Invalid Date"}
-                    </p>
+                <div className="space-y-6">
+                  {/* Order details */}
+                  <div className="grid grid-cols-2 gap-4 text-gray-700">
+                    <div>
+                      <p className="text-xs text-gray-500">Created at</p>
+                      <p className="font-semibold">
+                        {selectedOrder?.createdAt
+                          ? new Date(selectedOrder.createdAt).toLocaleDateString()
+                          : "Invalid Date"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Due Date</p>
+                      <p className="font-semibold">
+                        {selectedOrder?.dueDate
+                          ? new Date(selectedOrder.dueDate).toLocaleDateString()
+                          : "Invalid Date"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Bundle</p>
+                      <p className="font-semibold">
+                        {selectedOrder?.bundle || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Quantity</p>
+                      <p className="font-semibold">
+                        {selectedOrder?.quality || "N/A"}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Due Date</p>
-                    <p className="font-semibold">
-                      {selectedOrder?.dueDate
-                        ? new Date(selectedOrder.dueDate).toLocaleDateString()
-                        : "Invalid Date"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Bundle</p>
-                    <p className="font-semibold">
-                      {selectedOrder?.bundle || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Quantity</p>
-                    <p className="font-semibold">
-                      {selectedOrder?.quality || "N/A"}
-                    </p>
+
+                  {/* Timeline */}
+                  <div className="border-t pt-2">
+                    <h3 className="font-semibold text-gray-700 mb-4">Timeline</h3>
+                    <div className="relative pl-6">
+                      <div className="absolute left-1.5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+
+                      {/* Order Created */}
+                      <div className="relative mb-4">
+                        <div className="absolute left-0 -translate-x-1/2 w-3 h-3 bg-blue-600 rounded-full"></div>
+                        <div className="ml-4 space-y-1">
+                          <p className="font-semibold text-gray-700">Order Created</p>
+                          <p className="text-sm text-gray-500">
+                            {selectedOrder?.createdAt
+                              ? new Date(selectedOrder.createdAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    timeZoneName: "short",
+                                  }
+                                )
+                              : "Invalid Date"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* You can add more timeline events here if needed */}
+                    </div>
                   </div>
                 </div>
               )}
@@ -114,35 +152,6 @@ const OrderSideModal = ({
               />
             </>
           )}
-        </div>
-
-        {/* Timeline */}
-        <div className="border-t pt-2 px-6 ">
-          <h3 className="font-semibold text-gray-700 mb-4">Timeline</h3>
-          <div className="relative pl-6">
-            <div className="absolute left-1.5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
-            <div className="relative mb-4">
-              <div className="absolute left-0 -translate-x-1/2 w-3 h-3 bg-blue-600 rounded-full"></div>
-              <div className="ml-4">
-                <p className="font-semibold text-gray-700">Order Created</p>
-                <p className="text-sm text-gray-500">
-                  {selectedOrder?.createdAt
-                    ? new Date(selectedOrder.createdAt).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          timeZoneName: "short",
-                        }
-                      )
-                    : "N/A"}
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Bottom buttons */}
