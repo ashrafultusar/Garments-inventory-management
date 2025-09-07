@@ -82,15 +82,12 @@ export default function OrderTableData({ tableData = [] }) {
       {selectedRows?.length > 0 &&
         (() => {
           let totalGoj = 0;
-          let totalRollNo = 0;
-
+          let totalRollNo = selectedRows.length;
+          
           selectedRows?.forEach((idx) => {
             const row = tableData[idx];
             const goj = parseFloat(row.goj) || 0;
-            const rollNo = parseFloat(row.rollNo) || 0;
-
             totalGoj += goj;
-            totalRollNo += rollNo;
           });
 
           return (
