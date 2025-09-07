@@ -4,13 +4,9 @@ import { FaPencilAlt } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
 import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
-import OrderStatus from "./OrderStatus";
+import OrderStatus from "../OrderStatus/OrderStatus";
+import OrderTableData from "../OrderStatus/OrderTableData";
 
-const getPaymentColor = (payment) => {
-  return payment === "Paid"
-    ? "bg-green-100 text-green-700"
-    : "bg-red-100 text-red-700";
-};
 
 const OrderSideModal = ({
   isModalOpen,
@@ -117,6 +113,11 @@ const OrderSideModal = ({
                   selectedOrder.status = newStatus;
                 }}
               />
+
+              
+
+
+              
             </>
           )}
         </div>
