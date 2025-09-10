@@ -149,6 +149,7 @@ const OrderSideModal = ({
 
                   {/* Status Component */}
                   <OrderStatus
+             
                     orderId={selectedOrder?.orderId}
                     currentStatus={selectedOrder?.status || "Pending"}
                     tableData={selectedOrder?.tableData || []}
