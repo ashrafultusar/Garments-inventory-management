@@ -2,10 +2,7 @@ import mongoose from "mongoose";
 
 const batchSchema = new mongoose.Schema(
   {
-    orderId: {
-      type: String, // ✅ Must be string
-      required: true,
-    },
+    orderId: { type: String, required: true },
     batchName: { type: String, required: true },
     sillBatchName: { type: String, required: true },
     rows: [
@@ -13,9 +10,15 @@ const batchSchema = new mongoose.Schema(
         rollNo: Number,
         goj: Number,
         inputValue: Number,
+        idx: Number, // ✅ কোন row use হয়েছে সেটা store হবে
       },
     ],
-    selectedProcesses: [String],
+    selectedProcesses: [
+      {
+        name: String,
+        price: Number,
+      },
+    ],
     status: {
       type: String,
       enum: ["In Process", "Completed Process", "Delivered", "Billing", "Completed"],
@@ -26,5 +29,4 @@ const batchSchema = new mongoose.Schema(
 );
 
 const Batch = mongoose.models.Batch || mongoose.model("Batch", batchSchema);
-
 export default Batch;

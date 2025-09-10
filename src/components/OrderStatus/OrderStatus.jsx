@@ -16,8 +16,16 @@ const steps = [
   { id: 6, title: "Completed", description: "Order completed." },
 ];
 
-export default function OrderStatus({ orderId, currentStatus, tableData, onStatusChange, selectedOrder }) {
-  const [currentStep, setCurrentStep] = useState(steps.find((s) => s.title === currentStatus)?.id || 1);
+export default function OrderStatus({
+  orderId,
+  currentStatus,
+  tableData,
+  onStatusChange,
+  selectedOrder,
+}) {
+  const [currentStep, setCurrentStep] = useState(
+    steps.find((s) => s.title === currentStatus)?.id || 1
+  );
   const [selectedStep, setSelectedStep] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -77,15 +85,46 @@ export default function OrderStatus({ orderId, currentStatus, tableData, onStatu
     }
   };
 
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        const res = await fetch(`/api/batches?orderId=${orderId}`);
+        const data = await res.json();
+        if (res.ok) {
+          // ✅ already created batches থেকে সব used idx collect
+          const used = data.flatMap((b) => b.rows.map((r) => r.idx));
+          setUsedRowIndexes(used);
+          setCreatedBatches(data);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch batches");
+      }
+    };
+  
+    if (orderId && currentStep === 2) {
+      fetchBatches();
+    }
+  }, [orderId, currentStep]);
+  
+  
+
   const toggleProcessSelection = (index) => {
-    setProcesses((prev) => prev.map((p, i) => (i === index ? { ...p, selected: !p.selected } : p)));
+    setProcesses((prev) =>
+      prev.map((p, i) => (i === index ? { ...p, selected: !p.selected } : p))
+    );
   };
+ 
 
   return (
     <div>
       <h2 className="text-lg font-semibold mb-6 text-gray-800">Status</h2>
 
-      <Stepper steps={steps} currentStep={currentStep} onStepClick={handleStepClick} />
+      <Stepper
+        steps={steps}
+        currentStep={currentStep}
+        onStepClick={handleStepClick}
+      />
 
       <StatusDescription steps={steps} currentStep={currentStep} />
 
@@ -106,20 +145,27 @@ export default function OrderStatus({ orderId, currentStatus, tableData, onStatu
 
           {/* Processing List */}
           <div className="mt-6 p-4 border rounded-lg bg-gray-50">
-            <h3 className="text-md font-semibold mb-3">Current Processing List:</h3>
+            <h3 className="text-md font-semibold mb-3">
+              Current Processing List:
+            </h3>
             {loadingProcesses ? (
               <p className="text-gray-500">Loading processes...</p>
             ) : processes?.length > 0 ? (
               <ul className="space-y-2">
-                {processes.map((p, idx) => (
+                {processes?.map((p, idx) => (
                   <li
                     key={idx}
                     className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded"
                     onClick={() => toggleProcessSelection(idx)}
                   >
-                    <span>{p?.name}</span>
+                    <span className="capitalize">
+                      {p?.name}:{" "}
+                      <span className="text-blue-600">{p?.price} ৳</span>
+                    </span>
                     {p?.selected ? (
-                      <span className="text-green-600 font-semibold">✅ Selected</span>
+                      <span className="text-green-600 font-semibold">
+                        ✅ Selected
+                      </span>
                     ) : (
                       <span className="text-red-500">⭕ Unselected</span>
                     )}
@@ -137,9 +183,17 @@ export default function OrderStatus({ orderId, currentStatus, tableData, onStatu
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
             {selectedStep.title === "Completed Process" ? (
-              <ProcessingModal orderId={orderId} confirmChange={confirmChange} onClose={() => setShowModal(false)} />
+              <ProcessingModal
+                orderId={orderId}
+                confirmChange={confirmChange}
+                onClose={() => setShowModal(false)}
+              />
             ) : (
-              <StatusModal selectedStep={selectedStep} confirmChange={confirmChange} onClose={() => setShowModal(false)} />
+              <StatusModal
+                selectedStep={selectedStep}
+                confirmChange={confirmChange}
+                onClose={() => setShowModal(false)}
+              />
             )}
           </div>
         </div>
