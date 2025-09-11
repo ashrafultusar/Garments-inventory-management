@@ -34,6 +34,7 @@ export default function OrderStatus({
   const [usedRowIndexes, setUsedRowIndexes] = useState([]);
   const [createdBatches, setCreatedBatches] = useState([]);
 
+
   useEffect(() => {
     if (steps[currentStep - 1]?.title === "In Process") {
       const fetchProcesses = async () => {
@@ -85,36 +86,11 @@ export default function OrderStatus({
     }
   };
 
-  useEffect(() => {
-    const fetchBatches = async () => {
-      try {
-        const res = await fetch(`/api/batches?orderId=${orderId}`);
-        const data = await res.json();
-        if (res.ok) {
-          // ✅ already created batches থেকে সব used idx collect
-          const used = data.flatMap((b) => b.rows.map((r) => r.idx));
-          setUsedRowIndexes(used);
-          setCreatedBatches(data);
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch batches");
-      }
-    };
-  
-    if (orderId && currentStep === 2) {
-      fetchBatches();
-    }
-  }, [orderId, currentStep]);
-  
-  
-
   const toggleProcessSelection = (index) => {
     setProcesses((prev) =>
       prev.map((p, i) => (i === index ? { ...p, selected: !p.selected } : p))
     );
   };
- 
 
   return (
     <div>

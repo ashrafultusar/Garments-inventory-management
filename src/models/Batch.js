@@ -10,7 +10,7 @@ const batchSchema = new mongoose.Schema(
         rollNo: Number,
         goj: Number,
         inputValue: Number,
-        idx: Number, // ✅ কোন row use হয়েছে সেটা store হবে
+        idx: Number, // ✅ tracks which row is used
       },
     ],
     selectedProcesses: [
