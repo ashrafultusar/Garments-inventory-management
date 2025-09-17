@@ -2,28 +2,42 @@ import mongoose from "mongoose";
 
 const batchSchema = new mongoose.Schema(
   {
-    orderId: { type: String, required: true },
-    batchName: { type: String, required: true },
-    sillBatchName: { type: String, required: true },
-    rows: [
+    orderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      required: true,
+    }, 
+    batches: [
       {
-        rollNo: Number,
-        goj: Number,
-        inputValue: Number,
-        idx: Number, // ✅ tracks which row is used
+        batchName: { type: String, required: true },
+        sillBatchName: { type: String, required: true },
+        rows: [
+          {
+            rollNo: Number,
+            goj: Number,
+            inputValue: Number,
+            idx: Number,
+          },
+        ],
+        selectedProcesses: [
+          {
+            name: String,
+            price: Number,
+          },
+        ],
+        status: {
+          type: String,
+          enum: [
+            "In Process",
+            "Completed Process",
+            "Delivered",
+            "Billing",
+            "Completed",
+          ],
+          default: "In Process",
+        },
       },
     ],
-    selectedProcesses: [
-      {
-        name: String,
-        price: Number,
-      },
-    ],
-    status: {
-      type: String,
-      enum: ["In Process", "Completed Process", "Delivered", "Billing", "Completed"],
-      default: "In Process",
-    },
   },
   { timestamps: true }
 );
