@@ -16,15 +16,40 @@ export default function OrderTableData({
 }) {
   const [batchData, setBatchData] = useState([]);
   const [isBatchConfirmed, setIsBatchConfirmed] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  
-
+  // ✅ Fetch batches when step = "In Process"
   useEffect(() => {
-    if (currentStep !== 2) {
+    if (currentStep === 2 && orderId) {
+      const fetchBatches = async () => {
+        try {
+          setLoading(true);
+          const res = await fetch(`/api/batch?orderId=${orderId}`);
+          if (!res.ok) throw new Error("Failed to fetch batches");
+          const data = await res.json();
+
+          // সব used indexes বের করো
+          const usedIndexes = data
+            .flatMap((batchDoc) => batchDoc.batches || [])
+            .flatMap((b) => b.rows?.map((r) => r.idx) || []);
+
+          setUsedRowIndexes([...new Set(usedIndexes)]); // unique indexes
+          setCreatedBatches(data);
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to fetch batches");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchBatches();
+    } else {
+      // অন্য স্টেপে গেলে reset
       setBatchData([]);
       setIsBatchConfirmed(false);
     }
-  }, [currentStep]);
+  }, [currentStep, orderId, setUsedRowIndexes, setCreatedBatches]);
 
   if (tableData.length === 0) {
     return (
@@ -38,6 +63,7 @@ export default function OrderTableData({
     (k) => k !== "id" && k !== "_id"
   );
 
+  // ✅ Row select
   const handleSelectRow = (idx) => {
     if (currentStep !== 2 || usedRowIndexes.includes(idx) || isBatchConfirmed)
       return;
@@ -62,6 +88,7 @@ export default function OrderTableData({
 
   const isRowSelected = (idx) => batchData.some((row) => row.idx === idx);
 
+  // ✅ Confirm batch
   const confirmBatch = async () => {
     if (batchData.length === 0) {
       toast.error("Please select at least one row");
@@ -76,6 +103,8 @@ export default function OrderTableData({
     }
 
     try {
+      setLoading(true);
+
       const payload = {
         orderId,
         batchName: `Batch ${createdBatches.length + 1}`,
@@ -91,7 +120,7 @@ export default function OrderTableData({
           .map((p) => ({ name: p.name, price: p.price })),
       };
 
-      const res = await fetch("/api/batches", {
+      const res = await fetch("/api/batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -101,14 +130,20 @@ export default function OrderTableData({
 
       if (res.ok) {
         toast.success("Batch created successfully!");
-        // ✅ Merge new used rows with old ones
+
+        // ✅ New used indexes যোগ করো
         setUsedRowIndexes((prev) =>
           Array.from(new Set([...prev, ...batchData.map((r) => r.idx)]))
         );
-        setCreatedBatches((prev) => [...prev, newBatch]);
+
+        // ✅ DB থেকে fresh fetch
+        const fetchRes = await fetch(`/api/batch?orderId=${orderId}`);
+        const updatedData = await fetchRes.json();
+        setCreatedBatches(updatedData);
+
+        // reset selections
         setBatchData([]);
         setIsBatchConfirmed(true);
-
         setProcesses((prev) => prev.map((p) => ({ ...p, selected: false })));
       } else {
         toast.error(newBatch.message || "Batch creation failed");
@@ -116,6 +151,8 @@ export default function OrderTableData({
     } catch (err) {
       console.error(err);
       toast.error("Server error while creating batch");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,6 +160,11 @@ export default function OrderTableData({
     <div className="mt-6">
       <h3 className="font-semibold text-gray-700 mb-3">Processing Details</h3>
 
+      {loading && (
+        <p className="text-sm text-gray-500 italic">Loading batches...</p>
+      )}
+
+      {/* Table */}
       <div className="overflow-x-auto border rounded-lg">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-100 text-gray-700">
@@ -162,6 +204,7 @@ export default function OrderTableData({
         </table>
       </div>
 
+      {/* Batch Preview */}
       {batchData.length > 0 && (
         <div className="mt-6">
           <div className="p-4 border rounded-lg bg-gray-50 shadow-sm">
@@ -172,9 +215,10 @@ export default function OrderTableData({
               {!isBatchConfirmed ? (
                 <button
                   onClick={confirmBatch}
-                  className="px-4 py-1 text-sm bg-green-600 cursor-pointer text-white rounded hover:bg-green-700"
+                  disabled={loading}
+                  className="px-4 py-1 text-sm bg-green-600 cursor-pointer text-white rounded hover:bg-green-700 disabled:opacity-50"
                 >
-                  Completed Process
+                  {loading ? "Saving..." : "Completed Process"}
                 </button>
               ) : (
                 <span className="text-green-600 text-sm font-semibold">
