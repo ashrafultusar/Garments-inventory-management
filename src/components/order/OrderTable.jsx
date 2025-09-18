@@ -31,6 +31,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
     );
   }
 
+
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">
       <table className="min-w-full text-sm table-auto">
@@ -68,7 +69,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
                 </div>
               </td>
 
-              <td className="p-4 whitespace-nowrap">
+              <td className="p-4 whitespace-nowrap capitalize">
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(
                     order?.status
@@ -78,8 +79,16 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
                 </span>
               </td>
               <td className="p-4 whitespace-nowrap">
-                {order?.totalGoj || "N/A"}
+                {order?.totalGoj !== null && order?.totalGoj !== undefined
+                  ? order?.totalGoj
+                  : order?.tableData && order?.tableData.length > 0
+                  ? order.tableData.reduce(
+                      (sum, item) => sum + (item.goj || 0),
+                      0
+                    )
+                  : "N/A"}
               </td>
+
               <td className="p-4 whitespace-nowrap">
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded-full ${getPaymentColor(
