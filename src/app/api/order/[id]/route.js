@@ -95,3 +95,52 @@ export async function PUT(request, { params }) {
     });
   }
 }
+
+
+
+// ⬇️ শুধু status update করার জন্য PATCH method
+export async function PATCH(request, { params }) {
+  try {
+    await connectDB();
+    const { id } = params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return new Response(JSON.stringify({ error: "Invalid ID format" }), {
+        status: 400,
+      });
+    }
+
+    const { status } = await request.json();
+
+    if (!status) {
+      return new Response(JSON.stringify({ error: "Status is required" }), {
+        status: 400,
+      });
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return new Response(JSON.stringify({ error: "Order not found" }), {
+        status: 404,
+      });
+    }
+
+    return new Response(
+      JSON.stringify({
+        message: "Order status updated successfully",
+        order: updatedOrder,
+      }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("PATCH Error:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+    });
+  }
+}

@@ -8,7 +8,7 @@ export default function OrderTableData({
   currentStep,
   usedRowIndexes,
   setUsedRowIndexes,
-  sillName,
+  sillName, 
   processes,
   setProcesses,
   createdBatches,

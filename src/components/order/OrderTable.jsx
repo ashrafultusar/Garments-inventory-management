@@ -31,7 +31,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
     );
   }
 
-  console.log(orders);
+
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">
       <table className="min-w-full text-sm table-auto">

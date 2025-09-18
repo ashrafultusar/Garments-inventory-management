@@ -34,7 +34,6 @@ export default function OrderStatus({
   const [usedRowIndexes, setUsedRowIndexes] = useState([]);
   const [createdBatches, setCreatedBatches] = useState([]);
 
-
   useEffect(() => {
     if (steps[currentStep - 1]?.title === "In Process") {
       const fetchProcesses = async () => {
@@ -65,26 +64,30 @@ export default function OrderStatus({
     }
   };
 
+  // ✅ Updated confirmChange with /api/order/${orderId}
   const confirmChange = async () => {
     try {
-      const res = await fetch("/api/order", {
+      const res = await fetch(`/api/order/${orderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, status: selectedStep.title }),
+        body: JSON.stringify({ status: selectedStep.title }),
       });
+  
       const data = await res.json();
       if (res.ok) {
         setCurrentStep(selectedStep.id);
         setShowModal(false);
         onStatusChange(selectedStep.title);
+        toast.success("Status updated!");
       } else {
-        toast.error(data.message || "Failed to update status");
+        toast.error(data.error || "Failed to update status");
       }
     } catch (err) {
       console.error(err);
       toast.error("Server error");
     }
   };
+  
 
   const toggleProcessSelection = (index) => {
     setProcesses((prev) =>
