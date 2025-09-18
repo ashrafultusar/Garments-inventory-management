@@ -17,13 +17,26 @@ export async function POST(req) {
     let existing = await Batch.findOne({ orderId });
 
     if (existing) {
-      existing.batches.push(batchData);
+      // Determine last batch number
+      const lastBatchNumber =
+        existing.batches.length > 0
+          ? Math.max(
+              ...existing.batches.map(
+                (b) => parseInt(b.batchName.split(" ")[1] || 0)
+              )
+            )
+          : 0;
+
+      const newBatchName = `Batch ${lastBatchNumber + 1}`;
+
+      existing.batches.push({ ...batchData, batchName: newBatchName });
       await existing.save();
       return NextResponse.json(existing, { status: 200 });
     } else {
+      // first batch
       const newBatch = await Batch.create({
         orderId,
-        batches: [batchData],
+        batches: [{ ...batchData, batchName: "Batch 1" }],
       });
       return NextResponse.json(newBatch, { status: 201 });
     }
@@ -32,6 +45,7 @@ export async function POST(req) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
+
 
 // ✅ Get batches for specific order
 export async function GET(req) {

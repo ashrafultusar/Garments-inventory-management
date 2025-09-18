@@ -100,7 +100,7 @@ export default function BatchList({ orderId }) {
                             <td className="px-3 py-2 border">
                               <input
                                 type="number"
-                                value={row.idx || ""}
+                                
                                 className="w-24 border rounded px-2 py-1 text-center"
                                 onChange={(e) =>
                                   handleInputChange(bIdx, rIdx, e.target.value)
