@@ -9,16 +9,13 @@ export default function OrderTableData({
   usedRowIndexes,
   setUsedRowIndexes,
   sillName,
-  processes,
-  setProcesses,
   createdBatches,
   setCreatedBatches,
 }) {
   const [batchData, setBatchData] = useState([]);
-  const [isBatchConfirmed, setIsBatchConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch batches when step = "In Process"
+  // Fetch existing batches when step = "In Process"
   useEffect(() => {
     if (currentStep === 2 && orderId) {
       const fetchBatches = async () => {
@@ -28,7 +25,6 @@ export default function OrderTableData({
           if (!res.ok) throw new Error("Failed to fetch batches");
           const data = await res.json();
 
-          // সব used indexes বের করো
           const usedIndexes = data
             .flatMap((batchDoc) => batchDoc.batches || [])
             .flatMap((b) => b.rows?.map((r) => r.idx) || []);
@@ -45,9 +41,7 @@ export default function OrderTableData({
 
       fetchBatches();
     } else {
-      // অন্য স্টেপে গেলে reset
       setBatchData([]);
-      setIsBatchConfirmed(false);
     }
   }, [currentStep, orderId, setUsedRowIndexes, setCreatedBatches]);
 
@@ -63,42 +57,25 @@ export default function OrderTableData({
     (k) => k !== "id" && k !== "_id"
   );
 
-  // ✅ Row select
+  // Select / unselect row
   const handleSelectRow = (idx) => {
-    if (currentStep !== 2 || usedRowIndexes.includes(idx) || isBatchConfirmed)
-      return;
+    // Only prevent selecting rows that are already used
+    if (usedRowIndexes.includes(idx)) return;
 
     const isAlreadyInBatch = batchData.some((row) => row.idx === idx);
     if (isAlreadyInBatch) {
       setBatchData((prev) => prev.filter((row) => row.idx !== idx));
     } else {
-      setBatchData((prev) => [
-        ...prev,
-        { ...tableData[idx], inputValue: "", idx },
-      ]);
+      setBatchData((prev) => [...prev, { ...tableData[idx], idx }]);
     }
-  };
-
-  const handleInputChange = (idx, value) => {
-    if (isBatchConfirmed) return;
-    setBatchData((prev) =>
-      prev.map((row) => (row.idx === idx ? { ...row, inputValue: value } : row))
-    );
   };
 
   const isRowSelected = (idx) => batchData.some((row) => row.idx === idx);
 
-  // ✅ Confirm batch
+  // Confirm batch
   const confirmBatch = async () => {
     if (batchData.length === 0) {
       toast.error("Please select at least one row");
-      return;
-    }
-
-    if (!Array.isArray(processes) || !processes.some((p) => p.selected)) {
-      toast.error(
-        "Please select at least one process from Current Processing List"
-      );
       return;
     }
 
@@ -112,12 +89,9 @@ export default function OrderTableData({
         rows: batchData.map((row) => ({
           rollNo: row.rollNo,
           goj: row.goj,
-          inputValue: row.inputValue,
           idx: row.idx,
         })),
-        selectedProcesses: processes
-          .filter((p) => p.selected)
-          .map((p) => ({ name: p.name, price: p.price })),
+        selectedProcesses: [],
       };
 
       const res = await fetch("/api/batch", {
@@ -131,20 +105,18 @@ export default function OrderTableData({
       if (res.ok) {
         toast.success("Batch created successfully!");
 
-        // ✅ New used indexes যোগ করো
+        // Permanently mark selected rows as used
         setUsedRowIndexes((prev) =>
           Array.from(new Set([...prev, ...batchData.map((r) => r.idx)]))
         );
 
-        // ✅ DB থেকে fresh fetch
+        // Refresh batch list
         const fetchRes = await fetch(`/api/batch?orderId=${orderId}`);
         const updatedData = await fetchRes.json();
         setCreatedBatches(updatedData);
 
-        // reset selections
+        // Reset selection for next batch
         setBatchData([]);
-        setIsBatchConfirmed(true);
-        setProcesses((prev) => prev.map((p) => ({ ...p, selected: false })));
       } else {
         toast.error(newBatch.message || "Batch creation failed");
       }
@@ -205,26 +177,20 @@ export default function OrderTableData({
       </div>
 
       {/* Batch Preview */}
-      {batchData.length > 0 && (
+      {batchData?.length > 0 && (
         <div className="mt-6">
           <div className="p-4 border rounded-lg bg-gray-50 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-semibold text-gray-700">
-                Batch {createdBatches.length + 1}
+                Batch {createdBatches?.length + 1}
               </h4>
-              {!isBatchConfirmed ? (
-                <button
-                  onClick={confirmBatch}
-                  disabled={loading}
-                  className="px-4 py-1 text-sm bg-green-600 cursor-pointer text-white rounded hover:bg-green-700 disabled:opacity-50"
-                >
-                  {loading ? "Saving..." : "Completed Process"}
-                </button>
-              ) : (
-                <span className="text-green-600 text-sm font-semibold">
-                  ✅ Confirmed
-                </span>
-              )}
+              <button
+                onClick={confirmBatch}
+                disabled={loading}
+                className="px-4 py-1 text-sm bg-green-600 cursor-pointer text-white rounded hover:bg-green-700 disabled:opacity-50"
+              >
+                {loading ? "Saving..." : "Create Batch"}
+              </button>
             </div>
 
             <table className="w-full text-sm border-collapse">
@@ -235,30 +201,47 @@ export default function OrderTableData({
                       {key}
                     </th>
                   ))}
-                  <th className="px-4 py-2 border">Extra Input</th>
                 </tr>
               </thead>
               <tbody>
-                {batchData?.map((row, i) => (
+                {batchData.map((row, i) => (
                   <tr key={i} className="hover:bg-gray-50">
-                    {keys?.map((key, j) => (
+                    {keys.map((key, j) => (
                       <td key={j} className="px-4 py-2 border">
                         {row[key] ?? "N/A"}
                       </td>
                     ))}
-                    <td className="px-4 py-2 border">
-                      <input
-                        type="number"
-                        value={row.inputValue}
-                        onChange={(e) =>
-                          handleInputChange(row.idx, e.target.value)
-                        }
-                        onWheel={(e) => e.target.blur()}
-                        className="w-24 px-2 py-1 border rounded"
-                      />
-                    </td>
                   </tr>
                 ))}
+
+                {/* Totals row */}
+                <tr className="font-semibold bg-gray-200">
+                  {keys.map((key, i) => {
+                    if (key === "goj") {
+                      const gojSum = batchData.reduce(
+                        (acc, row) => acc + (Number(row.goj) || 0),
+                        0
+                      );
+                      return (
+                        <td key={i} className="px-4 py-2 border">
+                          Total: {gojSum}
+                        </td>
+                      );
+                    }
+                    if (key === "rollNo") {
+                      const rollNoSum = batchData.reduce(
+                        (acc, row) => acc + (Number(row.rollNo) || 0),
+                        0
+                      );
+                      return (
+                        <td key={i} className="px-4 py-2 border">
+                          Total: {rollNoSum}
+                        </td>
+                      );
+                    }
+                    return <td key={i} className="px-4 py-2 border"></td>;
+                  })}
+                </tr>
               </tbody>
             </table>
           </div>
