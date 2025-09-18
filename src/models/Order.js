@@ -12,13 +12,21 @@ const orderSchema = new mongoose.Schema(
         const month = String(now.getMonth() + 1).padStart(2, "0");
         const day = String(now.getDate()).padStart(2, "0");
         const random = Math.floor(Math.random() * 900) + 100;
-        return `#ORD-${year}-${month}${day}-${random}`;
+        return `#ord-${year}-${month}${day}-${random}`;
       },
     },
     status: {
       type: String,
-      enum: ["Pending", "In Process", "Delivered", "Billing", "Completed"],
-      default: "Pending",
+      enum: [
+        "pending",
+        "batch",
+        "inprocess",
+        "completedprocess",
+        "delivered",
+        "billing",
+        "completed",
+      ],
+      default: "pending",
     },
     date: String,
     invoiceNumber: String,

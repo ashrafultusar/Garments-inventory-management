@@ -69,7 +69,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
                 </div>
               </td>
 
-              <td className="p-4 whitespace-nowrap">
+              <td className="p-4 whitespace-nowrap capitalize">
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(
                     order?.status

@@ -146,7 +146,7 @@ const OrderSideModal = ({
                       </div>
                     </div>
                   )}
- 
+
                   {/* Status Component */}
                   <OrderStatus
                     orderId={selectedOrder?._id}

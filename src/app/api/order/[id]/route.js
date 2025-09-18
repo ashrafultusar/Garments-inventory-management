@@ -110,13 +110,16 @@ export async function PATCH(request, { params }) {
       });
     }
 
-    const { status } = await request.json();
+    let { status } = await request.json();
 
     if (!status) {
       return new Response(JSON.stringify({ error: "Status is required" }), {
         status: 400,
       });
     }
+
+    // small letter এ convert করে save হবে
+    status = status.toLowerCase();
 
     const updatedOrder = await Order.findByIdAndUpdate(
       id,

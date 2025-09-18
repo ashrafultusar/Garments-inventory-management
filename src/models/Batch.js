@@ -6,16 +6,14 @@ const batchSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
       required: true,
-    }, 
+    },
     batches: [
       {
         batchName: { type: String, required: true },
-        sillBatchName: { type: String, required: true },
         rows: [
           {
             rollNo: Number,
             goj: Number,
-            inputValue: Number,
             idx: Number,
           },
         ],
@@ -25,17 +23,6 @@ const batchSchema = new mongoose.Schema(
             price: Number,
           },
         ],
-        status: {
-          type: String,
-          enum: [
-            "In Process",
-            "Completed Process",
-            "Delivered",
-            "Billing",
-            "Completed",
-          ],
-          default: "In Process",
-        },
       },
     ],
   },
