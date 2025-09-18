@@ -14,7 +14,7 @@ const batchSchema = new mongoose.Schema(
           {
             rollNo: Number,
             goj: Number,
-            idx: Number,
+            idx: Number, 
           },
         ],
         selectedProcesses: [

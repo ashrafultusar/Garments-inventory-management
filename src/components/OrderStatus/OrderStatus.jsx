@@ -20,12 +20,12 @@ const steps = [
 
 // ✅ Mapping UI titles ↔ DB enum
 const statusMap = {
-  "Pending": "pending",
+  Pending: "pending",
   "In Process": "inprocess",
   "All Batches": "batch",
-  "Delivered": "delivered",
-  "Billing": "billing",
-  "Completed": "completed",
+  Delivered: "delivered",
+  Billing: "billing",
+  Completed: "completed",
 };
 
 export default function OrderStatus({
@@ -117,12 +117,10 @@ export default function OrderStatus({
         />
       )}
 
-{/* ✅ Only show BatchList in "All Batches" step */}
-{steps[currentStep - 1]?.title === "All Batches" && (
-  <BatchList orderId={orderId} />
-)}
-
-
+      {/* ✅ Only show BatchList in "All Batches" step */}
+      {steps[currentStep - 1]?.title === "All Batches" && (
+        <BatchList orderId={orderId} />
+      )}
 
       {/* ✅ Modal for confirming status change */}
       {showModal && selectedStep && (
