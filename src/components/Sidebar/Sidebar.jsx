@@ -98,6 +98,11 @@ const Sidebar = () => {
               icon: <LuUsers />,
             },
             {
+              href: "/dashboard/calender",
+              label: "Calender",
+              icon: <LuUsers />,
+            },
+            {
               href: "/dashboard/admins",
               label: "All Admin",
               icon: <LuUsers />,
