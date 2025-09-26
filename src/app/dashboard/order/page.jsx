@@ -124,7 +124,7 @@ const Orders = () => {
         data={data}
       />
 
-      {/* Table */}
+      {/* Table */} 
       <OrderTable
         orders={orders}
         handleOrderClick={handleOrderClick}
@@ -142,6 +142,7 @@ const Orders = () => {
           setCurrentPage(1);
         }}
       />
+
 
       {/* Modals */}
       <OrderSideModal

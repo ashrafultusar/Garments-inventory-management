@@ -35,7 +35,7 @@ export default function OrderStatus({
   onStatusChange,
   selectedOrder,
 }) {
-  // find matching step from DB status
+  // find matching step from DB status  
   const [currentStep, setCurrentStep] = useState(
     steps.find((s) => statusMap[s.title] === currentStatus)?.id || 1
   );

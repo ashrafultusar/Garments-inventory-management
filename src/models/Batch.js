@@ -14,7 +14,7 @@ const batchSchema = new mongoose.Schema(
           {
             rollNo: Number,
             goj: Number,
-            idx: Number, 
+            idx: Number,
           },
         ],
         selectedProcesses: [
@@ -23,6 +23,13 @@ const batchSchema = new mongoose.Schema(
             price: Number,
           },
         ],
+
+        clotheType: { type: mongoose.Schema.Types.ObjectId, ref: "ClotheType", required: true },
+        colour: { type: mongoose.Schema.Types.ObjectId, ref: "Colour", required: true },
+        sillName: { type: mongoose.Schema.Types.ObjectId, ref: "SillName", required: true },
+        finishingType: { type: mongoose.Schema.Types.ObjectId, ref: "FinishingType", required: true },
+        dyeing: { type: mongoose.Schema.Types.ObjectId, ref: "Dyeing", required: true },
+        calender: { type: mongoose.Schema.Types.ObjectId, ref: "Calender", required: false },
       },
     ],
   },
