@@ -2,36 +2,49 @@ import connectDB from "@/lib/db";
 import Batch from "@/models/Batch";
 import { NextResponse } from "next/server";
 
-
-
 export async function POST(req) {
   await connectDB();
   try {
     const body = await req.json();
-    const { orderId, clotheType, colour, sillName, finishingType, ...rest } = body;
+    const {
+      orderId,
+      clotheType,
+      colour,
+      sillName,
+      finishingType,
+      dyeing,
+      calender,
+      rows,
+      selectedProcesses
+    } = body;
 
-    if (!orderId || !clotheType || !colour || !sillName || !finishingType) {
+    // ✅ Validate required fields
+    if (!orderId || !clotheType || !colour || !sillName || !finishingType || !dyeing || !rows || !selectedProcesses) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
     let existing = await Batch.findOne({ orderId });
 
     const newBatch = {
-      ...rest,
+      batchName: "Batch 1", // temporary, will update if existing
       clotheType,
       colour,
       sillName,
       finishingType,
+      dyeing,
+      calender: calender || null, // optional
+      rows,
+      selectedProcesses,
     };
 
     if (existing) {
+      // Determine last batch number
       const lastBatchNumber =
         existing.batches.length > 0
           ? Math.max(...existing.batches.map((b) => parseInt(b.batchName.split(" ")[1] || 0)))
           : 0;
 
       newBatch.batchName = `Batch ${lastBatchNumber + 1}`;
-
       existing.batches.push(newBatch);
       await existing.save();
       return NextResponse.json(existing, { status: 200 });
@@ -46,8 +59,6 @@ export async function POST(req) {
   }
 }
 
-
-
 // ✅ Get batches for specific order
 export async function GET(req) {
   await connectDB();
@@ -59,9 +70,7 @@ export async function GET(req) {
       return NextResponse.json({ message: "Missing orderId" }, { status: 400 });
     }
 
-    // যেহেতু Batch schema তে orderId = Order._id (ObjectId হিসেবে save আছে)
     const batches = await Batch.find({ orderId: orderId });
-
     return NextResponse.json(batches, { status: 200 });
   } catch (error) {
     console.error("❌ Fetch batches error:", error);
@@ -69,7 +78,7 @@ export async function GET(req) {
   }
 }
 
-
+// ✅ Update a specific batch
 export async function PATCH(req) {
   await connectDB();
   try {
@@ -85,7 +94,6 @@ export async function PATCH(req) {
       return NextResponse.json({ message: "Batch not found" }, { status: 404 });
     }
 
-    // update specific batch
     batchDoc.batches[batchIndex] = batchData;
     await batchDoc.save();
 
