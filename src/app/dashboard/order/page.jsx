@@ -124,7 +124,7 @@ const Orders = () => {
         data={data}
       />
 
-      {/* Table */}
+      {/* Table */} 
       <OrderTable
         orders={orders}
         handleOrderClick={handleOrderClick}

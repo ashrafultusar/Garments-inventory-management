@@ -4,35 +4,35 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Link from "next/link";
 
-const CustomerPage = () => {
-  const [customers, setCustomers] = useState([]);
+const DyeingPage = () => {
+  const [dyeings, setDyeings] = useState([]);
 
-  const fetchCustomers = async () => {
+  const fetchDyeings = async () => {
     try {
-      const res = await fetch("/api/customers");
-      if (!res.ok) throw new Error("Failed to fetch customers");
+      const res = await fetch("/api/dyeings");
+      if (!res.ok) throw new Error("Failed to fetch dyeings");
       const data = await res.json();
-      setCustomers(data);
+      setDyeings(data);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load customers");
+      toast.error("Failed to load dyeings");
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchDyeings();
   }, []);
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this customer?")) return;
+    if (!confirm("Are you sure you want to delete this dyeing?")) return;
     try {
-      const res = await fetch(`/api/customers/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete customer");
-      toast.success("Customer deleted!");
-      fetchCustomers();
+      const res = await fetch(`/api/dyeings/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete dyeing");
+      toast.success("Dyeing deleted!");
+      fetchDyeings();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete customer");
+      toast.error("Failed to delete dyeing");
     }
   };
 
@@ -41,44 +41,44 @@ const CustomerPage = () => {
       {/* Create Button */}
       <div className="flex justify-end">
         <Link
-          href="/dashboard/customer/createCustomer"
+          href="/dashboard/dyeing/createDyeing"
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
         >
-          + Create Customer
+          + Create Dyeing
         </Link>
       </div>
 
       {/* Table */}
       <section className="bg-white p-6 rounded-2xl shadow-md overflow-x-auto">
-        <h2 className="text-2xl font-bold mb-4">Customers</h2>
+        <h2 className="text-2xl font-bold mb-4">Dyeings</h2>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">#</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Company</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Owner</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Phone</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Location</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Employees</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {customers?.map((c, index) => (
-              <tr key={c._id}>
+            {dyeings?.map((d, index) => (
+              <tr key={d._id}>
                 <td className="px-4 py-2 text-sm">{index + 1}</td>
-                <td className="px-4 py-2 text-sm">{c.companyName}</td>
-                <td className="px-4 py-2 text-sm">{c.ownerName}</td>
-                <td className="px-4 py-2 text-sm">{c.phoneNumber}</td>
-                <td className="px-4 py-2 text-sm">{c.employeeList.join(", ") || "N/A"}</td>
+                <td className="px-4 py-2 text-sm">{d.name}</td>
+                <td className="px-4 py-2 text-sm">{d.location}</td>
+                <td className="px-4 py-2 text-sm">
+                  {d.employees?.map((e) => e.employeeName).join(", ") || "N/A"}
+                </td>
                 <td className="px-4 py-2 text-sm flex gap-2">
                   <Link
-                    href={`/dashboard/customer/edit/${c._id}`}
+                    href={`/dashboard/dyeing/edit/${d._id}`}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
                   >
                     Edit
                   </Link>
                   <button
-                    onClick={() => handleDelete(c._id)}
+                    onClick={() => handleDelete(d._id)}
                     className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                   >
                     Delete
@@ -86,10 +86,10 @@ const CustomerPage = () => {
                 </td>
               </tr>
             ))}
-            {customers.length === 0 && (
+            {dyeings.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-4 text-gray-500">
-                  No customers found
+                <td colSpan={5} className="text-center py-4 text-gray-500">
+                  No dyeings found
                 </td>
               </tr>
             )}
@@ -100,4 +100,4 @@ const CustomerPage = () => {
   );
 };
 
-export default CustomerPage;
+export default DyeingPage;
