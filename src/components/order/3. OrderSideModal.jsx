@@ -7,7 +7,7 @@ import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderStatus from "../OrderStatus/OrderStatus";
-
+ 
 const OrderSideModal = ({
   isModalOpen,
   loadingOrder,

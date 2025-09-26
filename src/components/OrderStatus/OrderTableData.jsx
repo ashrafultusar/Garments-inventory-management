@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import BatchCreator from "../Batch/BatchCreator";
+
 
 export default function OrderTableData({
   orderId,
@@ -29,7 +31,7 @@ export default function OrderTableData({
             .flatMap((batchDoc) => batchDoc.batches || [])
             .flatMap((b) => b.rows?.map((r) => r.idx) || []);
 
-          setUsedRowIndexes([...new Set(usedIndexes)]); // unique indexes
+          setUsedRowIndexes([...new Set(usedIndexes)]);
           setCreatedBatches(data);
         } catch (err) {
           console.error(err);
@@ -59,7 +61,6 @@ export default function OrderTableData({
 
   // Select / unselect row
   const handleSelectRow = (idx) => {
-    // Only prevent selecting rows that are already used
     if (usedRowIndexes.includes(idx)) return;
 
     const isAlreadyInBatch = batchData.some((row) => row.idx === idx);
@@ -72,62 +73,6 @@ export default function OrderTableData({
 
   const isRowSelected = (idx) => batchData.some((row) => row.idx === idx);
 
-  // Confirm batch
-  const confirmBatch = async () => {
-    if (batchData.length === 0) {
-      toast.error("Please select at least one row");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const payload = {
-        orderId,
-        batchName: `Batch ${createdBatches.length + 1}`,
-        sillBatchName: `${sillName} ${createdBatches.length + 1}`,
-        rows: batchData.map((row) => ({
-          rollNo: row.rollNo,
-          goj: row.goj,
-          idx: row.idx,
-        })),
-        selectedProcesses: [],
-      };
-
-      const res = await fetch("/api/batch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const newBatch = await res.json();
-
-      if (res.ok) {
-        toast.success("Batch created successfully!");
-
-        // Permanently mark selected rows as used
-        setUsedRowIndexes((prev) =>
-          Array.from(new Set([...prev, ...batchData.map((r) => r.idx)]))
-        );
-
-        // Refresh batch list
-        const fetchRes = await fetch(`/api/batch?orderId=${orderId}`);
-        const updatedData = await fetchRes.json();
-        setCreatedBatches(updatedData);
-
-        // Reset selection for next batch
-        setBatchData([]);
-      } else {
-        toast.error(newBatch.message || "Batch creation failed");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Server error while creating batch");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="mt-6">
       <h3 className="font-semibold text-gray-700 mb-3">Processing Details</h3>
@@ -136,7 +81,7 @@ export default function OrderTableData({
         <p className="text-sm text-gray-500 italic">Loading batches...</p>
       )}
 
-      {/* Table */}
+      {/* Main Table */}
       <div className="overflow-x-auto border rounded-lg">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-100 text-gray-700">
@@ -172,81 +117,47 @@ export default function OrderTableData({
                 ))}
               </tr>
             ))}
+
+            {/* Totals row */}
+            <tr className="font-semibold bg-gray-200">
+              <td className="px-3 py-2 border text-center">Total</td>
+              {keys.map((key, i) => {
+                if (key === "goj") {
+                  const gojSum = tableData.reduce(
+                    (acc, row) => acc + (Number(row.goj) || 0),
+                    0
+                  );
+                  return (
+                    <td key={i} className="px-4 py-2 border">
+                      {gojSum}
+                    </td>
+                  );
+                }
+                if (key === "rollNo") {
+                  return (
+                    <td key={i} className="px-4 py-2 border">
+                      {tableData.length}
+                    </td>
+                  );
+                }
+                return <td key={i} className="px-4 py-2 border"></td>;
+              })}
+            </tr>
           </tbody>
         </table>
       </div>
 
-      {/* Batch Preview */}
-      {batchData?.length > 0 && (
-        <div className="mt-6">
-          <div className="p-4 border rounded-lg bg-gray-50 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-semibold text-gray-700">
-                Batch {createdBatches?.length + 1}
-              </h4>
-              <button
-                onClick={confirmBatch}
-                disabled={loading}
-                className="px-4 py-1 text-sm bg-green-600 cursor-pointer text-white rounded hover:bg-green-700 disabled:opacity-50"
-              >
-                {loading ? "Saving..." : "Create Batch"}
-              </button>
-            </div>
-
-            <table className="w-full text-sm border-collapse">
-              <thead className="bg-gray-100 text-gray-700">
-                <tr>
-                  {keys.map((key) => (
-                    <th key={key} className="px-4 py-2 border text-left">
-                      {key}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {batchData.map((row, i) => (
-                  <tr key={i} className="hover:bg-gray-50">
-                    {keys.map((key, j) => (
-                      <td key={j} className="px-4 py-2 border">
-                        {row[key] ?? "N/A"}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-
-                {/* Totals row */}
-                <tr className="font-semibold bg-gray-200">
-                  {keys.map((key, i) => {
-                    if (key === "goj") {
-                      const gojSum = batchData.reduce(
-                        (acc, row) => acc + (Number(row.goj) || 0),
-                        0
-                      );
-                      return (
-                        <td key={i} className="px-4 py-2 border">
-                          Total: {gojSum}
-                        </td>
-                      );
-                    }
-                    if (key === "rollNo") {
-                      const rollNoSum = batchData.reduce(
-                        (acc, row) => acc + (Number(row.rollNo) || 0),
-                        0
-                      );
-                      return (
-                        <td key={i} className="px-4 py-2 border">
-                          Total: {rollNoSum}
-                        </td>
-                      );
-                    }
-                    return <td key={i} className="px-4 py-2 border"></td>;
-                  })}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {/* Batch Creator (child component) */}
+      <BatchCreator
+        orderId={orderId}
+        sillName={sillName}
+        batchData={batchData}
+        setBatchData={setBatchData}
+        keys={keys}
+        createdBatches={createdBatches}
+        setCreatedBatches={setCreatedBatches}
+        setUsedRowIndexes={setUsedRowIndexes}
+      />
     </div>
   );
 }

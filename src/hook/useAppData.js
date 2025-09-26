@@ -9,6 +9,8 @@ export default function useAppData() {
     sillNames: [],
     qualities: [],
     customers: [],
+    calender: [],
+    dyeings: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,16 +19,26 @@ export default function useAppData() {
     async function fetchData() {
       try {
         setLoading(true);
-        const [finishingRes, clothRes, colourRes, sillRes, qualityRes,customersRes] =
-          await Promise.all([
-            axios.get("/api/menu/finishing-type"),
-            axios.get("/api/menu/cloth-type"),
-            axios.get("/api/menu/colour"),
+        const [
+          finishingRes,
+          clothRes,
+          colourRes,
+          sillRes,
+          qualityRes,
+          customersRes,
+          calenderRes,dyeingsRes,processRes
+        ] = await Promise.all([
+          axios.get("/api/menu/finishing-type"),
+          axios.get("/api/menu/cloth-type"),
+          axios.get("/api/menu/colour"),
 
-            axios.get("/api/menu/sill-name"),
-            axios.get("/api/menu/quality"),
-            axios.get("/api/customers"),
-          ]);
+          axios.get("/api/menu/sill-name"),
+          axios.get("/api/menu/quality"),
+          axios.get("/api/customers"),
+          axios.get("/api/calender"),
+          axios.get("/api/dyeings"),
+          axios.get("/api/menu/process"),
+        ]);
 
         setData({
           finishingTypes: finishingRes.data,
@@ -35,6 +47,9 @@ export default function useAppData() {
           sillNames: sillRes.data,
           qualities: qualityRes.data,
           customers: customersRes.data,
+          calender: calenderRes.data,
+          dyeings: dyeingsRes.data,
+          process: processRes.data,
         });
       } catch (err) {
         setError(err);

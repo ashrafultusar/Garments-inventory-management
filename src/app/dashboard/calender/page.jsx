@@ -4,35 +4,35 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Link from "next/link";
 
-const CustomerPage = () => {
-  const [customers, setCustomers] = useState([]);
+export default function CalenderPage() {
+  const [calenders, setCalenders] = useState([]);
 
-  const fetchCustomers = async () => {
+  const fetchCalenders = async () => {
     try {
-      const res = await fetch("/api/customers");
-      if (!res.ok) throw new Error("Failed to fetch customers");
+      const res = await fetch("/api/calender");
+      if (!res.ok) throw new Error("Failed to fetch calenders");
       const data = await res.json();
-      setCustomers(data);
+      setCalenders(data);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load customers");
+      toast.error("Failed to load calenders");
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchCalenders();
   }, []);
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this customer?")) return;
+    if (!confirm("Are you sure you want to delete this calender?")) return;
     try {
-      const res = await fetch(`/api/customers/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete customer");
-      toast.success("Customer deleted!");
-      fetchCustomers();
+      const res = await fetch(`/api/calender/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete calender");
+      toast.success("Calender deleted!");
+      fetchCalenders();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete customer");
+      toast.error("Failed to delete calender");
     }
   };
 
@@ -41,38 +41,34 @@ const CustomerPage = () => {
       {/* Create Button */}
       <div className="flex justify-end">
         <Link
-          href="/dashboard/customer/createCustomer"
+          href="/dashboard/calender/createCalender"
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
         >
-          + Create Customer
+          + Create Calender
         </Link>
       </div>
 
       {/* Table */}
       <section className="bg-white p-6 rounded-2xl shadow-md overflow-x-auto">
-        <h2 className="text-2xl font-bold mb-4">Customers</h2>
+        <h2 className="text-2xl font-bold mb-4">Calenders</h2>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">#</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Company</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Owner</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Phone</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Employees</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Location</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {customers?.map((c, index) => (
+            {calenders?.map((c, index) => (
               <tr key={c._id}>
                 <td className="px-4 py-2 text-sm">{index + 1}</td>
-                <td className="px-4 py-2 text-sm">{c.companyName}</td>
-                <td className="px-4 py-2 text-sm">{c.ownerName}</td>
-                <td className="px-4 py-2 text-sm">{c.phoneNumber}</td>
-                <td className="px-4 py-2 text-sm">{c.employeeList.join(", ") || "N/A"}</td>
+                <td className="px-4 py-2 text-sm">{c.name}</td>
+                <td className="px-4 py-2 text-sm">{c.location}</td>
                 <td className="px-4 py-2 text-sm flex gap-2">
                   <Link
-                    href={`/dashboard/customer/edit/${c._id}`}
+                    href={`/dashboard/calender/edit/${c._id}`}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
                   >
                     Edit
@@ -86,10 +82,10 @@ const CustomerPage = () => {
                 </td>
               </tr>
             ))}
-            {customers.length === 0 && (
+            {calenders.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-4 text-gray-500">
-                  No customers found
+                <td colSpan={4} className="text-center py-4 text-gray-500">
+                  No calenders found
                 </td>
               </tr>
             )}
@@ -98,6 +94,4 @@ const CustomerPage = () => {
       </section>
     </div>
   );
-};
-
-export default CustomerPage;
+}
