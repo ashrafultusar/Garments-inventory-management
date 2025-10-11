@@ -2,6 +2,7 @@
 import useAppData from "@/hook/useAppData";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+ 
 
 export default function BatchCreator({
   orderId,
@@ -15,18 +16,15 @@ export default function BatchCreator({
   const [loading, setLoading] = useState(false);
   const { data } = useAppData();
 
-  // Selected dropdowns store _id
-  const [selectedClotheType, setSelectedClotheType] = useState("");
   const [selectedColour, setSelectedColour] = useState("");
   const [selectedFinishing, setSelectedFinishing] = useState("");
   const [selectedSill, setSelectedSill] = useState("");
   const [selectedDyeing, setSelectedDyeing] = useState("");
-  const [selectedCalender, setSelectedCalender] = useState("");
-  const [selectedProcesses, setSelectedProcesses] = useState([]); // array of _id
+  const [selectedCalender, setSelectedCalender] = useState(""); // optional
+  const [selectedProcesses, setSelectedProcesses] = useState([]);
 
   if (!batchData?.length) return null;
 
-  // Generic dropdown component
   const Dropdown = ({ label, options, selected, setSelected, optional }) => (
     <div className="w-40 mb-1">
       <label className="block mb-2 text-sm font-medium text-gray-700">{label}</label>
@@ -37,39 +35,33 @@ export default function BatchCreator({
       >
         <option value="">{optional ? "None" : "Select"}</option>
         {options.map((opt) => (
-          <option key={opt._id} value={opt._id}>
-            {opt.name}
-          </option>
+          <option key={opt._id} value={opt.name}>{opt.name}</option>
         ))}
       </select>
       {selected && (
-        <p className="mt-2 cursor-pointer text-sm text-gray-600">
-          Selected:{" "}
-          <span className="font-semibold">
-            {options.find((o) => o._id === selected)?.name}
-          </span>
+        <p className="mt-2 text-sm text-gray-600">
+          Selected: <span className="font-semibold">{selected}</span>
         </p>
       )}
     </div>
   );
 
-  // Multi-select for process list
   const MultiSelectDropdown = ({ label, options, selected, setSelected }) => {
-    const toggle = (id) => {
-      if (selected.includes(id)) setSelected(selected.filter((s) => s !== id));
-      else setSelected([...selected, id]);
+    const toggle = (name) => {
+      if (selected.includes(name)) {
+        setSelected(selected.filter((s) => s !== name));
+      } else {
+        setSelected([...selected, name]);
+      }
     };
+
     return (
       <div className="w-40 mb-1">
         <label className="block mb-2 text-sm font-medium text-gray-700">{label}</label>
         <div className="border border-gray-300 rounded-md p-1 bg-white">
           {options.map((opt) => (
             <div key={opt._id} className="flex items-center gap-2 cursor-pointer p-1 hover:bg-gray-100">
-              <input
-                type="checkbox"
-                checked={selected.includes(opt._id)}
-                onChange={() => toggle(opt._id)}
-              />
+              <input type="checkbox" checked={selected.includes(opt.name)} onChange={() => toggle(opt.name)} />
               <span>{opt.name}</span>
             </div>
           ))}
@@ -78,16 +70,8 @@ export default function BatchCreator({
     );
   };
 
-  // Confirm batch creation
   const confirmBatch = async () => {
-    if (
-      !selectedClotheType ||
-      !selectedColour ||
-      !selectedFinishing ||
-      !selectedSill ||
-      !selectedDyeing ||
-      selectedProcesses.length === 0
-    ) {
+    if (!selectedColour || !selectedFinishing || !selectedSill || !selectedDyeing || selectedProcesses.length === 0) {
       toast.error("Please select all required dropdowns!");
       return;
     }
@@ -100,32 +84,21 @@ export default function BatchCreator({
     try {
       setLoading(true);
 
-      // Map selected processes to include price
-      const processesPayload = selectedProcesses.map((pid) => {
-        const p = data.process.find((pr) => pr._id === pid);
+      const processesPayload = selectedProcesses.map((pname) => {
+        const p = data.process.find((pr) => pr.name === pname);
         return { name: p.name, price: p.price };
       });
 
       const payload = {
         orderId,
-        clotheType: {
-          _id: selectedClotheType,
-          name: data.clotheTypes.find((c) => c._id === selectedClotheType)?.name,
-        },
         colour: selectedColour,
-        finishingType: selectedFinishing,
         sillName: selectedSill,
+        finishingType: selectedFinishing,
         dyeing: selectedDyeing,
         calender: selectedCalender || null,
-        rows: batchData.map((row) => ({
-          rollNo: row.rollNo,
-          goj: row.goj,
-          idx: row.idx,
-        })),
+        rows: batchData.map((row) => ({ rollNo: row.rollNo, goj: row.goj, idx: row.idx })),
         selectedProcesses: processesPayload,
       };
-
-      console.log("Payload to server:", payload);
 
       const res = await fetch("/api/batch", {
         method: "POST",
@@ -146,9 +119,8 @@ export default function BatchCreator({
         const updatedData = await fetchRes.json();
         setCreatedBatches(updatedData);
 
-        // Reset selections
+        // Reset
         setBatchData([]);
-        setSelectedClotheType("");
         setSelectedColour("");
         setSelectedFinishing("");
         setSelectedSill("");
@@ -170,9 +142,7 @@ export default function BatchCreator({
     <div className="mt-6">
       <div className="p-4 border rounded-lg bg-gray-50 shadow-sm">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="font-semibold text-gray-700">
-            Batch {createdBatches?.length + 1}
-          </h4>
+          <h4 className="font-semibold text-gray-700">Batch {createdBatches?.length + 1}</h4>
           <button
             onClick={confirmBatch}
             disabled={loading}
@@ -202,10 +172,7 @@ export default function BatchCreator({
               {keys.map((key, i) => {
                 let value = "";
                 if (key === "goj")
-                  value = batchData.reduce(
-                    (acc, row) => acc + (Number(row.goj) || 0),
-                    0
-                  );
+                  value = batchData.reduce((acc, row) => acc + (Number(row.goj) || 0), 0);
                 if (key === "rollNo") value = batchData.length;
                 return <td key={i} className="px-4 py-2 border">Total: {value}</td>;
               })}
@@ -214,51 +181,13 @@ export default function BatchCreator({
         </table>
       </div>
 
-      {/* Dropdowns */}
       <div className="flex justify-center gap-4 mt-4 flex-wrap py-4 border rounded-lg bg-gray-50 shadow-sm">
-        <Dropdown
-          label="Clothe Type"
-          options={data?.clotheTypes || []}
-          selected={selectedClotheType}
-          setSelected={setSelectedClotheType}
-        />
-        <Dropdown
-          label="Colour"
-          options={data?.colours || []}
-          selected={selectedColour}
-          setSelected={setSelectedColour}
-        />
-        <Dropdown
-          label="Sill Name"
-          options={data?.sillNames || []}
-          selected={selectedSill}
-          setSelected={setSelectedSill}
-        />
-        <Dropdown
-          label="Finishing Type"
-          options={data?.finishingTypes || []}
-          selected={selectedFinishing}
-          setSelected={setSelectedFinishing}
-        />
-        <Dropdown
-          label="Dyeing"
-          options={data?.dyeings || []}
-          selected={selectedDyeing}
-          setSelected={setSelectedDyeing}
-        />
-        <Dropdown
-          label="Calender"
-          options={data?.calender || []}
-          selected={selectedCalender}
-          setSelected={setSelectedCalender}
-          optional={true}
-        />
-        <MultiSelectDropdown
-          label="Process List"
-          options={data?.process || []}
-          selected={selectedProcesses}
-          setSelected={setSelectedProcesses}
-        />
+        <Dropdown label="Colour" options={data?.colours || []} selected={selectedColour} setSelected={setSelectedColour} />
+        <Dropdown label="Sill Name" options={data?.sillNames || []} selected={selectedSill} setSelected={setSelectedSill} />
+        <Dropdown label="Finishing Type" options={data?.finishingTypes || []} selected={selectedFinishing} setSelected={setSelectedFinishing} />
+        <Dropdown label="Dyeing" options={data?.dyeings || []} selected={selectedDyeing} setSelected={setSelectedDyeing} />
+        <Dropdown label="Calender" options={data?.calender || []} selected={selectedCalender} setSelected={setSelectedCalender} optional={true} />
+        <MultiSelectDropdown label="Process List" options={data?.process || []} selected={selectedProcesses} setSelected={setSelectedProcesses} />
       </div>
     </div>
   );

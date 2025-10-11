@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import BatchCreator from "../Batch/BatchCreator";
 
-
 export default function OrderTableData({
   orderId,
   tableData = [],
@@ -23,29 +22,30 @@ export default function OrderTableData({
       const fetchBatches = async () => {
         try {
           setLoading(true);
-          const res = await fetch(`/api/batch?orderId=${orderId}`);
-          if (!res.ok) throw new Error("Failed to fetch batches");
+          const res = await fetch(`/api/batch/${orderId}`);
           const data = await res.json();
-
-          const usedIndexes = data
+  
+          const batchArray = Array.isArray(data) ? data : [data];
+  
+          const usedIndexes = batchArray
             .flatMap((batchDoc) => batchDoc.batches || [])
             .flatMap((b) => b.rows?.map((r) => r.idx) || []);
-
+  
           setUsedRowIndexes([...new Set(usedIndexes)]);
-          setCreatedBatches(data);
+          setCreatedBatches(batchArray);
         } catch (err) {
           console.error(err);
-          toast.error("Failed to fetch batches");
         } finally {
           setLoading(false);
         }
       };
-
+  
       fetchBatches();
     } else {
       setBatchData([]);
     }
   }, [currentStep, orderId, setUsedRowIndexes, setCreatedBatches]);
+  
 
   if (tableData.length === 0) {
     return (
@@ -87,7 +87,7 @@ export default function OrderTableData({
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="px-3 py-2 border text-center">Select</th>
-              {keys.map((key) => (
+              {keys?.map((key) => (
                 <th key={key} className="px-4 py-2 border text-left">
                   {key}
                 </th>
@@ -121,7 +121,7 @@ export default function OrderTableData({
             {/* Totals row */}
             <tr className="font-semibold bg-gray-200">
               <td className="px-3 py-2 border text-center">Total</td>
-              {keys.map((key, i) => {
+              {keys?.map((key, i) => {
                 if (key === "goj") {
                   const gojSum = tableData.reduce(
                     (acc, row) => acc + (Number(row.goj) || 0),
