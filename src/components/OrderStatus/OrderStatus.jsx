@@ -36,7 +36,7 @@ export default function OrderStatus({
   onStatusChange,
   selectedOrder,
 }) {
-  // find matching step from DB status  
+  // find matching step from DB status
   const [currentStep, setCurrentStep] = useState(
     steps.find((s) => statusMap[s.title] === currentStatus)?.id || 1
   );
@@ -105,7 +105,7 @@ export default function OrderStatus({
       <StatusDescription steps={steps} currentStep={currentStep} />
 
       {/* ✅ Only show OrderTableData in In Process step */}
-      
+
       {steps[currentStep - 1]?.title === "In Process" && (
         <OrderTableData
           orderId={orderId}
@@ -118,17 +118,15 @@ export default function OrderStatus({
           setCreatedBatches={setCreatedBatches}
         />
       )}
- 
-      {/* ✅ Only show BatchList in "All Batches" step */} 
+
+      {/* ✅ Only show BatchList in "All Batches" step */}
       {steps[currentStep - 1]?.title === "All Batches" && (
         <BatchList orderId={orderId} />
       )}
 
-
-{steps[currentStep - 1]?.title === "Delivered" && (
-  <DeliveredBatchList orderId={orderId} />
-)}
-
+      {steps[currentStep - 1]?.title === "Delivered" && (
+        <DeliveredBatchList orderId={orderId} />
+      )}
 
       {/* ✅ Modal for confirming status change */}
       {showModal && selectedStep && (
