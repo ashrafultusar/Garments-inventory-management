@@ -46,34 +46,6 @@ export default function BatchList({ orderId }) {
     setBatches(updated);
   };
 
-  const handleSave = async (batchIndex) => {
-    try {
-      const res = await fetch(`/api/batch`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          batchIndex,
-          batchData: batches[batchIndex],
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("Batch updated successfully!");
-        // ✅ আবার pending গুলা filter করছি
-        const pendingBatches = (data.batches || []).filter(
-          (batch) => batch.status === "pending"
-        );
-        setBatches(pendingBatches);
-      } else {
-        toast.error(data.message || "Save failed");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Server error while saving");
-    }
-  };
 
   const handleDelete = async (batchIndex) => {
     if (!confirm("Are you sure you want to delete this batch?")) return;
