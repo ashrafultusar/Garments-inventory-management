@@ -81,46 +81,36 @@ export async function POST(req) {
   }
 }
  
-
-// UPDATE a specific batch
+// ✅ UPDATE (note, inputs, status change etc.)
 export async function PATCH(req) {
   await connectDB();
   try {
-    const body = await req.json();
-    const { orderId, batchIndex, batchData } = body;
-
-    if (!orderId) return NextResponse.json({ message: "Missing orderId" }, { status: 400 });
+    const { orderId, batchIndex, batchData } = await req.json();
 
     const batchDoc = await Batch.findOne({ orderId });
-    if (!batchDoc) return NextResponse.json({ message: "Batch not found" }, { status: 404 });
+    if (!batchDoc) {
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
 
-    // ✅ Replace batch data (including extraInputs)
-    batchDoc.batches[batchIndex] = batchData;
+    // পুরনো batch এর reference বের করো
+    const oldBatch = batchDoc.batches[batchIndex];
+
+    if (!oldBatch) {
+      return NextResponse.json({ message: "Batch not found" }, { status: 404 });
+    }
+
+    // ✅ Update করার সময় সব নতুন value set করে দিচ্ছি
+    batchDoc.batches[batchIndex] = {
+      ...oldBatch.toObject(),
+      ...batchData,
+      status: batchData.status || oldBatch.status, // ensure status update
+    };
+
     await batchDoc.save();
 
     return NextResponse.json(batchDoc, { status: 200 });
-  } catch (error) {
-    console.error("PATCH error:", error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
-  }
-}
-
-// DELETE a batch
-export async function DELETE(req) {
-  await connectDB();
-  try {
-    const { pathname } = new URL(req.url);
-    const batchId = pathname.split("/").pop();
-
-    const batchDoc = await Batch.findOne({ "batches._id": batchId });
-    if (!batchDoc) return NextResponse.json({ message: "Batch not found" }, { status: 404 });
-
-    batchDoc.batches = batchDoc.batches.filter((b) => b._id.toString() !== batchId);
-    await batchDoc.save();
-
-    return NextResponse.json({ batches: batchDoc.batches }, { status: 200 });
-  } catch (error) {
-    console.error("DELETE error:", error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+  } catch (err) {
+    console.error("PATCH error:", err);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

@@ -10,13 +10,13 @@ const batchSchema = new mongoose.Schema(
     batches: [
       {
         batchName: { type: String, required: true },
-        status: { type: String, default: "pending" }, // ✅ pending, inprocess, delivered
+        status: { type: String, default: "pending" }, 
         rows: [
           {
             rollNo: Number,
             goj: Number,
-            idx: Number,
-            extraInputs: [String], // multiple extra inputs
+            idx: [Number],
+            extraInputs: [String], 
           },
         ],
         selectedProcesses: [
@@ -33,7 +33,6 @@ const batchSchema = new mongoose.Schema(
         note: { type: String, default: "" }, // optional note
       },
     ],
-    
   },
   { timestamps: true }
 );

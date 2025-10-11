@@ -15,7 +15,11 @@ export default function BatchList({ orderId }) {
         const data = await res.json();
 
         if (res.ok) {
-          setBatches(data.batches || []);
+          // ✅ শুধুমাত্র pending batch গুলো রাখছি
+          const pendingBatches = (data.batches || []).filter(
+            (batch) => batch.status === "pending"
+          );
+          setBatches(pendingBatches);
         } else {
           toast.error(data.error || "Failed to load batches");
         }
@@ -57,7 +61,11 @@ export default function BatchList({ orderId }) {
       const data = await res.json();
       if (res.ok) {
         toast.success("Batch updated successfully!");
-        setBatches(data.batches);
+        // ✅ আবার pending গুলা filter করছি
+        const pendingBatches = (data.batches || []).filter(
+          (batch) => batch.status === "pending"
+        );
+        setBatches(pendingBatches);
       } else {
         toast.error(data.message || "Save failed");
       }
@@ -71,14 +79,19 @@ export default function BatchList({ orderId }) {
     if (!confirm("Are you sure you want to delete this batch?")) return;
 
     try {
-      const res = await fetch(`/api/batch/${batches[batchIndex]._id}`, {
+      const batchId = batches[batchIndex]._id;
+      const res = await fetch(`/api/batch/${orderId}?batchId=${batchId}`, {
         method: "DELETE",
       });
 
       const data = await res.json();
       if (res.ok) {
-        toast.success("Batch deleted!");
-        setBatches(data.batches || []);
+        toast.success("Batch deleted successfully!");
+        // শুধু pending batch গুলা রাখার জন্য:
+        const pendingBatches = (data.batches || []).filter(
+          (batch) => batch.status === "pending"
+        );
+        setBatches(pendingBatches);
       } else {
         toast.error(data.message || "Delete failed");
       }
@@ -88,7 +101,6 @@ export default function BatchList({ orderId }) {
     }
   };
 
-  // Add a new extra input for a row
   const addExtraInput = (batchIndex, rowIndex) => {
     const updated = [...batches];
     if (!updated[batchIndex].rows[rowIndex].extraInputs) {
@@ -98,7 +110,6 @@ export default function BatchList({ orderId }) {
     setBatches(updated);
   };
 
-  // Handle change for dynamic extra inputs
   const handleExtraInputChange = (batchIndex, rowIndex, inputIndex, value) => {
     const updated = [...batches];
     updated[batchIndex].rows[rowIndex].extraInputs[inputIndex] = value;
@@ -108,10 +119,10 @@ export default function BatchList({ orderId }) {
   const handleDelivered = async (batchIndex) => {
     const batch = batches[batchIndex];
     if (batch.status === "delivered") return;
-  
+
     try {
       const updatedBatch = { ...batch, status: "delivered" };
-  
+
       const res = await fetch(`/api/batch`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -121,11 +132,15 @@ export default function BatchList({ orderId }) {
           batchData: updatedBatch,
         }),
       });
-  
+
       const data = await res.json();
       if (res.ok) {
         toast.success(`Batch "${updatedBatch.batchName}" marked as delivered!`);
-        setBatches(data.batches);
+        // ✅ পুনরায় pending গুলো filter করছি
+        const pendingBatches = (data.batches || []).filter(
+          (batch) => batch.status === "pending"
+        );
+        setBatches(pendingBatches);
       } else {
         toast.error(data.message || "Failed to update status");
       }
@@ -134,16 +149,19 @@ export default function BatchList({ orderId }) {
       toast.error("Server error while updating status");
     }
   };
-  
 
   return (
     <div className="mt-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-800">All Batches</h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-800">
+        Pending Batches
+      </h3>
 
       {loading ? (
         <p className="text-gray-500">Loading batches...</p>
       ) : batches.length === 0 ? (
-        <p className="text-gray-500">No batches found for this order.</p>
+        <p className="text-gray-500">
+          No pending batches found for this order.
+        </p>
       ) : (
         <div className="space-y-6">
           {batches.map((batch, bIdx) => (
@@ -155,21 +173,15 @@ export default function BatchList({ orderId }) {
                 <h4 className="font-medium text-gray-700">
                   {batch.batchName || `Batch ${bIdx + 1}`}
                 </h4>
-                <div>
-                 
-                  <button onClick={() => handleDelete(bIdx)}>
-                    <Delete className="text-sm text-red-600" />
-                  </button>
+                <div className="flex justify-center gap-2">
                   <button
                     onClick={() => handleDelivered(bIdx)}
-                    className={`px-2 py-1 border rounded text-green-600 text-sm ${
-                      batch.status === "delivered"
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-green-100"
-                    }`}
-                    disabled={batch.status === "delivered"}
+                    className={`px-2 py-1 border rounded text-green-600 text-sm cursor-pointer bg-green-100`}
                   >
                     Delivered
+                  </button>
+                  <button onClick={() => handleDelete(bIdx)}>
+                    <Delete className="text-sm cursor-pointer text-red-600" />
                   </button>
                 </div>
               </div>
@@ -215,7 +227,6 @@ export default function BatchList({ orderId }) {
                           </td>
                           <td className="px-3 py-2 border">
                             <div className="space-y-1">
-                              {/* Existing extra inputs */}
                               {row.extraInputs?.map((input, idx) => (
                                 <input
                                   key={idx}
@@ -233,7 +244,6 @@ export default function BatchList({ orderId }) {
                                   }
                                 />
                               ))}
-                              {/* + button */}
                               <button
                                 type="button"
                                 onClick={() => addExtraInput(bIdx, rIdx)}
