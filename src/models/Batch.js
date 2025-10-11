@@ -10,11 +10,13 @@ const batchSchema = new mongoose.Schema(
     batches: [
       {
         batchName: { type: String, required: true },
+        status: { type: String, default: "pending" }, 
         rows: [
           {
             rollNo: Number,
             goj: Number,
-            idx: Number,
+            idx: [Number],
+            extraInputs: [String], 
           },
         ],
         selectedProcesses: [
@@ -23,13 +25,12 @@ const batchSchema = new mongoose.Schema(
             price: Number,
           },
         ],
-
-        clotheType: { type: mongoose.Schema.Types.ObjectId, ref: "ClotheType", required: true },
-        colour: { type: mongoose.Schema.Types.ObjectId, ref: "Colour", required: true },
-        sillName: { type: mongoose.Schema.Types.ObjectId, ref: "SillName", required: true },
-        finishingType: { type: mongoose.Schema.Types.ObjectId, ref: "FinishingType", required: true },
-        dyeing: { type: mongoose.Schema.Types.ObjectId, ref: "Dyeing", required: true },
-        calender: { type: mongoose.Schema.Types.ObjectId, ref: "Calender", required: false },
+        colour: { type: String, required: true },
+        sillName: { type: String, required: true },
+        finishingType: { type: String, required: true },
+        dyeing: { type: String, required: true },
+        calender: { type: String, required: false }, // optional
+        note: { type: String, default: "" }, // optional note
       },
     ],
   },
