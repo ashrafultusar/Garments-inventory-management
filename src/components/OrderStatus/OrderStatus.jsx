@@ -7,6 +7,7 @@ import StatusModal from "./StatusModal";
 import ProcessingModal from "./ProcessingModal";
 import OrderTableData from "./OrderTableData";
 import BatchList from "./BatchList";
+import DeliveredBatchList from "./DeliveredBatchList";
 
 // ✅ Steps for UI
 const steps = [
@@ -104,6 +105,7 @@ export default function OrderStatus({
       <StatusDescription steps={steps} currentStep={currentStep} />
 
       {/* ✅ Only show OrderTableData in In Process step */}
+      
       {steps[currentStep - 1]?.title === "In Process" && (
         <OrderTableData
           orderId={orderId}
@@ -116,11 +118,17 @@ export default function OrderStatus({
           setCreatedBatches={setCreatedBatches}
         />
       )}
-
-      {/* ✅ Only show BatchList in "All Batches" step */}
+ 
+      {/* ✅ Only show BatchList in "All Batches" step */} 
       {steps[currentStep - 1]?.title === "All Batches" && (
         <BatchList orderId={orderId} />
       )}
+
+
+{steps[currentStep - 1]?.title === "Delivered" && (
+  <DeliveredBatchList orderId={orderId} />
+)}
+
 
       {/* ✅ Modal for confirming status change */}
       {showModal && selectedStep && (
