@@ -7,7 +7,7 @@ import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderStatus from "../OrderStatus/OrderStatus";
- 
+
 const OrderSideModal = ({
   isModalOpen,
   loadingOrder,
@@ -74,78 +74,99 @@ const OrderSideModal = ({
                     </div>
                   </div>
 
-                  {/* Collapsible content */}
-                  {isDetailsOpen && (
-                    <div className="space-y-6">
-                      {/* Order details */}
-                      <div className="grid grid-cols-2 gap-4 text-gray-700">
-                        <div>
-                          <p className="text-xs text-gray-500">Created at</p>
-                          <p className="font-semibold">
-                            {selectedOrder?.createdAt
-                              ? new Date(
-                                  selectedOrder.createdAt
-                                ).toLocaleDateString()
-                              : "Invalid Date"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Due Date</p>
-                          <p className="font-semibold">
-                            {selectedOrder?.dueDate
-                              ? new Date(
-                                  selectedOrder.dueDate
-                                ).toLocaleDateString()
-                              : "Invalid Date"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Bundle</p>
-                          <p className="font-semibold">
-                            {selectedOrder?.bundle || "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Quantity</p>
-                          <p className="font-semibold">
-                            {selectedOrder?.quality || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Timeline */}
-                      <div className="border-t pt-2">
-                        <h3 className="font-semibold text-gray-700 mb-4">
-                          Timeline
-                        </h3>
-                        <div className="relative pl-6">
-                          <div className="absolute left-1.5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
-                          <div className="relative mb-4">
-                            <div className="absolute left-0 -translate-x-1/2 w-3 h-3 bg-blue-600 rounded-full"></div>
-                            <div className="ml-4 space-y-1">
-                              <p className="font-semibold text-gray-700">
-                                Order Created
-                              </p>
-                              <p className="text-sm text-gray-500">
+                  {/* Collapsible content with animation */}
+                  <AnimatePresence initial={false}>
+                    {isDetailsOpen && (
+                      <motion.div
+                        key="collapsible"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="space-y-6 pt-2">
+                          {/* Order details */}
+                          <div className="grid grid-cols-2 gap-4 text-gray-700">
+                            <div>
+                              <p className="text-xs text-gray-500">Created at</p>
+                              <p className="font-semibold">
                                 {selectedOrder?.createdAt
-                                  ? new Date(
-                                      selectedOrder.createdAt
-                                    ).toLocaleDateString("en-US", {
-                                      year: "numeric",
-                                      month: "long",
-                                      day: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                      timeZoneName: "short",
-                                    })
+                                  ? new Date(selectedOrder.createdAt).toLocaleDateString()
                                   : "Invalid Date"}
                               </p>
                             </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Due Date</p>
+                              <p className="font-semibold">
+                                {selectedOrder?.dueDate
+                                  ? new Date(selectedOrder.dueDate).toLocaleDateString()
+                                  : "Invalid Date"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Bundle</p>
+                              <p className="font-semibold">
+                                {selectedOrder?.bundle || "N/A"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Quantity</p>
+                              <p className="font-semibold">
+                                {selectedOrder?.quality || "N/A"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Timeline */}
+                          <div className="border-t pt-2">
+                            <h3 className="font-semibold text-gray-700 mb-4">Timeline</h3>
+                            <div className="relative pl-6">
+                              <div className="absolute left-1.5 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+                              <div className="relative mb-4">
+                                <div className="absolute left-0 -translate-x-1/2 w-3 h-3 bg-blue-600 rounded-full"></div>
+                                <div className="ml-4 space-y-1">
+                                  <p className="font-semibold text-gray-700">Order Created</p>
+                                  <p className="text-sm text-gray-500">
+                                    {selectedOrder?.createdAt
+                                      ? new Date(selectedOrder.createdAt).toLocaleDateString("en-US", {
+                                          year: "numeric",
+                                          month: "long",
+                                          day: "numeric",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          timeZoneName: "short",
+                                        })
+                                      : "Invalid Date"}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Footer buttons */}
+                          <div className="pt-4 border-t flex justify-between gap-4 bg-white">
+                            <button
+                              onClick={() =>
+                                router.push(`/dashboard/order/update/${selectedOrder?._id}`)
+                              }
+                              className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg font-semibold cursor-pointer hover:bg-blue-700 transition"
+                            >
+                              <FaPencilAlt className="inline-block mr-2" />
+                              Edit Order
+                            </button>
+                            <button
+                              onClick={() => confirmDelete(selectedOrder?._id)}
+                              className="flex-1 py-3 px-4 cursor-pointer bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition"
+                            >
+                              <LuTrash2 className="inline-block mr-2" />
+                              Delete
+                            </button>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Status Component */}
                   <OrderStatus
@@ -158,26 +179,6 @@ const OrderSideModal = ({
                   />
                 </>
               )}
-            </div>
-
-            {/* Footer buttons */}
-            <div className="p-6 border-t flex justify-between gap-4 bg-white">
-              <button
-                onClick={() =>
-                  router.push(`/dashboard/order/update/${selectedOrder?._id}`)
-                }
-                className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg font-semibold cursor-pointer hover:bg-blue-700 transition"
-              >
-                <FaPencilAlt className="inline-block mr-2" />
-                Edit Order
-              </button>
-              <button
-                onClick={() => confirmDelete(selectedOrder?._id)}
-                className="flex-1 py-3 px-4 cursor-pointer bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition"
-              >
-                <LuTrash2 className="inline-block mr-2" />
-                Delete
-              </button>
             </div>
           </motion.div>
         </div>

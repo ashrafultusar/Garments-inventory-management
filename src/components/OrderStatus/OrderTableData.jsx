@@ -96,12 +96,17 @@ export default function OrderTableData({
           </thead>
           <tbody>
             {tableData.map((row, idx) => (
-              <tr
-                key={idx}
-                className={`hover:bg-gray-50 ${
-                  isRowSelected(idx) ? "bg-blue-50" : ""
-                } ${usedRowIndexes.includes(idx) ? "opacity-50" : ""}`}
-              >
+             <tr
+             key={idx}
+             className={`${
+               usedRowIndexes.includes(idx)
+                 ? "bg-gray-100 opacity-50 cursor-not-allowed"
+                 : isRowSelected(idx)
+                 ? "bg-blue-50"
+                 : "hover:bg-gray-50"
+             }`}
+           >
+           
                 <td className="px-3 py-2 border text-center">
                   <input
                     type="checkbox"
