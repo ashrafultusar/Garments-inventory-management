@@ -87,7 +87,7 @@ export default function BatchList({ orderId }) {
     updated[batchIndex].rows[rowIndex].extraInputs[inputIndex] = value;
     setBatches(updated);
   };
-
+ 
   const handleDelivered = async (batchIndex) => {
     const batch = batches[batchIndex];
     if (batch.status === "delivered") return;
