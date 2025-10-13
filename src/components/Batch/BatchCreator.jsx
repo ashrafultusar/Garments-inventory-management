@@ -19,6 +19,7 @@ export default function BatchCreator({
   const [selectedDyeing, setSelectedDyeing] = useState("");
   const [selectedCalender, setSelectedCalender] = useState("");
   const [selectedProcesses, setSelectedProcesses] = useState([]);
+console.log(data.sillNames);
 
   if (!batchData?.length) return null;
 

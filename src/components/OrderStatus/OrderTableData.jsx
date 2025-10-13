@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-
+import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import BatchCreator from "../Batch/BatchCreator";
 
 export default function OrderTableData({
@@ -15,8 +15,9 @@ export default function OrderTableData({
 }) {
   const [batchData, setBatchData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [allSelected, setAllSelected] = useState(false);
 
-  // Fetch existing batches when step = "In Process"
+  // ✅ Fetch existing used rows from DB
   useEffect(() => {
     if (currentStep === 2 && orderId) {
       const fetchBatches = async () => {
@@ -27,10 +28,17 @@ export default function OrderTableData({
   
           const batchArray = Array.isArray(data) ? data : [data];
   
+          // ✅ Flatten idx arrays correctly
           const usedIndexes = batchArray
             .flatMap((batchDoc) => batchDoc.batches || [])
-            .flatMap((b) => b.rows?.map((r) => r.idx) || []);
+            .flatMap((b) =>
+              (b.rows || [])
+                .map((r) => r.idx)
+                .flat() // <-- important: this flattens nested [idx] arrays
+                .filter((x) => typeof x === "number")
+            );
   
+          // ✅ Make unique
           setUsedRowIndexes([...new Set(usedIndexes)]);
           setCreatedBatches(batchArray);
         } catch (err) {
@@ -39,7 +47,6 @@ export default function OrderTableData({
           setLoading(false);
         }
       };
-  
       fetchBatches();
     } else {
       setBatchData([]);
@@ -47,23 +54,22 @@ export default function OrderTableData({
   }, [currentStep, orderId, setUsedRowIndexes, setCreatedBatches]);
   
 
-  if (tableData.length === 0) {
+  if (tableData.length === 0)
     return (
       <p className="text-sm text-gray-500 italic">
         No table data available for this order.
       </p>
     );
-  }
 
   const keys = Object.keys(tableData[0]).filter(
     (k) => k !== "id" && k !== "_id"
   );
 
-  // Select / unselect row
+  // ✅ Select/unselect single row (cannot select if already used)
   const handleSelectRow = (idx) => {
     if (usedRowIndexes.includes(idx)) return;
-
     const isAlreadyInBatch = batchData.some((row) => row.idx === idx);
+
     if (isAlreadyInBatch) {
       setBatchData((prev) => prev.filter((row) => row.idx !== idx));
     } else {
@@ -71,7 +77,33 @@ export default function OrderTableData({
     }
   };
 
+  // ✅ All select only unused rows
+  const handleSelectAll = () => {
+    if (allSelected) {
+      setBatchData([]);
+      setAllSelected(false);
+    } else {
+      const availableRows = tableData
+        .map((row, idx) => ({ ...row, idx }))
+        .filter((r) => !usedRowIndexes.includes(r.idx));
+
+      setBatchData(availableRows);
+      setAllSelected(true);
+    }
+  };
+
   const isRowSelected = (idx) => batchData.some((row) => row.idx === idx);
+
+  useEffect(() => {
+    const selectableCount = tableData.filter(
+      (_, idx) => !usedRowIndexes.includes(idx)
+    ).length;
+    setAllSelected(
+      batchData.length > 0 &&
+        batchData.length === selectableCount &&
+        currentStep === 2
+    );
+  }, [batchData, usedRowIndexes, tableData, currentStep]);
 
   return (
     <div className="mt-6">
@@ -81,12 +113,23 @@ export default function OrderTableData({
         <p className="text-sm text-gray-500 italic">Loading batches...</p>
       )}
 
-      {/* Main Table */}
       <div className="overflow-x-auto border rounded-lg">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
-              <th className="px-3 py-2 border text-center">Select</th>
+              <th className="px-3 py-2 border text-center">
+                {currentStep === 2 ? (
+                  <button
+                    onClick={handleSelectAll}
+                    title="Select All"
+                    className="text-lg text-blue-600 hover:text-blue-800"
+                  >
+                    {allSelected ? <FaCheckSquare /> : <FaRegSquare />}
+                  </button>
+                ) : (
+                  "Select"
+                )}
+              </th>
               {keys?.map((key) => (
                 <th key={key} className="px-4 py-2 border text-left">
                   {key}
@@ -94,36 +137,39 @@ export default function OrderTableData({
               ))}
             </tr>
           </thead>
-          <tbody>
-            {tableData.map((row, idx) => (
-             <tr
-             key={idx}
-             className={`${
-               usedRowIndexes.includes(idx)
-                 ? "bg-gray-100 opacity-50 cursor-not-allowed"
-                 : isRowSelected(idx)
-                 ? "bg-blue-50"
-                 : "hover:bg-gray-50"
-             }`}
-           >
-           
-                <td className="px-3 py-2 border text-center">
-                  <input
-                    type="checkbox"
-                    disabled={usedRowIndexes.includes(idx) || currentStep !== 2}
-                    checked={isRowSelected(idx)}
-                    onChange={() => handleSelectRow(idx)}
-                  />
-                </td>
-                {keys.map((key, i) => (
-                  <td key={i} className="px-4 py-2 border">
-                    {row[key] ?? "N/A"}
-                  </td>
-                ))}
-              </tr>
-            ))}
 
-            {/* Totals row */}
+          <tbody>
+            {tableData.map((row, idx) => {
+              const isUsed = usedRowIndexes.includes(idx);
+              const isSelected = isRowSelected(idx);
+              return (
+                <tr
+                  key={idx}
+                  className={`${
+                    isUsed
+                      ? "bg-gray-100 opacity-50 cursor-not-allowed"
+                      : isSelected
+                      ? "bg-blue-50"
+                      : "hover:bg-gray-50"
+                  }`}
+                >
+                  <td className="px-3 py-2 border text-center">
+                    <input
+                      type="checkbox"
+                      disabled={isUsed || currentStep !== 2}
+                      checked={isSelected}
+                      onChange={() => handleSelectRow(idx)}
+                    />
+                  </td>
+                  {keys.map((key, i) => (
+                    <td key={i} className="px-4 py-2 border">
+                      {row[key] ?? "N/A"}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+
             <tr className="font-semibold bg-gray-200">
               <td className="px-3 py-2 border text-center">Total</td>
               {keys?.map((key, i) => {
@@ -152,7 +198,7 @@ export default function OrderTableData({
         </table>
       </div>
 
-      {/* Batch Creator (child component) */}
+      {/* ✅ Pass props down */}
       <BatchCreator
         orderId={orderId}
         sillName={sillName}
