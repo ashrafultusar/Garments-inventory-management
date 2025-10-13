@@ -87,7 +87,7 @@ export default function BatchList({ orderId }) {
     updated[batchIndex].rows[rowIndex].extraInputs[inputIndex] = value;
     setBatches(updated);
   };
-
+ 
   const handleDelivered = async (batchIndex) => {
     const batch = batches[batchIndex];
     if (batch.status === "delivered") return;
@@ -183,15 +183,15 @@ export default function BatchList({ orderId }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {batch.rows.map((row, rIdx) => (
+                      {batch?.rows?.map((row, rIdx) => (
                         <tr key={rIdx} className="text-center">
-                          <td className="px-3 py-2 border">{row.rollNo}</td>
-                          <td className="px-3 py-2 border">{row.goj}</td>
+                          <td className="px-3 py-2 border">{row?.rollNo}</td>
+                          <td className="px-3 py-2 border">{row?.goj}</td>
                           <td className="px-3 py-2 border">
                             <input
                               type="number"
                               className="w-24 border rounded px-2 py-1 text-center"
-                              value={row.idx || ""}
+                              
                               onChange={(e) =>
                                 handleInputChange(bIdx, rIdx, e.target.value)
                               }
