@@ -46,7 +46,6 @@ export default function BatchList({ orderId }) {
     setBatches(updated);
   };
 
-
   const handleDelete = async (batchIndex) => {
     if (!confirm("Are you sure you want to delete this batch?")) return;
 
@@ -87,7 +86,7 @@ export default function BatchList({ orderId }) {
     updated[batchIndex].rows[rowIndex].extraInputs[inputIndex] = value;
     setBatches(updated);
   };
- 
+
   const handleDelivered = async (batchIndex) => {
     const batch = batches[batchIndex];
     if (batch.status === "delivered") return;
@@ -121,7 +120,7 @@ export default function BatchList({ orderId }) {
       toast.error("Server error while updating status");
     }
   };
-
+  console.log(batches.calender);
   return (
     <div className="mt-6">
       <h3 className="text-lg font-semibold mb-4 text-gray-800">
@@ -136,7 +135,7 @@ export default function BatchList({ orderId }) {
         </p>
       ) : (
         <div className="space-y-6">
-          {batches.map((batch, bIdx) => (
+          {batches?.map((batch, bIdx) => (
             <div
               key={bIdx}
               className="border border-gray-200 rounded-lg p-4 shadow-sm"
@@ -191,7 +190,6 @@ export default function BatchList({ orderId }) {
                             <input
                               type="number"
                               className="w-24 border rounded px-2 py-1 text-center"
-                              
                               onChange={(e) =>
                                 handleInputChange(bIdx, rIdx, e.target.value)
                               }
@@ -228,6 +226,36 @@ export default function BatchList({ orderId }) {
                           </td>
                         </tr>
                       ))}
+                    </tbody>
+                  </table>
+{/* info section */}
+                  <table className="w-full text-sm mt-4 border rounded">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="border px-3 py-2 text-left">Field</th>
+                        <th className="border px-3 py-2 text-left">Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        ["Calendar", batch?.calender],
+                        ["Colour", batch?.colour],
+                        ["Dyeing", batch?.dyeing],
+                        ["Finishing Type", batch?.finishingType],
+                        ["Sill Name", batch?.sillName],
+                      ]
+                        .filter(([_, value]) => value)
+                        .map(([label, value], idx) => (
+                          <tr
+                            key={idx}
+                            className={idx % 2 === 0 ? "bg-gray-50" : ""}
+                          >
+                            <td className="border px-3 py-2 font-medium uppercase">
+                              {label}
+                            </td>
+                            <td className="border px-3 py-2">{value}</td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
