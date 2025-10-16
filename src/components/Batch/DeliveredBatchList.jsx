@@ -80,38 +80,48 @@ export default function DeliveredBatchList({ orderId }) {
                     ))}
                   </tbody>
 
-                 {/* Column-wise Totals */}
-{batch.rows.length > 0 && (
-  <tfoot>
-    <tr className="text-center font-semibold bg-gray-50">
-      {/* Roll No: count of rows */}
-      <td className="px-3 py-2 border">{batch.rows.length}</td>
+                  {/* Column-wise Totals */}
+                  {batch.rows.length > 0 && (
+                    <tfoot>
+                      <tr className="text-center font-semibold bg-gray-50">
+                        {/* Roll No: count of rows */}
+                        <td className="px-3 py-2 border">
+                          {batch.rows.length}
+                        </td>
 
-      {/* Goj: sum of numeric values */}
-      <td className="px-3 py-2 border">
-        {batch.rows.reduce((sum, row) => sum + (Number(row.goj) || 0), 0)}
-      </td>
+                        {/* Goj: sum of numeric values */}
+                        <td className="px-3 py-2 border">
+                          {batch.rows.reduce(
+                            (sum, row) => sum + (Number(row.goj) || 0),
+                            0
+                          )}
+                        </td>
 
-      {/* Index: sum of idx */}
-      <td className="px-3 py-2 border">
-        {batch.rows.reduce((sum, row) => sum + (Number(row.idx) || 0), 0)}
-      </td>
+                        {/* Index: sum of idx */}
+                        <td className="px-3 py-2 border">
+                          {batch.rows.reduce(
+                            (sum, row) => sum + (Number(row.idx) || 0),
+                            0
+                          )}
+                        </td>
 
-      {/* Extras: sum of all numeric values inside extraInputs */}
-      <td className="px-3 py-2 border">
-        {batch.rows.reduce(
-          (sum, row) =>
-            sum +
-            (row.extraInputs
-              ? row.extraInputs.reduce((s, val) => s + (Number(val) || 0), 0)
-              : 0),
-          0
-        )}
-      </td>
-    </tr>
-  </tfoot>
-)}
-
+                        {/* Extras: sum of all numeric values inside extraInputs */}
+                        <td className="px-3 py-2 border">
+                          {batch.rows.reduce(
+                            (sum, row) =>
+                              sum +
+                              (row.extraInputs
+                                ? row.extraInputs.reduce(
+                                    (s, val) => s + (Number(val) || 0),
+                                    0
+                                  )
+                                : 0),
+                            0
+                          )}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
 
                 {/* Info Section */}

@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 const Page = () => {
   const { data } = useAppData();
   const router = useRouter();
-
+  console.log(data);
   const [tableData, setTableData] = useState([{ goj: "" }]);
   const inputRefs = useRef([]);
   const [formData, setFormData] = useState({
@@ -351,14 +351,20 @@ const Page = () => {
             <label htmlFor="dyeingName" className="mb-1 font-medium text-sm">
               Dyeing Name
             </label>
-            <input
+            <select
               id="dyeingName"
-              type="text"
-              required
               value={formData.dyeingName}
+              required
               onChange={handleChange}
               className="rounded-lg border px-4 py-2"
-            />
+            >
+              <option value="">Select Dyeings</option>
+              {data?.dyeings?.map((item) => (
+                <option key={item.id || item.name} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Transporter Name */}
