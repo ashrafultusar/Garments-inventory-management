@@ -5,6 +5,7 @@ import Stepper from "./Stepper";
 import StatusModal from "./StatusModal";
 import OrderTableData from "./OrderTableData";
 import BatchList from "./BatchList";
+import DeliveredBatchList from "../Batch/DeliveredBatchList";
 
 // ✅ Steps for UI
 const steps = [
@@ -80,11 +81,9 @@ export default function OrderStatus({
       }
 
       await updateStatusDirectly(step);
-    }
-    else if (step.id <= currentStep) {
+    } else if (step.id <= currentStep) {
       setCurrentStep(step.id);
-    }
-    else {
+    } else {
       toast.error("You must complete the previous step first!");
     }
   };
@@ -99,7 +98,7 @@ export default function OrderStatus({
         onStepClick={handleStepClick}
       />
 
-      {/* ✅ Only show OrderTableData in In Process step */}
+      {/* Only show OrderTableData in In Process step */}
       {steps[currentStep - 1]?.title === "In Process" && (
         <OrderTableData
           orderId={orderId}
@@ -113,12 +112,17 @@ export default function OrderStatus({
         />
       )}
 
-      {/* ✅ Only show BatchList in "All Batches" step */}
+      {/* Only show BatchList in "All Batches" step */}
       {steps[currentStep - 1]?.title === "All Batches" && (
         <BatchList orderId={orderId} />
       )}
 
-      {/* ✅ Only FIRST confirm modal (Pending → In Process) */}
+      {/* Only show Delivered Batch List in "Delivered" step */}
+      {steps[currentStep - 1]?.title === "Delivered" && (
+        <DeliveredBatchList orderId={orderId} />
+      )}
+
+      {/* Only FIRST confirm modal (Pending → In Process) */}
       {showModal && selectedStep && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
