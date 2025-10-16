@@ -22,7 +22,7 @@ const OrderSideModal = ({
   const [printOrder, setPrintOrder] = useState(null);
 
   const handlePrint = (order) => {
-    setPrintOrder(order); // trigger PrintInvoice
+    setPrintOrder(order);
   };
 
   return (
@@ -206,6 +206,7 @@ const OrderSideModal = ({
 
                   {/* Status Component */}
                   <OrderStatus
+                  selectedOrder={selectedOrder}
                     orderId={selectedOrder?._id}
                     currentStatus={selectedOrder?.status || "Pending"}
                     tableData={selectedOrder?.tableData || []}

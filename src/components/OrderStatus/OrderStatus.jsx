@@ -32,7 +32,7 @@ export default function OrderStatus({
   currentStatus,
   tableData,
   onStatusChange,
-  selectedOrder,
+  selectedOrder
 }) {
   const [currentStep, setCurrentStep] = useState(
     steps.find((s) => statusMap[s.title] === currentStatus)?.id || 1
@@ -42,6 +42,7 @@ export default function OrderStatus({
 
   const [usedRowIndexes, setUsedRowIndexes] = useState([]);
   const [createdBatches, setCreatedBatches] = useState([]);
+
 
   // ✅ Direct status update without showing modal
   const updateStatusDirectly = async (step) => {
@@ -101,6 +102,7 @@ export default function OrderStatus({
       {/* Only show OrderTableData in In Process step */}
       {steps[currentStep - 1]?.title === "In Process" && (
         <OrderTableData
+        selectedOrder={selectedOrder}
           orderId={orderId}
           tableData={tableData}
           currentStep={currentStep}

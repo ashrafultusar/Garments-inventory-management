@@ -1,6 +1,6 @@
 "use client";
 
-import OrderSideModal from "@/components/order/3. OrderSideModal";
+import OrderSideModal from "@/components/order/OrderSideModal";
 import ConfirmationModal from "@/components/order/ConfirmationModal";
 import OrderFilters from "@/components/order/OrderFilters";
 import OrderTable from "@/components/order/OrderTable";
