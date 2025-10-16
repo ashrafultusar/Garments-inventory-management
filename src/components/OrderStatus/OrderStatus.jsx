@@ -1,22 +1,19 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import Stepper from "./Stepper";
-import StatusDescription from "./StatusDescription";
 import StatusModal from "./StatusModal";
-import ProcessingModal from "./ProcessingModal";
 import OrderTableData from "./OrderTableData";
 import BatchList from "./BatchList";
-import DeliveredBatchList from "./DeliveredBatchList";
 
 // ✅ Steps for UI
 const steps = [
-  { id: 1, title: "Pending", description: "Order is pending." },
-  { id: 2, title: "In Process", description: "Your order is being processed." },
-  { id: 3, title: "All Batches", description: "All Batches." },
-  { id: 4, title: "Delivered", description: "Order delivered." },
-  { id: 5, title: "Billing", description: "Billing finalized." },
-  { id: 6, title: "Completed", description: "Order completed." },
+  { id: 1, title: "Pending" },
+  { id: 2, title: "In Process" },
+  { id: 3, title: "All Batches" },
+  { id: 4, title: "Delivered" },
+  { id: 5, title: "Billing" },
+  { id: 6, title: "Completed" },
 ];
 
 // ✅ Mapping UI titles ↔ DB enum
@@ -36,7 +33,6 @@ export default function OrderStatus({
   onStatusChange,
   selectedOrder,
 }) {
-  // find matching step from DB status
   const [currentStep, setCurrentStep] = useState(
     steps.find((s) => statusMap[s.title] === currentStatus)?.id || 1
   );
@@ -46,42 +42,19 @@ export default function OrderStatus({
   const [usedRowIndexes, setUsedRowIndexes] = useState([]);
   const [createdBatches, setCreatedBatches] = useState([]);
 
-  const handleStepClick = (step) => {
-    // ✅ Moving forward
-    if (step.id === currentStep + 1) {
-      // Special condition: In Process → must create batch
-      if (currentStep === 2 && createdBatches.length === 0) {
-        toast.error("You must create at least one batch first!");
-        return;
-      }
-
-      setSelectedStep(step);
-      setShowModal(true);
-    }
-    // ✅ Going back
-    else if (step.id <= currentStep) {
-      setCurrentStep(step.id);
-    }
-    // ✅ Skipping steps
-    else {
-      toast.error("You must complete the previous step first!");
-    }
-  };
-
-  // ✅ Confirm status change → PATCH API
-  const confirmChange = async () => {
+  // ✅ Direct status update without showing modal
+  const updateStatusDirectly = async (step) => {
     try {
       const res = await fetch(`/api/order/${orderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: statusMap[selectedStep.title] }),
+        body: JSON.stringify({ status: statusMap[step.title] }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        setCurrentStep(selectedStep.id);
-        setShowModal(false);
-        onStatusChange(statusMap[selectedStep.title]);
+        setCurrentStep(step.id);
+        onStatusChange(statusMap[step.title]);
         toast.success("Status updated!");
       } else {
         toast.error(data.error || "Failed to update status");
@@ -89,6 +62,30 @@ export default function OrderStatus({
     } catch (err) {
       console.error(err);
       toast.error("Server error");
+    }
+  };
+
+  // ✅ Confirm status change → only used for first time
+  const confirmChange = async () => {
+    await updateStatusDirectly(selectedStep);
+    setShowModal(false);
+  };
+
+  const handleStepClick = async (step) => {
+    if (step.id === currentStep + 1) {
+      if (currentStep === 1 && step.id === 2) {
+        setSelectedStep(step);
+        setShowModal(true);
+        return;
+      }
+
+      await updateStatusDirectly(step);
+    }
+    else if (step.id <= currentStep) {
+      setCurrentStep(step.id);
+    }
+    else {
+      toast.error("You must complete the previous step first!");
     }
   };
 
@@ -102,10 +99,7 @@ export default function OrderStatus({
         onStepClick={handleStepClick}
       />
 
-      <StatusDescription steps={steps} currentStep={currentStep} />
-
       {/* ✅ Only show OrderTableData in In Process step */}
-
       {steps[currentStep - 1]?.title === "In Process" && (
         <OrderTableData
           orderId={orderId}
@@ -124,27 +118,15 @@ export default function OrderStatus({
         <BatchList orderId={orderId} />
       )}
 
-      {steps[currentStep - 1]?.title === "Delivered" && (
-        <DeliveredBatchList orderId={orderId} />
-      )}
-
-      {/* ✅ Modal for confirming status change */}
+      {/* ✅ Only FIRST confirm modal (Pending → In Process) */}
       {showModal && selectedStep && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
-            {selectedStep.title === "Completed Process" ? (
-              <ProcessingModal
-                orderId={orderId}
-                confirmChange={confirmChange}
-                onClose={() => setShowModal(false)}
-              />
-            ) : (
-              <StatusModal
-                selectedStep={selectedStep}
-                confirmChange={confirmChange}
-                onClose={() => setShowModal(false)}
-              />
-            )}
+            <StatusModal
+              selectedStep={selectedStep}
+              confirmChange={confirmChange}
+              onClose={() => setShowModal(false)}
+            />
           </div>
         </div>
       )}
