@@ -32,9 +32,6 @@ export default function DeliveredBatchList({ orderId }) {
     if (orderId) fetchDeliveredBatches();
   }, [orderId]);
 
-
-
-  console.log(batches);
   return (
     <div className="mt-6">
       <h3 className="text-lg font-semibold mb-4 text-gray-800">
@@ -44,7 +41,9 @@ export default function DeliveredBatchList({ orderId }) {
       {loading ? (
         <p className="text-gray-500">Loading delivered batches...</p>
       ) : batches.length === 0 ? (
-        <p className="text-gray-500">No delivered batches found for this order.</p>
+        <p className="text-gray-500">
+          No delivered batches found for this order.
+        </p>
       ) : (
         <div className="space-y-6">
           {batches?.map((batch, bIdx) => (
@@ -80,6 +79,49 @@ export default function DeliveredBatchList({ orderId }) {
                       </tr>
                     ))}
                   </tbody>
+
+                  {/* Column-wise Totals */}
+                  {batch.rows.length > 0 && (
+                    <tfoot>
+                      <tr className="text-center font-semibold bg-gray-50">
+                        {/* Roll No: count of rows */}
+                        <td className="px-3 py-2 border">
+                          {batch.rows.length}
+                        </td>
+
+                        {/* Goj: sum of numeric values */}
+                        <td className="px-3 py-2 border">
+                          {batch.rows.reduce(
+                            (sum, row) => sum + (Number(row.goj) || 0),
+                            0
+                          )}
+                        </td>
+
+                        {/* Index: sum of idx */}
+                        <td className="px-3 py-2 border">
+                          {batch.rows.reduce(
+                            (sum, row) => sum + (Number(row.idx) || 0),
+                            0
+                          )}
+                        </td>
+
+                        {/* Extras: sum of all numeric values inside extraInputs */}
+                        <td className="px-3 py-2 border">
+                          {batch.rows.reduce(
+                            (sum, row) =>
+                              sum +
+                              (row.extraInputs
+                                ? row.extraInputs.reduce(
+                                    (s, val) => s + (Number(val) || 0),
+                                    0
+                                  )
+                                : 0),
+                            0
+                          )}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
 
                 {/* Info Section */}
@@ -113,8 +155,10 @@ export default function DeliveredBatchList({ orderId }) {
                   </tbody>
                 </table>
               </div>
-              <p className="pt-3">Note: {batch?.note?.trim() || "Not Assigned"}</p>
 
+              <p className="pt-3">
+                Note: {batch?.note?.trim() || "Not Assigned"}
+              </p>
             </div>
           ))}
         </div>

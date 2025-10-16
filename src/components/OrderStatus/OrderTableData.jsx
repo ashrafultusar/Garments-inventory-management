@@ -11,7 +11,7 @@ export default function OrderTableData({
   setUsedRowIndexes,
   sillName,
   createdBatches,
-  setCreatedBatches,
+  setCreatedBatches,selectedOrder
 }) {
   const [batchData, setBatchData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -208,6 +208,7 @@ export default function OrderTableData({
         createdBatches={createdBatches}
         setCreatedBatches={setCreatedBatches}
         setUsedRowIndexes={setUsedRowIndexes}
+        selectedOrder={selectedOrder} 
       />
     </div>
   );
