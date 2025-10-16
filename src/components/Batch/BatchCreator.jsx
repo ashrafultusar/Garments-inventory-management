@@ -1,6 +1,6 @@
 "use client";
 import useAppData from "@/hook/useAppData";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
 export default function BatchCreator({
@@ -9,17 +9,36 @@ export default function BatchCreator({
   setBatchData,
   keys,
   setUsedRowIndexes,
-}) { 
+  selectedOrder, 
+}) {
   const [loading, setLoading] = useState(false);
   const { data } = useAppData();
- 
+console.log(selectedOrder);
   const [selectedColour, setSelectedColour] = useState("");
   const [selectedFinishing, setSelectedFinishing] = useState("");
   const [selectedSill, setSelectedSill] = useState("");
   const [selectedDyeing, setSelectedDyeing] = useState("");
   const [selectedCalender, setSelectedCalender] = useState("");
   const [selectedProcesses, setSelectedProcesses] = useState([]);
-console.log(data.sillNames);
+
+  // ✅ Auto-fill dropdowns from selectedOrder when it changes
+  useEffect(() => {
+    if (selectedOrder) {
+      setSelectedColour(selectedOrder?.colour || "");
+      setSelectedFinishing(selectedOrder?.finishingType || "");
+      setSelectedSill(selectedOrder?.sillName || "");
+      setSelectedDyeing(selectedOrder?.dyeingName || "");
+      setSelectedCalender(selectedOrder?.calender || "");
+
+      if (selectedOrder?.selectedProcesses?.length > 0) {
+        setSelectedProcesses(
+          selectedOrder.selectedProcesses.map((p) =>
+            typeof p === "string" ? p : p.name
+          )
+        );
+      }
+    }
+  }, [selectedOrder]);
 
   if (!batchData?.length) return null;
 
@@ -139,14 +158,8 @@ console.log(data.sillNames);
           Array.from(new Set([...prev, ...batchData.map((r) => r.idx)]))
         );
 
-        // Reset fields
+        // Reset batchData but keep autofill values
         setBatchData([]);
-        setSelectedColour("");
-        setSelectedFinishing("");
-        setSelectedSill("");
-        setSelectedDyeing("");
-        setSelectedCalender("");
-        setSelectedProcesses([]);
       } else {
         toast.error(newBatch?.message || "Batch creation failed");
       }
