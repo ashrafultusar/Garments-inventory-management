@@ -81,29 +81,40 @@ export async function POST(req) {
   }
 }
  
+
 // ✅ UPDATE (note, inputs, status change etc.)
 export async function PATCH(req) {
   await connectDB();
   try {
-    const { orderId, batchIndex, batchData } = await req.json();
+    const { orderId, batchId, batchData } = await req.json();
 
+    if (!orderId || !batchId || !batchData) {
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Find the batch document for this order
     const batchDoc = await Batch.findOne({ orderId });
     if (!batchDoc) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
     }
 
-    // পুরনো batch এর reference বের করো
-    const oldBatch = batchDoc.batches[batchIndex];
+    // Find the batch inside batches array by _id
+    const batchIndex = batchDoc.batches.findIndex(
+      (b) => b._id.toString() === batchId
+    );
 
-    if (!oldBatch) {
+    if (batchIndex === -1) {
       return NextResponse.json({ message: "Batch not found" }, { status: 404 });
     }
 
-    // ✅ Update করার সময় সব নতুন value set করে দিচ্ছি
+    // Update the batch with new data
     batchDoc.batches[batchIndex] = {
-      ...oldBatch.toObject(),
+      ...batchDoc.batches[batchIndex].toObject(),
       ...batchData,
-      status: batchData.status || oldBatch.status, // ensure status update
+      status: batchData.status || batchDoc.batches[batchIndex].status,
     };
 
     await batchDoc.save();
