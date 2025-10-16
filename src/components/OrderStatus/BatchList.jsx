@@ -80,7 +80,7 @@ export default function BatchList({ orderId }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId,
-          batchId: batch._id, // ✅ Better approach
+          batchId: batch._id,
           batchData: updatedBatch,
         }),
       });
@@ -173,13 +173,13 @@ export default function BatchList({ orderId }) {
                     <tbody>
                       {batch.rows.map((row, rIdx) => (
                         <tr key={rIdx} className="text-center">
-                          <td className="px-3 py-2 border">{row.rollNo}</td>
-                          <td className="px-3 py-2 border">{row.goj}</td>
+                          <td className="px-3 py-2 border">{row?.rollNo}</td>
+                          <td className="px-3 py-2 border">{row?.goj}</td>
                           <td className="px-3 py-2 border">
                             <input
                               type="number"
                               className="w-24 border rounded px-2 py-1 text-center"
-                              value={row.idx || ""}
+                              
                               onChange={(e) => handleInputChange(bIdx, rIdx, e.target.value)}
                             />
                           </td>
@@ -208,6 +208,24 @@ export default function BatchList({ orderId }) {
                         </tr>
                       ))}
                     </tbody>
+
+                    {/* Column-wise Sum */}
+                    {batch.rows.length > 0 && (
+                      <tfoot>
+                        <tr className="text-center font-semibold bg-gray-50">
+                        <td className="px-3 py-2 border">{batch?.rows?.length}</td>
+                          <td className="px-3 py-2 border">
+                            {batch.rows.reduce((sum, row) => sum + (Number(row.goj) || 0), 0)}
+                          </td>
+                          <td className="px-3 py-2 border">
+                            {batch.rows.reduce((sum, row) => sum + (Number(row.idx) || 0), 0)}
+                          </td>
+                          <td className="px-3 py-2 border">
+                            {batch.rows.reduce((sum, row) => sum + (row.extraInputs?.length || 0), 0)}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    )}
                   </table>
                 </div>
               ) : (
@@ -220,4 +238,3 @@ export default function BatchList({ orderId }) {
     </div>
   );
 }
-

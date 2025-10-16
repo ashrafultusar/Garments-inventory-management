@@ -9,7 +9,7 @@ export default function BatchCreator({
   setBatchData,
   keys,
   setUsedRowIndexes,
-}) {
+}) { 
   const [loading, setLoading] = useState(false);
   const { data } = useAppData();
  
