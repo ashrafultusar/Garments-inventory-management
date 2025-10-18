@@ -6,6 +6,7 @@ import StatusModal from "./StatusModal";
 import OrderTableData from "./OrderTableData";
 import BatchList from "./BatchList";
 import DeliveredBatchList from "../Batch/DeliveredBatchList";
+import CalendarBatch from "../Batch/CalenderBatch";
 
 // ✅ Steps for UI
 const steps = [
@@ -116,6 +117,9 @@ export default function OrderStatus({
         <BatchList orderId={orderId} />
       )}
 
+      {steps[currentStep - 1]?.title === "Calender" && (
+        <CalendarBatch orderId={orderId} />
+      )}
       {steps[currentStep - 1]?.title === "Delivered" && (
         <DeliveredBatchList orderId={orderId} />
       )}
