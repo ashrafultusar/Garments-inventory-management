@@ -1,9 +1,12 @@
 "use client";
-import { Delete, Plus } from "lucide-react";
+import { Delete, Edit, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function BatchList({ orderId }) {
+  const router = useRouter();
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -89,7 +92,9 @@ export default function BatchList({ orderId }) {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success(`Batch "${updatedBatch.batchName}" status updated to "${newStatus}"!`);
+        toast.success(
+          `Batch "${updatedBatch.batchName}" status updated to "${newStatus}"!`
+        );
         setBatches((prev) => prev.filter((b) => b._id !== batch._id));
       } else {
         toast.error(data.message || "Failed to update batch");
@@ -126,12 +131,16 @@ export default function BatchList({ orderId }) {
 
   return (
     <div className="mt-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-800">Pending Batches</h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-800">
+        Pending Batches
+      </h3>
 
       {loading ? (
         <p className="text-gray-500">Loading batches...</p>
       ) : batches.length === 0 ? (
-        <p className="text-gray-500">No pending batches found for this order.</p>
+        <p className="text-gray-500">
+          No pending batches found for this order.
+        </p>
       ) : (
         <div className="space-y-6">
           {batches.map((batch, bIdx) => {
@@ -146,7 +155,10 @@ export default function BatchList({ orderId }) {
             const newStatus = hasCalender ? "calender" : "delivered";
 
             return (
-              <div key={bIdx} className="border border-gray-200 rounded-lg p-4 shadow-sm">
+              <div
+                key={bIdx}
+                className="border border-gray-200 rounded-lg p-4 shadow-sm"
+              >
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="font-medium text-gray-700">
                     {batch.batchName || `Batch ${bIdx + 1}`}
@@ -165,12 +177,21 @@ export default function BatchList({ orderId }) {
                     <button onClick={() => handleDelete(bIdx)}>
                       <Delete className="text-sm cursor-pointer text-red-600" />
                     </button>
+                    <button
+                      onClick={() =>
+                        router.push(`/dashboard/allbatch/${batch._id}`)
+                      }
+                    >
+                      <Edit className="cursor-pointer text-green-400" />
+                    </button>
                   </div>
                 </div>
 
                 {/* Note Section */}
                 <div className="mb-3">
-                  <label className="block text-sm text-gray-600 mb-1">Note:</label>
+                  <label className="block text-sm text-gray-600 mb-1">
+                    Note:
+                  </label>
                   <textarea
                     className="w-full border rounded p-2 text-sm"
                     value={batch.note || ""}
@@ -191,7 +212,7 @@ export default function BatchList({ orderId }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {batch.rows.map((row, rIdx) => (
+                        {batch?.rows?.map((row, rIdx) => (
                           <tr key={rIdx} className="text-center">
                             <td className="px-3 py-2 border">{row?.rollNo}</td>
                             <td className="px-3 py-2 border">{row?.goj}</td>
@@ -214,7 +235,12 @@ export default function BatchList({ orderId }) {
                                     value={input}
                                     placeholder="Optional"
                                     onChange={(e) =>
-                                      handleExtraInputChange(bIdx, rIdx, idx, e.target.value)
+                                      handleExtraInputChange(
+                                        bIdx,
+                                        rIdx,
+                                        idx,
+                                        e.target.value
+                                      )
                                     }
                                   />
                                 ))}
@@ -233,10 +259,12 @@ export default function BatchList({ orderId }) {
                       </tbody>
 
                       {/* Column-wise Sum */}
-                      {batch.rows.length > 0 && (
+                      {batch?.rows?.length > 0 && (
                         <tfoot>
                           <tr className="text-center font-semibold bg-gray-50">
-                            <td className="px-3 py-2 border">{batch?.rows?.length}</td>
+                            <td className="px-3 py-2 border">
+                              {batch?.rows?.length}
+                            </td>
                             <td className="px-3 py-2 border">
                               {batch.rows.reduce(
                                 (sum, row) => sum + (Number(row.goj) || 0),
@@ -251,7 +279,8 @@ export default function BatchList({ orderId }) {
                             </td>
                             <td className="px-3 py-2 border">
                               {batch.rows.reduce(
-                                (sum, row) => sum + (row.extraInputs?.length || 0),
+                                (sum, row) =>
+                                  sum + (row.extraInputs?.length || 0),
                                 0
                               )}
                             </td>
@@ -259,9 +288,87 @@ export default function BatchList({ orderId }) {
                         </tfoot>
                       )}
                     </table>
+
+                    {/* Batch Summary Table */}
+                    <div className="overflow-x-auto my-3">
+                      <table className="w-full text-sm border border-gray-200">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-3 py-2 border text-left w-1/3">
+                              Field
+                            </th>
+                            <th className="px-3 py-2 border text-left">
+                              Value
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="px-3 py-2 border font-medium">
+                              COLOUR
+                            </td>
+                            <td className="px-3 py-2 border">
+                              {batch.colour || "—"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="px-3 py-2 border font-medium">
+                              DYEING
+                            </td>
+                            <td className="px-3 py-2 border">
+                              {batch.dyeing || "—"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="px-3 py-2 border font-medium">
+                              FINISHING TYPE
+                            </td>
+                            <td className="px-3 py-2 border">
+                              {batch.finishingType || "—"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="px-3 py-2 border font-medium">
+                              SILL NAME
+                            </td>
+                            <td className="px-3 py-2 border">
+                              {batch.sillName || "—"}
+                            </td>
+                          </tr>
+
+                          {/* ✅ Process List */}
+                          <tr>
+                            <td className="px-3 py-2 border font-medium">
+                              PROCESS LIST
+                            </td>
+                            <td className="px-3 py-2 border">
+                              {batch.selectedProcesses?.length > 0
+                                ? batch.selectedProcesses
+                                    .map((p) => p.name)
+                                    .join(", ")
+                                : "—"}
+                            </td>
+                          </tr>
+
+                          {/* ✅ Calender (Optional) */}
+                          {batch.calender && (
+                            <tr>
+                              <td className="px-3 py-2 border font-medium">
+                                CALENDER
+                              </td>
+                              <td className="px-3 py-2 border">
+                                {batch.calender}
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 mt-2">No rows available for this batch.</p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    No rows available for this batch.
+                  </p>
                 )}
               </div>
             );

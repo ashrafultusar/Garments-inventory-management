@@ -13,7 +13,7 @@ export default function BatchCreator({
 }) {
   const [loading, setLoading] = useState(false);
   const { data } = useAppData();
-console.log(selectedOrder);
+
   const [selectedColour, setSelectedColour] = useState("");
   const [selectedFinishing, setSelectedFinishing] = useState("");
   const [selectedSill, setSelectedSill] = useState("");
