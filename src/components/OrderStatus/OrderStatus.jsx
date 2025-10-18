@@ -10,18 +10,20 @@ import DeliveredBatchList from "../Batch/DeliveredBatchList";
 // ✅ Steps for UI
 const steps = [
   { id: 1, title: "Pending" },
-  { id: 2, title: "In Process" },
-  { id: 3, title: "All Batches" },
-  { id: 4, title: "Delivered" },
-  { id: 5, title: "Billing" },
-  { id: 6, title: "Completed" },
+  { id: 2, title: "Process" },
+  { id: 3, title: "Batches" },
+  { id: 4, title: "Calender" },
+  { id: 5, title: "Delivered" },
+  { id: 6, title: "Billing" },
+  { id: 7, title: "Completed" },
 ];
 
 // ✅ Mapping UI titles ↔ DB enum
 const statusMap = {
   Pending: "pending",
-  "In Process": "inprocess",
-  "All Batches": "batch",
+  Process: "inprocess",
+  Batches: "batch",
+  Calender: "calender",
   Delivered: "delivered",
   Billing: "billing",
   Completed: "completed",
@@ -32,7 +34,7 @@ export default function OrderStatus({
   currentStatus,
   tableData,
   onStatusChange,
-  selectedOrder
+  selectedOrder,
 }) {
   const [currentStep, setCurrentStep] = useState(
     steps.find((s) => statusMap[s.title] === currentStatus)?.id || 1
@@ -43,8 +45,7 @@ export default function OrderStatus({
   const [usedRowIndexes, setUsedRowIndexes] = useState([]);
   const [createdBatches, setCreatedBatches] = useState([]);
 
-
-  // ✅ Direct status update without showing modal
+  // ✅ Direct status update
   const updateStatusDirectly = async (step) => {
     try {
       const res = await fetch(`/api/order/${orderId}`, {
@@ -57,7 +58,7 @@ export default function OrderStatus({
       if (res.ok) {
         setCurrentStep(step.id);
         onStatusChange(statusMap[step.title]);
-        toast.success("Status updated!");
+        // toast.success("Status updated!");
       } else {
         toast.error(data.error || "Failed to update status");
       }
@@ -67,26 +68,23 @@ export default function OrderStatus({
     }
   };
 
-  // ✅ Confirm status change → only used for first time
+  // ✅ Confirm change (Pending → Process only)
   const confirmChange = async () => {
     await updateStatusDirectly(selectedStep);
     setShowModal(false);
   };
 
+  // ✅ Handle step click
   const handleStepClick = async (step) => {
-    if (step.id === currentStep + 1) {
-      if (currentStep === 1 && step.id === 2) {
-        setSelectedStep(step);
-        setShowModal(true);
-        return;
-      }
-
-      await updateStatusDirectly(step);
-    } else if (step.id <= currentStep) {
-      setCurrentStep(step.id);
-    } else {
-      toast.error("You must complete the previous step first!");
+    // Only show confirm when going from Pending → Process
+    if (currentStep === 1 && step.id === 2) {
+      setSelectedStep(step);
+      setShowModal(true);
+      return;
     }
+
+    // Allow any other status change directly
+    await updateStatusDirectly(step);
   };
 
   return (
@@ -99,10 +97,10 @@ export default function OrderStatus({
         onStepClick={handleStepClick}
       />
 
-      {/* Only show OrderTableData in In Process step */}
-      {steps[currentStep - 1]?.title === "In Process" && (
+      {/* Show content based on current step */}
+      {steps[currentStep - 1]?.title === "Process" && (
         <OrderTableData
-        selectedOrder={selectedOrder}
+          selectedOrder={selectedOrder}
           orderId={orderId}
           tableData={tableData}
           currentStep={currentStep}
@@ -114,17 +112,15 @@ export default function OrderStatus({
         />
       )}
 
-      {/* Only show BatchList in "All Batches" step */}
-      {steps[currentStep - 1]?.title === "All Batches" && (
+      {steps[currentStep - 1]?.title === "Batches" && (
         <BatchList orderId={orderId} />
       )}
 
-      {/* Only show Delivered Batch List in "Delivered" step */}
       {steps[currentStep - 1]?.title === "Delivered" && (
         <DeliveredBatchList orderId={orderId} />
       )}
 
-      {/* Only FIRST confirm modal (Pending → In Process) */}
+      {/* Confirmation modal only for first change */}
       {showModal && selectedStep && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg">
