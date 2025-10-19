@@ -13,7 +13,7 @@ export default function BatchCreator({
 }) {
   const [loading, setLoading] = useState(false);
   const { data } = useAppData();
-console.log(selectedOrder);
+
   const [selectedColour, setSelectedColour] = useState("");
   const [selectedFinishing, setSelectedFinishing] = useState("");
   const [selectedSill, setSelectedSill] = useState("");
@@ -225,47 +225,55 @@ console.log(selectedOrder);
           </tbody>
         </table>
       </div>
+{/* Dropdowns */}
+<div className="flex justify-center gap-4 mt-4 flex-wrap py-4 border rounded-lg bg-gray-50 shadow-sm">
+  <Dropdown
+    label="Colour"
+    options={data?.colours || []}
+    selected={selectedColour}
+    setSelected={setSelectedColour}
+  />
+  <Dropdown
+    label="Sill Name"
+    options={data?.sillNames || []}
+    selected={selectedSill}
+    setSelected={setSelectedSill}
+  />
+  <Dropdown
+    label="Finishing Type"
+    options={data?.finishingTypes || []}
+    selected={selectedFinishing}
+    setSelected={setSelectedFinishing}
+  />
+  <Dropdown
+    label="Dyeing"
+    options={data?.dyeings || []}
+    selected={selectedDyeing}
+    setSelected={setSelectedDyeing}
+  />
 
-      {/* Dropdowns */}
-      <div className="flex justify-center gap-4 mt-4 flex-wrap py-4 border rounded-lg bg-gray-50 shadow-sm">
-        <Dropdown
-          label="Colour"
-          options={data?.colours || []}
-          selected={selectedColour}
-          setSelected={setSelectedColour}
-        />
-        <Dropdown
-          label="Sill Name"
-          options={data?.sillNames || []}
-          selected={selectedSill}
-          setSelected={setSelectedSill}
-        />
-        <Dropdown
-          label="Finishing Type"
-          options={data?.finishingTypes || []}
-          selected={selectedFinishing}
-          setSelected={setSelectedFinishing}
-        />
-        <Dropdown
-          label="Dyeing"
-          options={data?.dyeings || []}
-          selected={selectedDyeing}
-          setSelected={setSelectedDyeing}
-        />
-        <Dropdown
-          label="Calender"
-          options={data?.calender || []}
-          selected={selectedCalender}
-          setSelected={setSelectedCalender}
-          optional={true}
-        />
-        <MultiSelectDropdown
-          label="Process List"
-          options={data?.process || []}
-          selected={selectedProcesses}
-          setSelected={setSelectedProcesses}
-        />
-      </div>
+  
+{selectedProcesses.some(
+  (p) => p.toLowerCase() === "calender"
+) && (
+  <Dropdown
+    label="Calender"
+    options={data?.calender || []}
+    selected={selectedCalender}
+    setSelected={setSelectedCalender}
+    optional={true}
+  />
+)}
+
+
+  <MultiSelectDropdown
+    label="Process List"
+    options={data?.process || []}
+    selected={selectedProcesses}
+    setSelected={setSelectedProcesses}
+  />
+</div>
+
     </div>
   );
 }
