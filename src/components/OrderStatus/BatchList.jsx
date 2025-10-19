@@ -143,7 +143,7 @@ export default function BatchList({ orderId }) {
         </p>
       ) : (
         <div className="space-y-6">
-          {batches.map((batch, bIdx) => {
+          {batches?.map((batch, bIdx) => {
             // Check if this batch has Calender in process list
             const hasCalender = batch.selectedProcesses?.some(
               (p) =>
@@ -161,7 +161,7 @@ export default function BatchList({ orderId }) {
               >
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="font-medium text-gray-700">
-                    {batch.batchName || `Batch ${bIdx + 1}`}
+                    {batch?.batchName || `Batch ${bIdx + 1}`}
                   </h4>
                   <div className="flex justify-center gap-2">
                     <button
