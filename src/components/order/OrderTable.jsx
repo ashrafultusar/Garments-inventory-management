@@ -30,7 +30,7 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
       </div>
     );
   }
-
+ 
 
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">

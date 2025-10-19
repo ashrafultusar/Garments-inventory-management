@@ -18,7 +18,6 @@ export default function CalendarBatch({ orderId }) {
         const data = await res.json();
 
         if (res.ok) {
-          // শুধু "calender" স্ট্যাটাসের ব্যাচগুলো ফিল্টার করা হচ্ছে
           const deliveredBatches = (data.batches || []).filter(
             (batch) => batch.status === "calender"
           );
@@ -37,6 +36,38 @@ export default function CalendarBatch({ orderId }) {
     if (orderId) fetchDeliveredBatches();
   }, [orderId]);
 
+  // ✅ Delivered button logic
+  const handleDelivered = async (batchId) => {
+    if (!orderId || !batchId) {
+      toast.error("Order ID or Batch ID missing");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/batch/status/${batchId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          parentId: orderId, // Order _id
+          newStatus: "delivered",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Batch marked as delivered!");
+        // UI থেকে remove
+        setBatches((prev) => prev.filter((b) => b._id !== batchId));
+      } else {
+        toast.error(data.error || "Failed to update status");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error while updating status");
+    }
+  };
+
   return (
     <div className="mt-6">
       <h3 className="text-lg font-semibold mb-4 text-gray-800">
@@ -51,7 +82,7 @@ export default function CalendarBatch({ orderId }) {
         </p>
       ) : (
         <div className="space-y-6">
-          {batches?.map((batch, bIdx) => (
+          {batches.map((batch, bIdx) => (
             <div
               key={bIdx}
               className="border border-gray-200 rounded-lg p-4 shadow-sm"
@@ -62,16 +93,24 @@ export default function CalendarBatch({ orderId }) {
                 </h4>
                 <div className="flex gap-2">
                   <button
+                    onClick={() =>
+                      router.push(`/dashboard/calenderbatch/${batch._id}`)
+                    }
                     className="text-blue-500 hover:text-blue-700 cursor-pointer"
                     title="Edit Batch"
                   >
                     <Edit size={20} />
                   </button>
-                  <button className="bg-green-300 text-gray-700 px-2 py-1 rounded cursor-pointer">
+
+                  <button
+                    onClick={() => handleDelivered(batch._id)}
+                    className="bg-green-300 text-gray-700 px-2 py-1 rounded cursor-pointer hover:bg-green-400"
+                  >
                     Delivered
                   </button>
                 </div>
               </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border border-gray-200">
                   <thead className="bg-gray-100">
@@ -83,11 +122,11 @@ export default function CalendarBatch({ orderId }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {batch?.rows?.map((row, rIdx) => (
+                    {batch.rows.map((row, rIdx) => (
                       <tr key={rIdx} className="text-center">
-                        <td className="px-3 py-2 border">{row?.rollNo}</td>
-                        <td className="px-3 py-2 border">{row?.goj}</td>
-                        <td className="px-3 py-2 border">{row?.idx || "-"}</td>
+                        <td className="px-3 py-2 border">{row.rollNo}</td>
+                        <td className="px-3 py-2 border">{row.goj}</td>
+                        <td className="px-3 py-2 border">{row.idx || "-"}</td>
                         <td className="px-3 py-2 border">
                           {row.extraInputs?.length
                             ? row.extraInputs.join(", ")
@@ -97,34 +136,22 @@ export default function CalendarBatch({ orderId }) {
                     ))}
                   </tbody>
 
-                  {/* Column-wise Totals */}
                   {batch.rows.length > 0 && (
                     <tfoot>
                       <tr className="text-center font-semibold bg-gray-50">
+                        <td className="px-3 py-2 border">{batch.rows.length}</td>
                         <td className="px-3 py-2 border">
-                          {batch.rows.length}
+                          {batch.rows.reduce((sum, row) => sum + (Number(row.goj) || 0), 0)}
                         </td>
                         <td className="px-3 py-2 border">
-                          {batch.rows.reduce(
-                            (sum, row) => sum + (Number(row.goj) || 0),
-                            0
-                          )}
-                        </td>
-                        <td className="px-3 py-2 border">
-                          {batch.rows.reduce(
-                            (sum, row) => sum + (Number(row.idx) || 0),
-                            0
-                          )}
+                          {batch.rows.reduce((sum, row) => sum + (Number(row.idx) || 0), 0)}
                         </td>
                         <td className="px-3 py-2 border">
                           {batch.rows.reduce(
                             (sum, row) =>
                               sum +
                               (row.extraInputs
-                                ? row.extraInputs.reduce(
-                                    (s, val) => s + (Number(val) || 0),
-                                    0
-                                  )
+                                ? row.extraInputs.reduce((s, val) => s + (Number(val) || 0), 0)
                                 : 0),
                             0
                           )}
@@ -134,7 +161,7 @@ export default function CalendarBatch({ orderId }) {
                   )}
                 </table>
 
-                {/* Info Section (Read-Only) */}
+                {/* Info Section */}
                 <table className="w-full text-sm mt-4 border rounded">
                   <thead className="bg-gray-100">
                     <tr>
@@ -144,21 +171,16 @@ export default function CalendarBatch({ orderId }) {
                   </thead>
                   <tbody>
                     {[
-                      ["Calendar", batch?.calender],
-                      ["Colour", batch?.colour],
-                      ["Dyeing", batch?.dyeing],
-                      ["Finishing Type", batch?.finishingType],
-                      ["Sill Name", batch?.sillName],
+                      ["Calendar", batch.calender],
+                      ["Colour", batch.colour],
+                      ["Dyeing", batch.dyeing],
+                      ["Finishing Type", batch.finishingType],
+                      ["Sill Name", batch.sillName],
                     ]
                       .filter(([_, value]) => value)
                       .map(([label, value], idx) => (
-                        <tr
-                          key={idx}
-                          className={idx % 2 === 0 ? "bg-gray-50" : ""}
-                        >
-                          <td className="border px-3 py-2 font-medium uppercase">
-                            {label}
-                          </td>
+                        <tr key={idx} className={idx % 2 === 0 ? "bg-gray-50" : ""}>
+                          <td className="border px-3 py-2 font-medium uppercase">{label}</td>
                           <td className="border px-3 py-2">{value}</td>
                         </tr>
                       ))}
@@ -166,9 +188,7 @@ export default function CalendarBatch({ orderId }) {
                 </table>
               </div>
 
-              <p className="pt-3">
-                Note: {batch?.note?.trim() || "Not Assigned"}
-              </p>
+              <p className="pt-3">Note: {batch.note?.trim() || "Not Assigned"}</p>
             </div>
           ))}
         </div>
