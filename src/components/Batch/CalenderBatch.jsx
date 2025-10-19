@@ -1,19 +1,24 @@
 "use client";
+import { Edit } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function CalendarBatch({ orderId }) {
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchDeliveredBatches = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/batch/${orderId}`);
+        // /api/batch/[orderId] এই রুটটি ধরে নেওয়া হচ্ছে যে অর্ডারের সব ব্যাচ রিটার্ন করে
+        const res = await fetch(`/api/batch/${orderId}`); 
         const data = await res.json();
 
         if (res.ok) {
+          // শুধু "calender" স্ট্যাটাসের ব্যাচগুলো ফিল্টার করা হচ্ছে
           const deliveredBatches = (data.batches || []).filter(
             (batch) => batch.status === "calender"
           );
@@ -35,7 +40,7 @@ export default function CalendarBatch({ orderId }) {
   return (
     <div className="mt-6">
       <h3 className="text-lg font-semibold mb-4 text-gray-800">
-        Delivered Batches
+        Delivered Batches (Calendar)
       </h3>
 
       {loading ? (
@@ -51,10 +56,25 @@ export default function CalendarBatch({ orderId }) {
               key={bIdx}
               className="border border-gray-200 rounded-lg p-4 shadow-sm"
             >
-              <h4 className="font-medium text-gray-700 mb-3">
-                {batch.batchName || `Batch ${bIdx + 1}`} ✅
-              </h4>
-
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-medium text-gray-700 ">
+                  {batch.batchName || `Batch ${bIdx + 1}`} ✅
+                </h4>
+                <div className="flex gap-2">
+                <button
+        onClick={() =>
+            router.push(`/dashboard/calender-batch/${batch._id}`)
+        }
+        className="text-blue-500 hover:text-blue-700 cursor-pointer"
+        title="Edit Batch"
+    >
+        <Edit size={20} />
+    </button>
+                  <button className="bg-green-300 text-gray-700 px-2 py-1 rounded cursor-pointer">
+                    Delivered
+                  </button>
+                </div>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border border-gray-200">
                   <thead className="bg-gray-100">
@@ -84,28 +104,21 @@ export default function CalendarBatch({ orderId }) {
                   {batch.rows.length > 0 && (
                     <tfoot>
                       <tr className="text-center font-semibold bg-gray-50">
-                        {/* Roll No: count of rows */}
                         <td className="px-3 py-2 border">
                           {batch.rows.length}
                         </td>
-
-                        {/* Goj: sum of numeric values */}
                         <td className="px-3 py-2 border">
                           {batch.rows.reduce(
                             (sum, row) => sum + (Number(row.goj) || 0),
                             0
                           )}
                         </td>
-
-                        {/* Index: sum of idx */}
                         <td className="px-3 py-2 border">
                           {batch.rows.reduce(
                             (sum, row) => sum + (Number(row.idx) || 0),
                             0
                           )}
                         </td>
-
-                        {/* Extras: sum of all numeric values inside extraInputs */}
                         <td className="px-3 py-2 border">
                           {batch.rows.reduce(
                             (sum, row) =>
@@ -124,7 +137,7 @@ export default function CalendarBatch({ orderId }) {
                   )}
                 </table>
 
-                {/* Info Section */}
+                {/* Info Section (Read-Only) */}
                 <table className="w-full text-sm mt-4 border rounded">
                   <thead className="bg-gray-100">
                     <tr>
