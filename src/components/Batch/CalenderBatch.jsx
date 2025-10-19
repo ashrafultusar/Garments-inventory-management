@@ -13,8 +13,8 @@ export default function CalendarBatch({ orderId }) {
     const fetchDeliveredBatches = async () => {
       try {
         setLoading(true);
-        // /api/batch/[orderId] এই রুটটি ধরে নেওয়া হচ্ছে যে অর্ডারের সব ব্যাচ রিটার্ন করে
-        const res = await fetch(`/api/batch/${orderId}`); 
+
+        const res = await fetch(`/api/batch/${orderId}`);
         const data = await res.json();
 
         if (res.ok) {
@@ -61,15 +61,12 @@ export default function CalendarBatch({ orderId }) {
                   {batch.batchName || `Batch ${bIdx + 1}`} ✅
                 </h4>
                 <div className="flex gap-2">
-                <button
-        onClick={() =>
-            router.push(`/dashboard/calender-batch/${batch._id}`)
-        }
-        className="text-blue-500 hover:text-blue-700 cursor-pointer"
-        title="Edit Batch"
-    >
-        <Edit size={20} />
-    </button>
+                  <button
+                    className="text-blue-500 hover:text-blue-700 cursor-pointer"
+                    title="Edit Batch"
+                  >
+                    <Edit size={20} />
+                  </button>
                   <button className="bg-green-300 text-gray-700 px-2 py-1 rounded cursor-pointer">
                     Delivered
                   </button>
