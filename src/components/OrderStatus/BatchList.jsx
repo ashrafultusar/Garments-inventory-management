@@ -1,7 +1,6 @@
 "use client";
 import { Delete, Edit, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -9,6 +8,33 @@ export default function BatchList({ orderId }) {
   const router = useRouter();
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // ✅ LocalStorage key (unique per order)
+  const storageKey = `batches-${orderId}`;
+
+  // ✅ Restore data from localStorage
+  useEffect(() => {
+    const savedData = localStorage.getItem(storageKey);
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        if (Array.isArray(parsed)) {
+          setBatches(parsed);
+        }
+      } catch (e) {
+        console.error("Error parsing localStorage data", e);
+      }
+    }
+  }, [orderId]);
+
+  // ✅ Auto-save to localStorage when batches change
+  useEffect(() => {
+    if (batches.length > 0) {
+      localStorage.setItem(storageKey, JSON.stringify(batches));
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  }, [batches, storageKey]);
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -21,7 +47,23 @@ export default function BatchList({ orderId }) {
           const pendingBatches = (data.batches || []).filter(
             (batch) => batch.status === "pending"
           );
-          setBatches(pendingBatches);
+
+          // ✅ যদি LocalStorage এ ডেটা থাকে, তাহলে সেটাই প্রাধান্য পাবে
+          const savedData = localStorage.getItem(storageKey);
+          if (savedData) {
+            try {
+              const parsed = JSON.parse(savedData);
+              if (Array.isArray(parsed)) {
+                setBatches(parsed);
+              } else {
+                setBatches(pendingBatches);
+              }
+            } catch {
+              setBatches(pendingBatches);
+            }
+          } else {
+            setBatches(pendingBatches);
+          }
         } else {
           toast.error(data.error || "Failed to load batches");
         }
@@ -34,7 +76,7 @@ export default function BatchList({ orderId }) {
     };
 
     if (orderId) fetchBatches();
-  }, [orderId]);
+  }, [orderId, storageKey]);
 
   const handleInputChange = (batchIndex, rowIndex, value) => {
     const updated = [...batches];
@@ -63,7 +105,6 @@ export default function BatchList({ orderId }) {
     setBatches(updated);
   };
 
-  // ✅ Updated status handler (dynamic Calender button)
   const handleStatusChange = async (batchIndex, newStatus) => {
     const batch = batches[batchIndex];
     if (!batch) return;
@@ -95,7 +136,11 @@ export default function BatchList({ orderId }) {
         toast.success(
           `Batch "${updatedBatch.batchName}" status updated to "${newStatus}"!`
         );
-        setBatches((prev) => prev.filter((b) => b._id !== batch._id));
+        setBatches((prev) => {
+          const filtered = prev.filter((b) => b._id !== batch._id);
+          localStorage.setItem(storageKey, JSON.stringify(filtered));
+          return filtered;
+        });
       } else {
         toast.error(data.message || "Failed to update batch");
       }
@@ -117,9 +162,11 @@ export default function BatchList({ orderId }) {
       const data = await res.json();
       if (res.ok) {
         toast.success("Batch deleted successfully!");
-        setBatches(
-          (data.batches || []).filter((batch) => batch.status === "pending")
+        const filtered = (data.batches || []).filter(
+          (batch) => batch.status === "pending"
         );
+        setBatches(filtered);
+        localStorage.setItem(storageKey, JSON.stringify(filtered));
       } else {
         toast.error(data.message || "Delete failed");
       }
@@ -144,7 +191,6 @@ export default function BatchList({ orderId }) {
       ) : (
         <div className="space-y-6">
           {batches?.map((batch, bIdx) => {
-            // Check if this batch has Calender in process list
             const hasCalender = batch.selectedProcesses?.some(
               (p) =>
                 (typeof p === "string" && p.toLowerCase() === "calender") ||
@@ -220,6 +266,7 @@ export default function BatchList({ orderId }) {
                               <input
                                 type="number"
                                 className="w-24 border rounded px-2 py-1 text-center"
+                                value={row.idx || ""}
                                 onChange={(e) =>
                                   handleInputChange(bIdx, rIdx, e.target.value)
                                 }
@@ -258,7 +305,6 @@ export default function BatchList({ orderId }) {
                         ))}
                       </tbody>
 
-                      {/* Column-wise Sum */}
                       {batch?.rows?.length > 0 && (
                         <tfoot>
                           <tr className="text-center font-semibold bg-gray-50">
@@ -289,7 +335,6 @@ export default function BatchList({ orderId }) {
                       )}
                     </table>
 
-                    {/* Batch Summary Table */}
                     <div className="overflow-x-auto my-3">
                       <table className="w-full text-sm border border-gray-200">
                         <thead className="bg-gray-100">
@@ -335,8 +380,6 @@ export default function BatchList({ orderId }) {
                               {batch.sillName || "—"}
                             </td>
                           </tr>
-
-                          {/* ✅ Process List */}
                           <tr>
                             <td className="px-3 py-2 border font-medium">
                               PROCESS LIST
@@ -349,8 +392,6 @@ export default function BatchList({ orderId }) {
                                 : "—"}
                             </td>
                           </tr>
-
-                          {/* ✅ Calender (Optional) */}
                           {batch.calender && (
                             <tr>
                               <td className="px-3 py-2 border font-medium">
