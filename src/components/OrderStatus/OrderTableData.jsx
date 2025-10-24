@@ -109,9 +109,7 @@ export default function OrderTableData({
     <div className="mt-6">
       <h3 className="font-semibold text-gray-700 mb-3">Processing Details</h3>
 
-      {loading && (
-        <p className="text-sm text-gray-500 italic">Loading batches...</p>
-      )}
+      
 
       <div className="overflow-x-auto border rounded-lg">
         <table className="w-full text-sm border-collapse">
