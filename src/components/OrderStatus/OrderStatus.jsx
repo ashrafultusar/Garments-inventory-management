@@ -20,7 +20,7 @@ const steps = [
   { id: 7, title: "Completed" },
 ];
 
-// ✅ Mapping UI titles ↔ DB enum
+
 const statusMap = {
   Pending: "pending",
   Process: "inprocess",
@@ -70,15 +70,15 @@ export default function OrderStatus({
     }
   };
 
-  // ✅ Confirm change (Pending → Process only)
+ 
   const confirmChange = async () => {
     await updateStatusDirectly(selectedStep);
     setShowModal(false);
   };
 
-  // ✅ Handle step click
+  
   const handleStepClick = async (step) => {
-    // Only show confirm when going from Pending → Process
+    
     if (currentStep === 1 && step.id === 2) {
       setSelectedStep(step);
       setShowModal(true);
