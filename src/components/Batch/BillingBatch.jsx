@@ -59,7 +59,7 @@ export default function BillingBatch({ orderId }) {
 
       if (res.ok) {
         toast.success("Invoice deleted and batches reverted to Delivered!");
-        // Remove deleted invoice from local state
+        
         setInvoices((prev) =>
           prev.filter((inv) => inv.invoiceNumber !== invoiceNumber)
         );
