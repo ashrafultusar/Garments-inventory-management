@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import { FaPrint, FaEye } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 
 export default function BillingBatch({ orderId }) {
   const [invoices, setInvoices] = useState([]);
@@ -47,6 +48,30 @@ export default function BillingBatch({ orderId }) {
     );
   };
 
+  const handleDeleteInvoice = async (invoiceNumber) => {
+    if (!confirm("Are you sure you want to delete this invoice?")) return;
+
+    try {
+      const res = await fetch(`/api/batch/invoice/delete/${invoiceNumber}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Invoice deleted and batches reverted to Delivered!");
+        // Remove deleted invoice from local state
+        setInvoices((prev) =>
+          prev.filter((inv) => inv.invoiceNumber !== invoiceNumber)
+        );
+      } else {
+        toast.error(data.error || "Failed to delete invoice");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error while deleting invoice");
+    }
+  };
+
   if (loading) return <p>Loading billing invoices...</p>;
 
   if (!invoices.length)
@@ -89,7 +114,7 @@ export default function BillingBatch({ orderId }) {
               <div className="flex items-center gap-3 text-gray-600">
                 <button
                   onClick={() => toggleExpand(inv.invoiceNumber)}
-                  className="hover:text-blue-600 transition"
+                  className="hover:text-blue-600 transition cursor-pointer"
                   title="View Details"
                 >
                   <FaEye size={18} />
@@ -98,6 +123,12 @@ export default function BillingBatch({ orderId }) {
                   size={18}
                   className="hover:text-green-600 cursor-pointer transition"
                   title="Print"
+                />
+                <MdDelete
+                  size={20}
+                  onClick={() => handleDeleteInvoice(inv.invoiceNumber)}
+                  className="text-red-500 hover:text-red-600 cursor-pointer transition"
+                  title="Delete Invoice"
                 />
               </div>
             </div>
@@ -144,7 +175,9 @@ export default function BillingBatch({ orderId }) {
                                   ? row.extraInputs.join(", ")
                                   : "—"}
                               </td>
-                              <td className="px-3 py-2 border">{row.sillName}</td>
+                              <td className="px-3 py-2 border">
+                                {row.sillName}
+                              </td>
                               <td className="px-3 py-2 border">{row.colour}</td>
                               <td className="px-3 py-2 border">
                                 {row.finishingType}
@@ -171,7 +204,9 @@ export default function BillingBatch({ orderId }) {
                             <tbody>
                               {b.rows.map((r, rIdx) => (
                                 <tr key={rIdx} className="text-center">
-                                  <td className="px-3 py-2 border">{r.rollNo}</td>
+                                  <td className="px-3 py-2 border">
+                                    {r.rollNo}
+                                  </td>
                                   <td className="px-3 py-2 border">{r.goj}</td>
                                   <td className="px-3 py-2 border">
                                     {Array.isArray(r.idx)
