@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
@@ -8,7 +7,6 @@ import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderStatus from "../OrderStatus/OrderStatus";
-import PrintInvoice from "../Print/PrintInvoice/PrintInvoice";
 
 const OrderSideModal = ({
   isModalOpen,
@@ -206,7 +204,7 @@ const OrderSideModal = ({
 
                   {/* Status Component */}
                   <OrderStatus
-                  selectedOrder={selectedOrder}
+                    selectedOrder={selectedOrder}
                     orderId={selectedOrder?._id}
                     currentStatus={selectedOrder?.status || "Pending"}
                     tableData={selectedOrder?.tableData || []}
