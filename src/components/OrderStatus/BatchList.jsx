@@ -1,18 +1,18 @@
 "use client";
-import { Delete, Edit, Plus } from "lucide-react";
+import { Delete, Edit, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function BatchList({ orderId }) {
   const router = useRouter();
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState(null);
 
-  // ✅ LocalStorage key (unique per order)
   const storageKey = `batches-${orderId}`;
 
-  // ✅ Restore data from localStorage
   useEffect(() => {
     const savedData = localStorage.getItem(storageKey);
     if (savedData) {
@@ -27,7 +27,6 @@ export default function BatchList({ orderId }) {
     }
   }, [orderId]);
 
-  // ✅ Auto-save to localStorage when batches change
   useEffect(() => {
     if (batches.length > 0) {
       localStorage.setItem(storageKey, JSON.stringify(batches));
@@ -48,7 +47,6 @@ export default function BatchList({ orderId }) {
             (batch) => batch.status === "pending"
           );
 
-          // ✅ যদি LocalStorage এ ডেটা থাকে, তাহলে সেটাই প্রাধান্য পাবে
           const savedData = localStorage.getItem(storageKey);
           if (savedData) {
             try {
@@ -335,76 +333,105 @@ export default function BatchList({ orderId }) {
                       )}
                     </table>
 
-                    <div className="overflow-x-auto my-3">
-                      <table className="w-full text-sm border border-gray-200">
-                        <thead className="bg-gray-100">
-                          <tr>
-                            <th className="px-3 py-2 border text-left w-1/3">
-                              Field
-                            </th>
-                            <th className="px-3 py-2 border text-left">
-                              Value
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td className="px-3 py-2 border font-medium">
-                              COLOUR
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch.colour || "—"}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-3 py-2 border font-medium">
-                              DYEING
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch.dyeing || "—"}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-3 py-2 border font-medium">
-                              FINISHING TYPE
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch.finishingType || "—"}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-3 py-2 border font-medium">
-                              SILL NAME
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch.sillName || "—"}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-3 py-2 border font-medium">
-                              PROCESS LIST
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch.selectedProcesses?.length > 0
-                                ? batch.selectedProcesses
-                                    .map((p) => p.name)
-                                    .join(", ")
-                                : "—"}
-                            </td>
-                          </tr>
-                          {batch.calender && (
-                            <tr>
-                              <td className="px-3 py-2 border font-medium">
-                                CALENDER
-                              </td>
-                              <td className="px-3 py-2 border">
-                                {batch.calender}
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
+                    {/* ✅ COLLAPSIBLE SECTION BELOW */}
+                    <button
+                      onClick={() =>
+                        setExpandedIndex(expandedIndex === bIdx ? null : bIdx)
+                      }
+                      className="flex items-center justify-between w-full px-3 py-2 mt-3 bg-gray-100 border rounded text-sm text-gray-700 cursor-pointer"
+                    >
+                      <span className="cursor-pointer">Show Batch Details</span>
+                      {expandedIndex === bIdx ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+
+                    <AnimatePresence>
+                      {expandedIndex === bIdx && (
+                        <motion.div
+                          key="collapse-content"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="overflow-x-auto my-3">
+                            <table className="w-full text-sm border border-gray-200">
+                              <thead className="bg-gray-100">
+                                <tr>
+                                  <th className="px-3 py-2 border text-left w-1/3">
+                                    Field
+                                  </th>
+                                  <th className="px-3 py-2 border text-left">
+                                    Value
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="px-3 py-2 border font-medium">
+                                    COLOUR
+                                  </td>
+                                  <td className="px-3 py-2 border">
+                                    {batch.colour || "—"}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="px-3 py-2 border font-medium">
+                                    DYEING
+                                  </td>
+                                  <td className="px-3 py-2 border">
+                                    {batch.dyeing || "—"}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="px-3 py-2 border font-medium">
+                                    FINISHING TYPE
+                                  </td>
+                                  <td className="px-3 py-2 border">
+                                    {batch.finishingType || "—"}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="px-3 py-2 border font-medium">
+                                    SILL NAME
+                                  </td>
+                                  <td className="px-3 py-2 border">
+                                    {batch.sillName || "—"}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="px-3 py-2 border font-medium">
+                                    PROCESS LIST
+                                  </td>
+                                  <td className="px-3 py-2 border">
+                                    {batch.selectedProcesses?.length > 0
+                                      ? batch.selectedProcesses
+                                          .map((p) => p.name)
+                                          .join(", ")
+                                      : "—"}
+                                  </td>
+                                </tr>
+                                {batch.calender && (
+                                  <tr>
+                                    <td className="px-3 py-2 border font-medium">
+                                      CALENDER
+                                    </td>
+                                    <td className="px-3 py-2 border">
+                                      {batch.calender}
+                                    </td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                 
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 mt-2">

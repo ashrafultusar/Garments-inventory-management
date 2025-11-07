@@ -53,6 +53,38 @@ export default function DeliveredBatchList({ orderId }) {
   };
 
   // ✅ single batch billing
+  // const handleSingleBilling = async (batchId) => {
+  //   try {
+  //     const res = await fetch("/api/batch/invoice/create", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ orderId, batchIds: [batchId] }),
+  //     });
+  //     const data = await res.json();
+
+  //     if (res.ok) {
+  //       toast.success(`Invoice ${data.invoiceNumber} created for batch`);
+
+  //       setBatches((prev) =>
+  //         prev.map((b) =>
+  //           b._id === batchId
+  //             ? {
+  //                 ...b,
+  //                 status: "billing",
+  //                 invoiceNumber: data.invoiceNumber,
+  //                 isExpanded: b.isExpanded,
+  //               }
+  //             : b
+  //         )
+  //       );
+  //     } else toast.error(data.error || "Billing failed");
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Server error during billing");
+  //   }
+  // };
+
+
   const handleSingleBilling = async (batchId) => {
     try {
       const res = await fetch("/api/batch/invoice/create", {
@@ -61,33 +93,61 @@ export default function DeliveredBatchList({ orderId }) {
         body: JSON.stringify({ orderId, batchIds: [batchId] }),
       });
       const data = await res.json();
-
+  
       if (res.ok) {
         toast.success(`Invoice ${data.invoiceNumber} created for batch`);
-
-        // ✅ instant UI update + preserve isExpanded
-        setBatches((prev) =>
-          prev.map((b) =>
-            b._id === batchId
-              ? {
-                  ...b,
-                  status: "billing",
-                  invoiceNumber: data.invoiceNumber,
-                  isExpanded: b.isExpanded,
-                }
-              : b
-          )
-        );
+  
+        // ✅ Remove that batch from the delivered list immediately
+        setBatches((prev) => prev.filter((b) => b._id !== batchId));
       } else toast.error(data.error || "Billing failed");
     } catch (err) {
       console.error(err);
       toast.error("Server error during billing");
     }
   };
+  
+
 
   // ✅ multiple batch billing
+  // const handleMultiBilling = async () => {
+  //   if (selectedBatches.length === 0) return;
+  //   try {
+  //     const res = await fetch("/api/batch/invoice/create", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ orderId, batchIds: selectedBatches }),
+  //     });
+  //     const data = await res.json();
+
+  //     if (res.ok) {
+  //       toast.success(
+  //         `Invoice ${data.invoiceNumber} created for ${selectedBatches.length} batches`
+  //       );
+
+  //       setBatches((prev) =>
+  //         prev.map((b) =>
+  //           selectedBatches.includes(b._id)
+  //             ? {
+  //                 ...b,
+  //                 status: "billing",
+  //                 invoiceNumber: data.invoiceNumber,
+  //                 isExpanded: b.isExpanded,
+  //               }
+  //             : b
+  //         )
+  //       );
+  //       setSelectedBatches([]);
+  //     } else toast.error(data.error || "Billing failed");
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Server error during multi billing");
+  //   }
+  // };
+
+
   const handleMultiBilling = async () => {
     if (selectedBatches.length === 0) return;
+  
     try {
       const res = await fetch("/api/batch/invoice/create", {
         method: "POST",
@@ -95,23 +155,15 @@ export default function DeliveredBatchList({ orderId }) {
         body: JSON.stringify({ orderId, batchIds: selectedBatches }),
       });
       const data = await res.json();
-
+  
       if (res.ok) {
         toast.success(
           `Invoice ${data.invoiceNumber} created for ${selectedBatches.length} batches`
         );
-
+  
+        // ✅ Instantly remove billed batches from UI
         setBatches((prev) =>
-          prev.map((b) =>
-            selectedBatches.includes(b._id)
-              ? {
-                  ...b,
-                  status: "billing",
-                  invoiceNumber: data.invoiceNumber,
-                  isExpanded: b.isExpanded,
-                }
-              : b
-          )
+          prev.filter((b) => !selectedBatches.includes(b._id))
         );
         setSelectedBatches([]);
       } else toast.error(data.error || "Billing failed");
@@ -120,6 +172,7 @@ export default function DeliveredBatchList({ orderId }) {
       toast.error("Server error during multi billing");
     }
   };
+  
 
   // ✅ toggle details open/close
   const toggleExpand = (batchId) => {
@@ -150,16 +203,22 @@ export default function DeliveredBatchList({ orderId }) {
       {loading ? (
         <p className="text-gray-500">Loading batches...</p>
       ) : batches.length === 0 ? (
-        <p className="text-gray-500">No delivered batches found for this order.</p>
+        <p className="text-gray-500">
+          No delivered batches found for this order.
+        </p>
       ) : (
         <div className="space-y-6">
           <div className="flex items-center gap-2 mb-2">
             <input
               type="checkbox"
-              checked={selectedBatches.length === batches.length && batches.length > 0}
+              checked={
+                selectedBatches.length === batches.length && batches.length > 0
+              }
               onChange={handleSelectAll}
             />
-            <span className="text-sm text-gray-600">Select All ({batches.length})</span>
+            <span className="text-sm text-gray-600">
+              Select All ({batches.length})
+            </span>
           </div>
 
           {batches.map((batch, bIdx) => {
@@ -240,11 +299,19 @@ export default function DeliveredBatchList({ orderId }) {
                             <tbody>
                               {batch.rows.map((row, rIdx) => (
                                 <tr key={rIdx} className="text-center">
-                                  <td className="px-3 py-2 border">{row.rollNo}</td>
-                                  <td className="px-3 py-2 border">{row.goj}</td>
-                                  <td className="px-3 py-2 border">{row.idx || "-"}</td>
                                   <td className="px-3 py-2 border">
-                                    {row.extraInputs?.length ? row.extraInputs.join(", ") : "—"}
+                                    {row.rollNo}
+                                  </td>
+                                  <td className="px-3 py-2 border">
+                                    {row.goj}
+                                  </td>
+                                  <td className="px-3 py-2 border">
+                                    {row.idx || "-"}
+                                  </td>
+                                  <td className="px-3 py-2 border">
+                                    {row.extraInputs?.length
+                                      ? row.extraInputs.join(", ")
+                                      : "—"}
                                   </td>
                                 </tr>
                               ))}
