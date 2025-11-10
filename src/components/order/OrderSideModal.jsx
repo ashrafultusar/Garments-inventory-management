@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { FaPencilAlt, FaPrint } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
@@ -7,6 +7,7 @@ import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderStatus from "../OrderStatus/OrderStatus";
+import OrderPrint from "../Print/OrderInvoicePrint/OrderInvoicePrint";
 
 const OrderSideModal = ({
   isModalOpen,
@@ -17,11 +18,46 @@ const OrderSideModal = ({
 }) => {
   const router = useRouter();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [printOrder, setPrintOrder] = useState(null);
+  const printRef = useRef();
 
-  const handlePrint = (order) => {
-    setPrintOrder(order);
+  const handlePrint = () => {
+    const printContents = printRef.current.innerHTML;
+  
+    // create a hidden iframe
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "absolute";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    document.body.appendChild(iframe);
+  
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+      <html>
+        <head>
+          <title>Print</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+          </style>
+        </head>
+        <body>${printContents}</body>
+      </html>
+    `);
+    doc.close();
+  
+    // print the iframe content
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+  
+    // remove iframe after printing
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 1000);
   };
+  
 
   return (
     <AnimatePresence>
@@ -163,16 +199,21 @@ const OrderSideModal = ({
                             </div>
 
                             <div className="border-t pt-2">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handlePrint(selectedOrder);
-                                }}
-                                className="text-gray-600 hover:text-gray-900 flex justify-center items-center gap-1 border p-1 border-gray-500 rounded cursor-pointer"
-                              >
-                                Print
-                                <FaPrint size={18} />
-                              </button>
+                          {/* Print button */}
+      <button
+        onClick={handlePrint}
+        className="text-black hover:text-gray-900 flex justify-center items-center gap-1 border p-1 border-gray-500 bg-green-500 rounded cursor-pointer"
+      >
+        Print
+        <FaPrint size={18} />
+      </button>
+
+      {/* Hidden div for printing */}
+      <div style={{ display: "none" }}>
+        <div ref={printRef}>
+          <OrderPrint order={selectedOrder} />
+        </div>
+      </div>
                             </div>
                           </div>
 
@@ -216,10 +257,8 @@ const OrderSideModal = ({
               )}
             </div>
           </motion.div>
-
-          {/* Render PrintInvoice */}
-          {printOrder && <PrintInvoice order={printOrder} />}
         </div>
+        
       )}
     </AnimatePresence>
   );

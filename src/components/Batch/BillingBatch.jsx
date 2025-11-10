@@ -83,6 +83,9 @@ export default function BillingBatch({ orderId }) {
     }, 200);
   };
 
+// console.log(orderId);
+// console.log(invoices);
+
   if (loading) return <p>Loading billing invoices...</p>;
 
   if (!invoices.length)

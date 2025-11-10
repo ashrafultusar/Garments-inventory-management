@@ -6,8 +6,8 @@ export default function PrintBillingInvoice() {
         <h1 className="text-xl font-bold">
           মেসার্স এস.এন ডাইং এন্ড ফিনিশিং এজেন্ট
         </h1>
-        <p className="font-bold text-[14px]">ঠিখানা: মাধবদী, নরসিংদী</p>
-      </div>
+        <p className="font-bold text-[14px]"> ঠিকানা: মাধবদী, নরসিংদী</p>
+      </div> 
 
       <div className="flex justify-between mt-3">
         <div>
