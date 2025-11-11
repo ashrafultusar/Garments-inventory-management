@@ -268,7 +268,7 @@ export default function BillingBatch({ orderId }) {
           </div>
         );
       })}
-
+ 
       {selectedInvoiceToPrint && (
         <div className="print-only">
           <PrintBillingInvoice />

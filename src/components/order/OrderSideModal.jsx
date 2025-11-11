@@ -7,7 +7,7 @@ import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderStatus from "../OrderStatus/OrderStatus";
-import OrderPrint from "../Print/OrderInvoicePrint/OrderInvoicePrint";
+import OrderInvoicePrint from "../Print/OrderInvoicePrint/OrderInvoicePrint";
 
 const OrderSideModal = ({
   isModalOpen,
@@ -21,42 +21,31 @@ const OrderSideModal = ({
   const printRef = useRef();
 
   const handlePrint = () => {
-    const printContents = printRef.current.innerHTML;
+    // hidden div এর content clone করে নতুন div তৈরি করা
+    const printArea = printRef.current.cloneNode(true);
   
-    // create a hidden iframe
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "absolute";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    iframe.style.border = "0";
-    document.body.appendChild(iframe);
+    // একটা temporary div বানাও যাতে Tailwind CSS কাজ করে
+    const tempDiv = document.createElement("div");
+    tempDiv.style.position = "absolute";
+    tempDiv.style.top = "0";
+    tempDiv.style.left = "0";
+    tempDiv.style.width = "100%";
+    tempDiv.style.background = "white";
+    tempDiv.style.zIndex = "9999";
+    tempDiv.appendChild(printArea);
   
-    const doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(`
-      <html>
-        <head>
-          <title>Print</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-          </style>
-        </head>
-        <body>${printContents}</body>
-      </html>
-    `);
-    doc.close();
+    // body তে বসাও
+    document.body.appendChild(tempDiv);
   
-    // print the iframe content
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
+    // print চালাও (same page browser dialog)
+    window.print();
   
-    // remove iframe after printing
+    // print শেষ হলে remove করে দাও
     setTimeout(() => {
-      document.body.removeChild(iframe);
-    }, 1000);
+      document.body.removeChild(tempDiv);
+    }, 500);
   };
+  
   
 
   return (
@@ -210,10 +199,11 @@ const OrderSideModal = ({
 
       {/* Hidden div for printing */}
       <div style={{ display: "none" }}>
-        <div ref={printRef}>
-          <OrderPrint order={selectedOrder} />
-        </div>
-      </div>
+  <div ref={printRef}>
+    <OrderInvoicePrint order={selectedOrder} />
+  </div>
+</div>
+
                             </div>
                           </div>
 
