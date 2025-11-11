@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { FaPencilAlt, FaPrint } from "react-icons/fa";
 import { LuTrash2 } from "react-icons/lu";
@@ -7,6 +7,7 @@ import { CiGrid41 } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderStatus from "../OrderStatus/OrderStatus";
+import OrderInvoicePrint from "../Print/OrderInvoicePrint/OrderInvoicePrint";
 
 const OrderSideModal = ({
   isModalOpen,
@@ -17,10 +18,32 @@ const OrderSideModal = ({
 }) => {
   const router = useRouter();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [printOrder, setPrintOrder] = useState(null);
+  const printRef = useRef();
 
-  const handlePrint = (order) => {
-    setPrintOrder(order);
+  const handlePrint = () => {
+    // hidden div এর content clone করে নতুন div তৈরি করা
+    const printArea = printRef.current.cloneNode(true);
+
+    // একটা temporary div বানাও যাতে Tailwind CSS কাজ করে
+    const tempDiv = document.createElement("div");
+    tempDiv.style.position = "absolute";
+    tempDiv.style.top = "0";
+    tempDiv.style.left = "0";
+    tempDiv.style.width = "100%";
+    tempDiv.style.background = "white";
+    tempDiv.style.zIndex = "9999";
+    tempDiv.appendChild(printArea);
+
+    // body তে বসাও
+    document.body.appendChild(tempDiv);
+
+    // print চালাও (same page browser dialog)
+    window.print();
+
+    // print শেষ হলে remove করে দাও
+    setTimeout(() => {
+      document.body.removeChild(tempDiv);
+    }, 500);
   };
 
   return (
@@ -163,16 +186,21 @@ const OrderSideModal = ({
                             </div>
 
                             <div className="border-t pt-2">
+                              {/* Print button */}
                               <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handlePrint(selectedOrder);
-                                }}
-                                className="text-gray-600 hover:text-gray-900 flex justify-center items-center gap-1 border p-1 border-gray-500 rounded cursor-pointer"
+                                onClick={handlePrint}
+                                className="text-black hover:text-gray-900 flex justify-center items-center gap-1 border p-1 border-gray-500 bg-green-500 rounded cursor-pointer"
                               >
                                 Print
                                 <FaPrint size={18} />
                               </button>
+
+                              {/* Hidden div for printing */}
+                              <div style={{ display: "none" }}>
+                                <div ref={printRef}>
+                                  <OrderInvoicePrint order={selectedOrder} />
+                                </div>
+                              </div>
                             </div>
                           </div>
 
@@ -216,9 +244,6 @@ const OrderSideModal = ({
               )}
             </div>
           </motion.div>
-
-          {/* Render PrintInvoice */}
-          {printOrder && <PrintInvoice order={printOrder} />}
         </div>
       )}
     </AnimatePresence>
