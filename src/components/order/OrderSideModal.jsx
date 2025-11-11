@@ -23,7 +23,7 @@ const OrderSideModal = ({
   const handlePrint = () => {
     // hidden div এর content clone করে নতুন div তৈরি করা
     const printArea = printRef.current.cloneNode(true);
-  
+
     // একটা temporary div বানাও যাতে Tailwind CSS কাজ করে
     const tempDiv = document.createElement("div");
     tempDiv.style.position = "absolute";
@@ -33,20 +33,18 @@ const OrderSideModal = ({
     tempDiv.style.background = "white";
     tempDiv.style.zIndex = "9999";
     tempDiv.appendChild(printArea);
-  
+
     // body তে বসাও
     document.body.appendChild(tempDiv);
-  
+
     // print চালাও (same page browser dialog)
     window.print();
-  
+
     // print শেষ হলে remove করে দাও
     setTimeout(() => {
       document.body.removeChild(tempDiv);
     }, 500);
   };
-  
-  
 
   return (
     <AnimatePresence>
@@ -188,22 +186,21 @@ const OrderSideModal = ({
                             </div>
 
                             <div className="border-t pt-2">
-                          {/* Print button */}
-      <button
-        onClick={handlePrint}
-        className="text-black hover:text-gray-900 flex justify-center items-center gap-1 border p-1 border-gray-500 bg-green-500 rounded cursor-pointer"
-      >
-        Print
-        <FaPrint size={18} />
-      </button>
+                              {/* Print button */}
+                              <button
+                                onClick={handlePrint}
+                                className="text-black hover:text-gray-900 flex justify-center items-center gap-1 border p-1 border-gray-500 bg-green-500 rounded cursor-pointer"
+                              >
+                                Print
+                                <FaPrint size={18} />
+                              </button>
 
-      {/* Hidden div for printing */}
-      <div style={{ display: "none" }}>
-  <div ref={printRef}>
-    <OrderInvoicePrint order={selectedOrder} />
-  </div>
-</div>
-
+                              {/* Hidden div for printing */}
+                              <div style={{ display: "none" }}>
+                                <div ref={printRef}>
+                                  <OrderInvoicePrint order={selectedOrder} />
+                                </div>
+                              </div>
                             </div>
                           </div>
 
@@ -248,7 +245,6 @@ const OrderSideModal = ({
             </div>
           </motion.div>
         </div>
-        
       )}
     </AnimatePresence>
   );

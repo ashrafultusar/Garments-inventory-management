@@ -3,13 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
-
 @media print {
-  .no-print { display: none !important; }
+  .no-print {
+    display: none !important;
+  }
 }
-
-
-
 
 @theme inline {
   --color-background: var(--background);
@@ -130,19 +128,26 @@
 }
 
 
+
 @media print {
-  body * {
-    visibility: hidden;
+  .no-print {
+    display: none !important;
   }
-  .print-area,
-  .print-area * {
-    visibility: visible;
+
+  
+
+  .print-only {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    background: white !important;
+    z-index: 999999 !important;
+    padding: 0 !important; /* Printing component handles its own padding (e.g., 0.5in) */
   }
-  .print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+
+  @page {
+    margin: 0;
   }
 }
-
