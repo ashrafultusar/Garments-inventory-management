@@ -61,7 +61,6 @@ export default function BillingBatch({ orderId }) {
 
       if (res.ok) {
         toast.success("Invoice deleted and batches reverted to Delivered!");
-
         setInvoices((prev) =>
           prev.filter((inv) => inv.invoiceNumber !== invoiceNumber)
         );
@@ -77,24 +76,55 @@ export default function BillingBatch({ orderId }) {
   const handlePrintInvoice = (invoice) => {
     setSelectedInvoiceToPrint(invoice);
 
+    // wait for render before printing (100ms is usually enough)
     setTimeout(() => {
       window.print();
       setSelectedInvoiceToPrint(null);
-    }, 200);
+    }, 100);
   };
 
   if (loading) return <p>Loading billing invoices...</p>;
-
   if (!invoices.length)
     return <p className="text-gray-500">No invoice billing data found.</p>;
 
   return (
     <div className="mt-6 space-y-6">
-      {invoices.map((inv, iIdx) => {
+      <style jsx global>{`
+        @media print {
+          /* **Crucial for A4 full-page print:** Remove browser default margins */
+          @page {
+            margin: 0 !important;
+          }
+          body {
+            background: white !important;
+            overflow: visible !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          .print-only {
+            display: block !important;
+            width: 100vw; /* Take full viewport width */
+            min-height: 100vh; /* Take full viewport height */
+            margin: 0;
+            padding: 0;
+            /* Ensure the component itself is the only thing rendered */
+            position: absolute;
+            top: 0;
+            left: 0;
+          }
+        }
+        .print-only {
+          display: none;
+        }
+      `}</style>
+
+      {invoices?.map((inv) => {
         const isExpanded = inv.isExpanded;
         const isMultiple = inv.batchCount > 1;
 
-        // If multiple batches, merge all rows together
         const mergedRows = isMultiple
           ? inv.batches.flatMap((b) =>
               (b.rows || []).map((r) => ({
@@ -112,27 +142,7 @@ export default function BillingBatch({ orderId }) {
             key={inv.invoiceNumber}
             className="border rounded-lg shadow-sm border-gray-200 overflow-hidden"
           >
-            <style jsx global>{`
-              @media print {
-                .no-print {
-                  display: none !important;
-                }
-                .print-only {
-                  display: block !important;
-                  position: fixed;
-                  inset: 0;
-                  width: 100%;
-                  background: white;
-                  z-index: 9999;
-                  padding: 20px;
-                }
-              }
-              .print-only {
-                display: none;
-              }
-            `}</style>
-
-            <div className="flex justify-between items-center bg-gray-100 px-4 py-3">
+            <div className="flex justify-between items-center bg-gray-100 px-4 py-3 no-print">
               <h4 className="font-medium text-gray-700">
                 Invoice:{" "}
                 <span className="text-blue-600 font-semibold">
@@ -156,7 +166,6 @@ export default function BillingBatch({ orderId }) {
                   title="Print"
                   onClick={() => handlePrintInvoice(inv)}
                 />
-
                 <MdDelete
                   size={20}
                   onClick={() => handleDeleteInvoice(inv?.invoiceNumber)}
@@ -176,6 +185,7 @@ export default function BillingBatch({ orderId }) {
                   className="bg-white border-t border-gray-200 overflow-hidden"
                 >
                   <div className="p-4 overflow-x-auto">
+                    {/* ... (Merged/Single batch table display logic - kept as is) ... */}
                     {isMultiple ? (
                       <table className="w-full text-sm border border-gray-200">
                         <thead className="bg-gray-100">
@@ -266,9 +276,10 @@ export default function BillingBatch({ orderId }) {
         );
       })}
 
+      {/* PRINT-ONLY INVOICE COMPONENT */}
       {selectedInvoiceToPrint && (
-        <div className="print-only">
-          <PrintBillingInvoice />
+        <div className="fixed inset-0 bg-white z-[9999] print-only">
+          <PrintBillingInvoice invoice={selectedInvoiceToPrint} />
         </div>
       )}
     </div>

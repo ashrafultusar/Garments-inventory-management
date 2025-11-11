@@ -34,7 +34,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile/Tablet Navbar */}
-      <div className="md:hidden cursor-pointer fixed top-0 left-0 right-0 z-50 bg-gray-800 text-white flex justify-between items-center px-4 py-3 shadow-md ">
+      <div className="no-print md:hidden cursor-pointer fixed top-0 left-0 right-0 z-50 bg-gray-800 text-white flex justify-between items-center px-4 py-3 shadow-md ">
         {/* Hamburger */}
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -65,7 +65,7 @@ const Sidebar = () => {
           md:translate-x-0 md:static md:h-screen`}
       >
         {/* Logo for desktop */}
-        <div className="hidden md:flex items-center justify-center">
+        <div className="no-print hidden md:flex items-center justify-center">
           <Link href="/dashboard/order">
             <Image
               className="w-auto h-8"
