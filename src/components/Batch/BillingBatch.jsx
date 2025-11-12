@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import { FaPrint, FaEye } from "react-icons/fa";
@@ -9,32 +9,50 @@ import PrintBillingInvoice from "../Print/PrintBillingInvoice/PrintBillingInvoic
 export default function BillingBatch({ orderId }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
+  // 🐛 FIX 1: Added missing state definition for orderInfo
+  const [orderInfo, setOrderInfo] = useState({}); 
+  const printRef = useRef();
   const [selectedInvoiceToPrint, setSelectedInvoiceToPrint] = useState(null);
 
   // ✅ Fetch invoice-wise batches
   const fetchBillingData = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/batch/invoice/billing/${orderId}`);
-      const data = await res.json();
 
-      if (res.ok) {
+      const [invoiceRes, orderRes] = await Promise.all([
+        fetch(`/api/batch/invoice/billing/${orderId}`),
+        fetch(`/api/order/${orderId}`),
+      ]);
+
+      const invoiceData = await invoiceRes.json();
+      const orderData = await orderRes.json();
+
+      if (invoiceRes.ok) {
         setInvoices(
-          data.invoices.map((inv) => ({
+          invoiceData.invoices.map((inv) => ({
             ...inv,
             isExpanded: false,
           }))
         );
       } else {
-        toast.error(data.error || "Failed to load invoice data");
+        toast.error(invoiceData.error || "Failed to load invoice data");
+      }
+
+      if (orderRes.ok) {
+        // Line 45 now works because setOrderInfo is defined
+        setOrderInfo(orderData);
+      } else {
+        toast.error(orderData.error || "Failed to load order info");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Server error while fetching invoice batches");
+      toast.error("Server error while fetching order/invoice data");
     } finally {
       setLoading(false);
     }
   };
+
+
 
   useEffect(() => {
     if (orderId) fetchBillingData();
@@ -73,14 +91,29 @@ export default function BillingBatch({ orderId }) {
     }
   };
 
-  const handlePrintInvoice = (invoice) => {
-    setSelectedInvoiceToPrint(invoice);
+  // ✅ Same print logic from OrderSideModal
+  const handlePrint = (invoice) => {
+    if (!invoice) return;
+    
+    // 🐛 FIX 2: Corrected state update to merge invoice and orderInfo objects
+    setSelectedInvoiceToPrint({ ...invoice, orderInfo: orderInfo });
 
-    // wait for render before printing (100ms is usually enough)
+    const printArea = printRef.current.cloneNode(true);
+    const tempDiv = document.createElement("div");
+    tempDiv.style.position = "absolute";
+    tempDiv.style.top = "0";
+    tempDiv.style.left = "0";
+    tempDiv.style.width = "100%";
+    tempDiv.style.background = "white";
+    tempDiv.style.zIndex = "9999";
+    tempDiv.appendChild(printArea);
+
+    document.body.appendChild(tempDiv);
+    window.print();
+
     setTimeout(() => {
-      window.print();
-      setSelectedInvoiceToPrint(null);
-    }, 100);
+      document.body.removeChild(tempDiv);
+    }, 500);
   };
 
   if (loading) return <p>Loading billing invoices...</p>;
@@ -89,38 +122,6 @@ export default function BillingBatch({ orderId }) {
 
   return (
     <div className="mt-6 space-y-6">
-      <style jsx global>{`
-        @media print {
-          /* **Crucial for A4 full-page print:** Remove browser default margins */
-          @page {
-            margin: 0 !important;
-          }
-          body {
-            background: white !important;
-            overflow: visible !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-          .print-only {
-            display: block !important;
-            width: 100vw; /* Take full viewport width */
-            min-height: 100vh; /* Take full viewport height */
-            margin: 0;
-            padding: 0;
-            /* Ensure the component itself is the only thing rendered */
-            position: absolute;
-            top: 0;
-            left: 0;
-          }
-        }
-        .print-only {
-          display: none;
-        }
-      `}</style>
-
       {invoices?.map((inv) => {
         const isExpanded = inv.isExpanded;
         const isMultiple = inv.batchCount > 1;
@@ -160,12 +161,16 @@ export default function BillingBatch({ orderId }) {
                 >
                   <FaEye size={18} />
                 </button>
-                <FaPrint
-                  size={18}
-                  className="hover:text-green-600 cursor-pointer transition"
-                  title="Print"
-                  onClick={() => handlePrintInvoice(inv)}
-                />
+
+                {/* ✅ Print Button with same print logic */}
+                <button
+                  onClick={() => handlePrint(inv)}
+                  className="hover:text-green-600 transition cursor-pointer"
+                  title="Print Invoice"
+                >
+                  <FaPrint size={18} />
+                </button>
+
                 <MdDelete
                   size={20}
                   onClick={() => handleDeleteInvoice(inv?.invoiceNumber)}
@@ -185,7 +190,7 @@ export default function BillingBatch({ orderId }) {
                   className="bg-white border-t border-gray-200 overflow-hidden"
                 >
                   <div className="p-4 overflow-x-auto">
-                    {/* ... (Merged/Single batch table display logic - kept as is) ... */}
+                    {/* Same existing batch table logic */}
                     {isMultiple ? (
                       <table className="w-full text-sm border border-gray-200">
                         <thead className="bg-gray-100">
@@ -276,12 +281,14 @@ export default function BillingBatch({ orderId }) {
         );
       })}
 
-      {/* PRINT-ONLY INVOICE COMPONENT */}
-      {selectedInvoiceToPrint && (
-        <div className="fixed inset-0 bg-white z-[9999] print-only">
-          <PrintBillingInvoice invoice={selectedInvoiceToPrint} />
+      {/* ✅ Hidden printable area */}
+      <div style={{ display: "none" }}>
+        <div ref={printRef} className="print-only">
+          {selectedInvoiceToPrint && (
+            <PrintBillingInvoice order={selectedInvoiceToPrint} />
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

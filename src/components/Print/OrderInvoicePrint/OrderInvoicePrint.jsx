@@ -1,5 +1,6 @@
 "use client";
 
+
 import React from "react";
 
 export default function OrderPrint({ order }) {
@@ -27,7 +28,7 @@ export default function OrderPrint({ order }) {
   const partyName = order?.companyName || "M/S Rahman Fabrics";
 
   return (
-    <div className="print-area font-sans text-gray-900 bg-white p-10 max-w-3xl mx-auto border border-gray-300 rounded-lg shadow-md print:shadow-none print:border-none print:p-0">
+    <div className="print-area font-sans mt-12 text-gray-900 bg-white p-10 max-w-3xl mx-auto border border-gray-300 rounded-lg shadow-md print:shadow-none print:border-none print:p-0">
       {/* HEADER */}
       <div className="text-center border-b-2 border-black pb-3 mb-4">
         <h1 className="text-2xl font-bold">মেসার্স এস.এন ডাইং এন্ড ফিনিশিং এজেন্ট</h1>
