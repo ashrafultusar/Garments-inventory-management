@@ -58,8 +58,7 @@ export default function OrderPrint({ order }) {
           <tr className="bg-gray-100">
             <th className="border border-gray-400 py-2 w-[25%]">রোল নং</th>
             <th className="border border-gray-400 py-2 w-[25%]">গজ</th>
-            <th className="border border-gray-400 py-2 w-[25%]">এক্সট্রা</th>
-            <th className="border border-gray-400 py-2 w-[25%]">মোট (গজ+এক্সট্রা)</th>
+          
           </tr>
         </thead>
         <tbody>
@@ -69,8 +68,8 @@ export default function OrderPrint({ order }) {
               <tr key={row._id || i} className="even:bg-gray-50 text-center">
                 <td className="border border-gray-400 py-1">{row.rollNo}</td>
                 <td className="border border-gray-400 py-1">{row.goj}</td>
-                <td className="border border-gray-400 py-1">{row.extra}</td>
-                <td className="border border-gray-400 py-1 font-medium">{totalRow.toFixed(2)}</td>
+              
+               
               </tr>
             );
           })}
@@ -79,7 +78,7 @@ export default function OrderPrint({ order }) {
           <tr className="bg-gray-100 font-semibold">
             <td className="border border-gray-400 py-2 text-left pl-3">মোট রোল: {totalRoll}</td>
             <td colSpan={3} className="border border-gray-400 py-2 text-right pr-3">
-              মোট গজ (সহ এক্সট্রা): {totalGoj}
+              মোট গজ: {totalGoj}
             </td>
           </tr>
         </tfoot>
