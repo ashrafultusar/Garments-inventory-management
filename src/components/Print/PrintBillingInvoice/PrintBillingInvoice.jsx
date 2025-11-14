@@ -1,31 +1,44 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
 
 export default function PrintBillingInvoice({ order }) {
   const orderInfo = order?.orderInfo;
-  // console.log(orderInfo);
 
-  const [loading, setLoading] = useState(true);
-  const [batches, setBatches] = useState([]);
+  const batches = order?.batches || []; 
 
-  useEffect(() => {
-    if (order && order.batches) {
-      setBatches(order.batches);
-      setLoading(false);
-    }
-  }, [order]);
-
-  console.log(order);
-
-
-  if (loading)
-    return <p className="text-gray-500 py-6 text-center">Loading invoice...</p>;
-
-  // প্রতি সারিতে ৩টা ব্যাচ দেখানোর জন্য chunk তৈরি
   const chunkedBatches = [];
   for (let i = 0; i < batches.length; i += 3) {
     chunkedBatches.push(batches.slice(i, i + 3));
   }
+
+
+  // --- ফিনিশিং ডেটার মোট গজ এবং রোলের হিসেব ---
+  let grandTotalFinishGoj = 0;
+  let grandTotalFinishRolls = 0;
+
+  batches.forEach(batch => {
+    // FINISHING rows = rows + extraInputs
+    const finishingMainRows = batch.rows?.map(r => ({
+      rollNo: r.rollNo,
+      goj: r.goj
+    })) || [];
+
+    const finishingExtraRows = batch.rows
+      ?.flatMap(r => r.extraInputs?.map((ex, exIndex) => ({
+        rollNo: `${r.rollNo}.${exIndex + 1}`,
+        goj: Number(ex.value || 0)
+      })) || [])
+      || [];
+
+    const finishingRows = [...finishingMainRows, ...finishingExtraRows];
+
+    const totalFinish = finishingRows.reduce((sum, r) => sum + (r.goj || 0), 0);
+
+    grandTotalFinishGoj += totalFinish;
+    grandTotalFinishRolls += finishingRows.length;
+  });
+ 
+
 
   return (
     <div
@@ -90,66 +103,144 @@ export default function PrintBillingInvoice({ order }) {
         </div>
       </div>
 
-      {/* ব্যাচগুলোর grid layout */}
-      <div className="mt-4 space-y-6">
-        {chunkedBatches.map((row, rowIndex) => (
-          <div key={rowIndex} className="grid grid-cols-3 gap-2">
-            {row.map((batch, index) => {
-              const totalRoll = batch.rows?.length || 0;
-              const totalGoj = batch.rows?.reduce(
-                (sum, r) => sum + (r.goj || 0),
-                0
-              );
+   {/* ব্যাচগুলোর grid layout */}
+<div className="mt-4 space-y-6">
+  {chunkedBatches.map((row, rowIndex) => (
+    <div key={rowIndex} className="grid grid-cols-3 gap-4">
+      {row.map((batch, index) => {
 
-              return (
-                <div
-                  key={index}
-                  className="border border-black flex flex-col"
-                  style={{ pageBreakInside: "avoid" }}
-                >
-                  {/* ব্যাচ হেডার */}
-                  <div className="text-center font-bold border-b border-black py-1">
-                    {batch.batchName} - {batch.sillName}
-                  </div>
+        // GRAY (same as rows)
+        const grayRows = batch.rows?.map(r => ({
+          rollNo: r.rollNo,
+          goj: r.goj
+        })) || [];
 
-                  {/* Dyeing + Finishing info */}
-                  <div className="text-center border-b border-black py-1 text-[11px] leading-tight">
-                    ডাইং: {batch.dyeing} <br />
-                    ফিনিশিং: {batch.finishingType}
-                  </div>
+        // FINISHING rows = rows + extraInputs
+        const finishingMainRows = batch.rows?.map(r => ({
+          rollNo: r.rollNo,
+          goj: r.goj
+        })) || [];
 
-                  {/* Rows table */}
-                  <div className="flex-1">
-                    <div className="grid grid-cols-2 border-b border-black text-center font-semibold text-[10px]">
-                      <div className="border-r border-black p-1">রোল</div>
-                      <div className="p-1">গজ</div>
-                    </div>
-                    {batch.rows?.map((rowData, rIndex) => (
-                      <div
-                        key={rIndex}
-                        className="grid grid-cols-2 text-center border-b border-gray-300 text-[10px]"
-                      >
-                        <div className="border-r border-black p-1">
-                          {rowData.rollNo}
-                        </div>
-                        <div className="p-1">{rowData.goj}</div>
-                      </div>
-                    ))}
-                  </div>
+        const finishingExtraRows = batch.rows
+          ?.flatMap(r => r.extraInputs?.map((ex, exIndex) => ({
+            rollNo: `${r.rollNo}.${exIndex + 1}`,
+            goj: Number(ex.value || 0)
+          })) || [])
+          || [];
 
-                  {/* মোট ফলাফল */}
-                  <div className="grid grid-cols-2 text-[11px] font-bold text-center border-t border-black">
-                    <div className="border-r border-black p-1">
-                      রোল: {totalRoll}
-                    </div>
-                    <div className="p-1">গজ: {totalGoj}</div>
-                  </div>
+        const finishingRows = [...finishingMainRows, ...finishingExtraRows];
+
+        const totalGray = grayRows.reduce((sum, r) => sum + (r.goj || 0), 0);
+        const totalFinish = finishingRows.reduce((sum, r) => sum + (r.goj || 0), 0);
+
+        return (
+          <div
+            key={index}
+            className="border border-black"
+            style={{ pageBreakInside: "avoid" }}
+          >
+            {/* Header */}
+            <div className="text-center font-bold border-b border-black py-1">
+              {batch.batchName} - {batch.sillName}
+            </div>
+
+            {/* Title */}
+            <div className="text-center border-b border-black py-1 text-[11px] leading-tight">
+              ডাইং-গ্রে রোল ফিনিশিং-ফুল হাড়
+            </div>
+
+            {/* 2 Table Layout */}
+            <div className="grid grid-cols-2">
+
+              {/* GRAY TABLE */}
+              <div className="border-r border-black">
+                <div className="text-center font-semibold border-b border-black py-1 text-[11px]">
+                  গ্রে- বেচ ১
                 </div>
-              );
-            })}
+
+                {/* Header */}
+                <div className="grid grid-cols-2 text-[10px] font-semibold border-b border-black text-center">
+                  <div className="border-r border-black py-1">রোল</div>
+                  <div className="py-1">গজ</div>
+                </div>
+
+                {/* Rows */}
+                {grayRows.map((r, i) => (
+                  <div
+                    key={i}
+                    className="grid grid-cols-2 border-b border-gray-300 text-[10px] text-center"
+                  >
+                    <div className="border-r border-black py-1">{r.rollNo}</div>
+                    <div className="py-1">{r.goj}</div>
+                  </div>
+                ))}
+
+                {/* Total */}
+                <div className="grid grid-cols-2 text-center text-[11px] font-bold border-t border-black">
+                  <div className="border-r border-black py-1">
+                    রোল: {grayRows.length}
+                  </div>
+                  <div className="py-1">গজ: {totalGray}</div>
+                </div>
+              </div>
+
+              {/* FINISHING TABLE */}
+              <div>
+                <div className="text-center font-semibold border-b border-black py-1 text-[11px]">
+                  ফিনিশিং- বেচ ১
+                </div>
+
+                <div className="grid grid-cols-2 text-[10px] font-semibold border-b border-black text-center">
+                  <div className="border-r border-black py-1">রোল</div>
+                  <div className="py-1">গজ</div>
+                </div>
+
+                {/* All finishing rows */}
+                {finishingRows.map((r, i) => (
+                  <div
+                    key={i}
+                    className="grid grid-cols-2 border-b border-gray-300 text-[10px] text-center"
+                  >
+                    <div className="border-r border-black py-1">{r.rollNo}</div>
+                    <div className="py-1">{r.goj}</div>
+                  </div>
+                ))}
+
+                <div className="grid grid-cols-2 text-center text-[11px] font-bold border-t border-black">
+                  <div className="border-r border-black py-1">
+                    রোল: {finishingRows.length}
+                  </div>
+                  <div className="py-1">গজ: {totalFinish}</div>
+                </div>
+              </div>
+
+            </div>
           </div>
-        ))}
+        );
+      })}
+    </div>
+  ))}
+</div>
+
+      {/* Grand Summary Section  */}
+      <div className="mt-6 border-b-2 border-black">
+        <div className="grid grid-cols-4 font-bold text-lg text-center border border-black" style={{ backgroundColor: "#D3D3D3" }}>
+          <div className="py-2 border-r border-black">
+            মোট গজ:
+          </div>
+          <div className="py-2 border-r border-black">
+            {grandTotalFinishGoj}
+          </div>
+          <div className="py-2 border-r border-black">
+            মোট রোল:
+          </div>
+          <div className="py-2">
+            {grandTotalFinishRolls}
+          </div>
+        </div>
       </div>
+  
+
 
       {/* স্বাক্ষর অংশ */}
       <div className="grid grid-cols-2 text-xs mt-10">

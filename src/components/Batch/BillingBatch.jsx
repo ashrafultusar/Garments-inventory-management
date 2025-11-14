@@ -9,7 +9,6 @@ import PrintBillingInvoice from "../Print/PrintBillingInvoice/PrintBillingInvoic
 export default function BillingBatch({ orderId }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
-  // 🐛 FIX 1: Added missing state definition for orderInfo
   const [orderInfo, setOrderInfo] = useState({}); 
   const printRef = useRef();
   const [selectedInvoiceToPrint, setSelectedInvoiceToPrint] = useState(null);
@@ -39,7 +38,6 @@ export default function BillingBatch({ orderId }) {
       }
 
       if (orderRes.ok) {
-        // Line 45 now works because setOrderInfo is defined
         setOrderInfo(orderData);
       } else {
         toast.error(orderData.error || "Failed to load order info");
@@ -91,30 +89,40 @@ export default function BillingBatch({ orderId }) {
     }
   };
 
-  // ✅ Same print logic from OrderSideModal
+  // 1. ⚠️ পরিবর্তন: এই ফাংশনটি এখন শুধুমাত্র state আপডেট করবে।
   const handlePrint = (invoice) => {
     if (!invoice) return;
     
-    // 🐛 FIX 2: Corrected state update to merge invoice and orderInfo objects
+    // সঠিক ডেটা merge করে state আপডেট করা হলো
     setSelectedInvoiceToPrint({ ...invoice, orderInfo: orderInfo });
-
-    const printArea = printRef.current.cloneNode(true);
-    const tempDiv = document.createElement("div");
-    tempDiv.style.position = "absolute";
-    tempDiv.style.top = "0";
-    tempDiv.style.left = "0";
-    tempDiv.style.width = "100%";
-    tempDiv.style.background = "white";
-    tempDiv.style.zIndex = "9999";
-    tempDiv.appendChild(printArea);
-
-    document.body.appendChild(tempDiv);
-    window.print();
-
-    setTimeout(() => {
-      document.body.removeChild(tempDiv);
-    }, 500);
   };
+
+
+  // 2. ✅ নতুন useEffect: যখনই selectedInvoiceToPrint আপডেট হবে, তখনই প্রিন্ট ফাংশন কল হবে।
+  useEffect(() => {
+    if (selectedInvoiceToPrint) {
+      // DOM ক্লোনিং এবং প্রিন্টিং লজিক
+      const printArea = printRef.current.cloneNode(true);
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.top = "0";
+      tempDiv.style.left = "0";
+      tempDiv.style.width = "100%";
+      tempDiv.style.background = "white";
+      tempDiv.style.zIndex = "9999";
+      tempDiv.appendChild(printArea);
+
+      document.body.appendChild(tempDiv);
+      window.print();
+
+      setTimeout(() => {
+        document.body.removeChild(tempDiv);
+        // প্রিন্ট শেষ হওয়ার পর state null করে দেওয়া ভালো অনুশীলন।
+        setSelectedInvoiceToPrint(null); 
+      }, 500);
+    }
+  }, [selectedInvoiceToPrint]);
+
 
   if (loading) return <p>Loading billing invoices...</p>;
   if (!invoices.length)
@@ -162,7 +170,7 @@ export default function BillingBatch({ orderId }) {
                   <FaEye size={18} />
                 </button>
 
-                {/* ✅ Print Button with same print logic */}
+                {/* ✅ Print Button calling the updated handlePrint */}
                 <button
                   onClick={() => handlePrint(inv)}
                   className="hover:text-green-600 transition cursor-pointer"
