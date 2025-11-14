@@ -1,5 +1,6 @@
 "use client";
 
+
 import React from "react";
 
 export default function OrderPrint({ order }) {
@@ -27,7 +28,7 @@ export default function OrderPrint({ order }) {
   const partyName = order?.companyName || "M/S Rahman Fabrics";
 
   return (
-    <div className="print-area font-sans text-gray-900 bg-white p-10 max-w-3xl mx-auto border border-gray-300 rounded-lg shadow-md print:shadow-none print:border-none print:p-0">
+    <div className="print-area font-sans mt-12 text-gray-900 bg-white p-10 max-w-3xl mx-auto border border-gray-300 rounded-lg shadow-md print:shadow-none print:border-none print:p-0">
       {/* HEADER */}
       <div className="text-center border-b-2 border-black pb-3 mb-4">
         <h1 className="text-2xl font-bold">মেসার্স এস.এন ডাইং এন্ড ফিনিশিং এজেন্ট</h1>
@@ -57,8 +58,7 @@ export default function OrderPrint({ order }) {
           <tr className="bg-gray-100">
             <th className="border border-gray-400 py-2 w-[25%]">রোল নং</th>
             <th className="border border-gray-400 py-2 w-[25%]">গজ</th>
-            <th className="border border-gray-400 py-2 w-[25%]">এক্সট্রা</th>
-            <th className="border border-gray-400 py-2 w-[25%]">মোট (গজ+এক্সট্রা)</th>
+          
           </tr>
         </thead>
         <tbody>
@@ -68,8 +68,8 @@ export default function OrderPrint({ order }) {
               <tr key={row._id || i} className="even:bg-gray-50 text-center">
                 <td className="border border-gray-400 py-1">{row.rollNo}</td>
                 <td className="border border-gray-400 py-1">{row.goj}</td>
-                <td className="border border-gray-400 py-1">{row.extra}</td>
-                <td className="border border-gray-400 py-1 font-medium">{totalRow.toFixed(2)}</td>
+              
+               
               </tr>
             );
           })}
@@ -78,15 +78,15 @@ export default function OrderPrint({ order }) {
           <tr className="bg-gray-100 font-semibold">
             <td className="border border-gray-400 py-2 text-left pl-3">মোট রোল: {totalRoll}</td>
             <td colSpan={3} className="border border-gray-400 py-2 text-right pr-3">
-              মোট গজ (সহ এক্সট্রা): {totalGoj}
+              মোট গজ: {totalGoj}
             </td>
           </tr>
         </tfoot>
       </table>
 
       {/* SIGNATURE */}
-      <div className="flex justify-between mt-16 text-sm text-center">
-        <div className="border-t border-gray-500 border-dashed pt-1 w-40">গ্রাহকের স্বাক্ষর</div>
+      <div className="mt-24 text-sm text-center">
+       
         <div className="border-t border-gray-500 border-dashed pt-1 w-40">কর্তৃপক্ষের স্বাক্ষর</div>
       </div>
     </div>

@@ -9,10 +9,12 @@ export default function LoadingSpiner({ onFinish }) {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          onFinish(); // call when loading complete
+          if (typeof onFinish === "function") {
+            onFinish(); 
+          }
           return 100;
         }
-        return prev + 2; // speed of loading
+        return prev + 2;
       });
     }, 100);
 

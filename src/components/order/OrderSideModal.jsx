@@ -21,10 +21,8 @@ const OrderSideModal = ({
   const printRef = useRef();
 
   const handlePrint = () => {
-    // hidden div এর content clone করে নতুন div তৈরি করা
     const printArea = printRef.current.cloneNode(true);
 
-    // একটা temporary div বানাও যাতে Tailwind CSS কাজ করে
     const tempDiv = document.createElement("div");
     tempDiv.style.position = "absolute";
     tempDiv.style.top = "0";
@@ -34,13 +32,10 @@ const OrderSideModal = ({
     tempDiv.style.zIndex = "9999";
     tempDiv.appendChild(printArea);
 
-    // body তে বসাও
     document.body.appendChild(tempDiv);
 
-    // print চালাও (same page browser dialog)
     window.print();
 
-    // print শেষ হলে remove করে দাও
     setTimeout(() => {
       document.body.removeChild(tempDiv);
     }, 500);
@@ -49,7 +44,7 @@ const OrderSideModal = ({
   return (
     <AnimatePresence>
       {isModalOpen && (
-        <div className="fixed inset-0 flex justify-end z-50">
+        <div className="no-print fixed inset-0 flex justify-end z-50">
           {/* Overlay */}
           <motion.div
             className="absolute inset-0 bg-black/30"
@@ -197,7 +192,7 @@ const OrderSideModal = ({
 
                               {/* Hidden div for printing */}
                               <div style={{ display: "none" }}>
-                                <div ref={printRef}>
+                                <div ref={printRef} className="print-only">
                                   <OrderInvoicePrint order={selectedOrder} />
                                 </div>
                               </div>
