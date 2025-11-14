@@ -85,8 +85,8 @@ export default function OrderPrint({ order }) {
       </table>
 
       {/* SIGNATURE */}
-      <div className="flex justify-between mt-16 text-sm text-center">
-        <div className="border-t border-gray-500 border-dashed pt-1 w-40">গ্রাহকের স্বাক্ষর</div>
+      <div className="mt-24 text-sm text-center">
+       
         <div className="border-t border-gray-500 border-dashed pt-1 w-40">কর্তৃপক্ষের স্বাক্ষর</div>
       </div>
     </div>
