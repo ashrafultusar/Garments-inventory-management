@@ -2,7 +2,6 @@
 
 export default function PrintBillingInvoice({ order }) {
   const orderInfo = order?.orderInfo;
-
   const batches = order?.batches || [];
 
   // Chunk batches 3 per row
@@ -11,34 +10,28 @@ export default function PrintBillingInvoice({ order }) {
     chunkedBatches.push(batches.slice(i, i + 3));
   }
 
-  // --- GRAND TOTAL CALCULATION (Finishing অনুযায়ী) ---
+  // --- GRAND TOTAL CALCULATION ---
   let grandTotalFinishGoj = 0;
   let grandTotalFinishRolls = 0;
 
-  batches.forEach((batch) => {
-    const finishingMainRows =
-      batch.rows?.map((r) => ({
-        rollNo: r.rollNo,
-        goj: Number(r.idx?.[0] || 0),
-      })) || [];
+  batches?.forEach((batch) => {
+    const finishingRows =
+      batch.rows?.map((r) => {
+        const idxValue = Number(r.idx?.[0] || 0);
 
-    const finishingExtraRows =
-      batch.rows?.flatMap(
-        (r) =>
-          r.extraInputs?.map((ex, exIndex) => ({
-            rollNo: `${r.rollNo}.${exIndex + 1}`,
-            goj: Number(r.idx?.[0] || 0) + Number(ex.value || 0),
-          })) || []
-      ) || [];
+        const extras = r.extraInputs
+          ? r.extraInputs.map((v) => Number(v || 0))
+          : [];
 
-    const finishingRows = [...finishingMainRows, ...finishingExtraRows];
+        const totalGoj = idxValue + extras.reduce((s, v) => s + v, 0);
+        const rollCount = 1 + extras.length;
+
+        return { goj: totalGoj, rollCount };
+      }) || [];
 
     grandTotalFinishGoj += finishingRows.reduce((s, r) => s + r.goj, 0);
-    grandTotalFinishRolls += finishingRows.length;
+    grandTotalFinishRolls += finishingRows.reduce((s, r) => s + r.rollCount, 0);
   });
-
-  console.log(chunkedBatches.finishingType);
-  console.log(chunkedBatches.colour);
 
   return (
     <div
@@ -59,11 +52,11 @@ export default function PrintBillingInvoice({ order }) {
         <p className="text-sm">ঠিকানা: মাধবদী, নরসিংদী</p>
       </div>
 
+      {/* Order Info */}
       <div className="grid grid-cols-3 text-sm font-medium border-b border-gray-400 pb-2 mb-4">
         <div className="space-y-1">
           <p>
-            পার্টির নাম:{" "}
-            <span className="font-normal">{orderInfo?.companyName}</span>
+            পার্টির নাম: <span className="font-normal">{orderInfo?.companyName}</span>
           </p>
           <p>
             Cloth Type:{" "}
@@ -85,8 +78,7 @@ export default function PrintBillingInvoice({ order }) {
             Order ID: <span className="font-normal">{orderInfo?.orderId}</span>
           </p>
           <p>
-            Invoice Number:{" "}
-            <span className="font-normal">{order?.invoiceNumber}</span>
+            Invoice Number: <span className="font-normal">{order?.invoiceNumber}</span>
           </p>
           <p>
             Date:{" "}
@@ -108,51 +100,47 @@ export default function PrintBillingInvoice({ order }) {
         {chunkedBatches?.map((row, rowIndex) => (
           <div key={rowIndex} className="grid grid-cols-3 gap-4">
             {row.map((batch, index) => {
-              // --- GRAY SECTION (Same as original) ---
+              // GRAY rows
               const grayRows =
                 batch.rows?.map((r) => ({
                   rollNo: r.rollNo,
                   goj: r.goj,
                 })) || [];
 
-              const totalGray = grayRows.reduce(
-                (sum, r) => sum + (r.goj || 0),
-                0
-              );
+              const totalGray = grayRows.reduce((sum, r) => sum + (r.goj || 0), 0);
 
-              // --- FINISHING SECTION (Updated Logic) ---
-              const finishingMainRows =
-                batch.rows?.map((r) => ({
-                  rollNo: r.rollNo,
-                  goj: Number(r.idx?.[0] || 0),
-                })) || [];
+              // --- UPDATED FINISHING LOGIC ---
+              const finishingRows =
+                batch.rows?.map((r) => {
+                  const idxValue = Number(r.idx?.[0] || 0);
+                  const extras = r.extraInputs
+                    ? r.extraInputs.map((v) => Number(v || 0))
+                    : [];
 
-              const finishingExtraRows =
-                batch.rows?.flatMap(
-                  (r) =>
-                    r.extraInputs?.map((ex, exIndex) => ({
-                      rollNo: `${r.rollNo}.${exIndex + 1}`,
-                      goj: Number(r.idx?.[0] || 0) + Number(ex.value || 0),
-                    })) || []
-                ) || [];
+                  const calcText =
+                    extras.length > 0
+                      ? `${idxValue} + ${extras.join(" + ")}`
+                      : `${idxValue}`;
 
-              const finishingRows = [
-                ...finishingMainRows,
-                ...finishingExtraRows,
-              ];
+                  const totalGoj = idxValue + extras.reduce((s, v) => s + v, 0);
+                  const rollCount = 1 + extras.length; // number of values
 
-              const totalFinish = finishingRows.reduce(
-                (sum, r) => sum + (r.goj || 0),
+                  return {
+                    goj: totalGoj,
+                    calcText,
+                    rollCount,
+                  };
+                }) || [];
+
+              const totalFinish = finishingRows.reduce((sum, r) => sum + r.goj, 0);
+              const totalFinishRolls = finishingRows.reduce(
+                (sum, r) => sum + r.rollCount,
                 0
               );
 
               return (
-                <div
-                  key={index}
-                  className="border border-black"
-                  style={{ pageBreakInside: "avoid" }}
-                >
-                  {/* Header */}
+                <div key={index} className="border border-black" style={{ pageBreakInside: "avoid" }}>
+                  {/* Batch Header */}
                   <div className="text-center font-bold border-b border-black py-1">
                     {batch?.batchName} - {batch?.sillName}
                   </div>
@@ -175,21 +163,14 @@ export default function PrintBillingInvoice({ order }) {
                       </div>
 
                       {grayRows?.map((r, i) => (
-                        <div
-                          key={i}
-                          className="grid grid-cols-2 border-b border-gray-300 text-[10px] text-center"
-                        >
-                          <div className="border-r border-black py-1">
-                            {r.rollNo}
-                          </div>
+                        <div key={i} className="grid grid-cols-2 border-b border-gray-300 text-[10px] text-center">
+                          <div className="border-r border-black py-1">{r.rollNo}</div>
                           <div className="py-1">{r.goj}</div>
                         </div>
                       ))}
 
                       <div className="grid grid-cols-2 text-center text-[11px] font-bold border-t border-black">
-                        <div className="border-r border-black py-1">
-                          রোল: {grayRows.length}
-                        </div>
+                        <div className="border-r border-black py-1">রোল: {grayRows.length}</div>
                         <div className="py-1">গজ: {totalGray}</div>
                       </div>
                     </div>
@@ -206,20 +187,15 @@ export default function PrintBillingInvoice({ order }) {
                       </div>
 
                       {finishingRows?.map((r, i) => (
-                        <div
-                          key={i}
-                          className="grid grid-cols-2 border-b border-gray-300 text-[10px] text-center"
-                        >
-                          <div className="border-r border-black py-1">
-                            {r.rollNo}
-                          </div>
-                          <div className="py-1">{r.goj}</div>
+                        <div key={i} className="grid grid-cols-2 border-b border-gray-300 text-[10px] text-center">
+                          <div className="border-r border-black py-1">{r.rollCount}</div>
+                          <div className="py-1">{r.calcText}</div>
                         </div>
                       ))}
 
                       <div className="grid grid-cols-2 text-center text-[11px] font-bold border-t border-black">
                         <div className="border-r border-black py-1">
-                          রোল: {finishingRows.length}
+                          রোল: {totalFinishRolls}
                         </div>
                         <div className="py-1">গজ: {totalFinish}</div>
                       </div>
@@ -239,9 +215,7 @@ export default function PrintBillingInvoice({ order }) {
           style={{ backgroundColor: "#D3D3D3" }}
         >
           <div className="py-2 border-r border-black">মোট গজ:</div>
-          <div className="py-2 border-r border-black">
-            {grandTotalFinishGoj}
-          </div>
+          <div className="py-2 border-r border-black">{grandTotalFinishGoj}</div>
           <div className="py-2 border-r border-black">মোট রোল:</div>
           <div className="py-2">{grandTotalFinishRolls}</div>
         </div>
@@ -249,25 +223,10 @@ export default function PrintBillingInvoice({ order }) {
 
       {/* Signatures */}
       <div className="flex justify-between items-center mt-24 text-xs">
-        {/* Left Signature */}
-        <div
-          className="text-center pt-4"
-          style={{
-            width: "120px",
-            borderTop: "1px solid black",
-          }}
-        >
+        <div className="text-center pt-4" style={{ width: "120px", borderTop: "1px solid black" }}>
           <p>প্রদানকারীর স্বাক্ষর</p>
         </div>
-
-        {/* Right Signature */}
-        <div
-          className="text-center pt-4"
-          style={{
-            width: "120px",
-            borderTop: "1px solid black",
-          }}
-        >
+        <div className="text-center pt-4" style={{ width: "120px", borderTop: "1px solid black" }}>
           <p>গ্রহীতার স্বাক্ষর</p>
         </div>
       </div>
