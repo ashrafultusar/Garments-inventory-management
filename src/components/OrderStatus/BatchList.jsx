@@ -264,7 +264,7 @@ export default function BatchList({ orderId }) {
                               <input
                                 type="number"
                                 className="w-24 border rounded px-2 py-1 text-center"
-                                value={row.idx || ""}
+                               
                                 onChange={(e) =>
                                   handleInputChange(bIdx, rIdx, e.target.value)
                                 }
@@ -316,13 +316,13 @@ export default function BatchList({ orderId }) {
                               )}
                             </td>
                             <td className="px-3 py-2 border">
-                              {batch.rows.reduce(
+                              {batch?.rows?.reduce(
                                 (sum, row) => sum + (Number(row.idx) || 0),
                                 0
                               )}
                             </td>
                             <td className="px-3 py-2 border">
-                              {batch.rows.reduce(
+                              {batch?.rows?.reduce(
                                 (sum, row) =>
                                   sum + (row.extraInputs?.length || 0),
                                 0
