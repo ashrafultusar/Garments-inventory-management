@@ -37,6 +37,9 @@ export default function PrintBillingInvoice({ order }) {
     grandTotalFinishRolls += finishingRows.length;
   });
 
+  console.log(chunkedBatches.finishingType);
+  console.log(chunkedBatches.colour);
+
   return (
     <div
       className="print-only p-0 text-xs text-gray-800 font-sans bg-white"
@@ -151,11 +154,11 @@ export default function PrintBillingInvoice({ order }) {
                 >
                   {/* Header */}
                   <div className="text-center font-bold border-b border-black py-1">
-                    {batch.batchName} - {batch.sillName}
+                    {batch?.batchName} - {batch?.sillName}
                   </div>
 
                   <div className="text-center border-b border-black py-1 text-[11px] leading-tight">
-                    ডাইং-গ্রে রোল ফিনিশিং-ফুল হাড়
+                    ডাইং- {batch?.finishingType} - {batch?.colour}
                   </div>
 
                   {/* 2 Table Layout */}
