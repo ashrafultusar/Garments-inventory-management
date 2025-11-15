@@ -35,9 +35,9 @@ const SignUp = () => {
     }
   };
 
-  const handleGoogleSignUp = () => {
-    signIn("google", { callbackUrl: "/dashboard/order" });
-  };
+  // const handleGoogleSignUp = () => {
+  //   signIn("google", { callbackUrl: "/dashboard/order" });
+  // };
 
   return (
     <div className="flex w-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800">
@@ -59,7 +59,7 @@ const SignUp = () => {
         </p>
 
         {/* Google signup */}
-        <button
+        {/* <button
           onClick={handleGoogleSignUp}
           type="button"
           className="flex items-center justify-center mt-4 text-gray-600 w-full border rounded-lg hover:bg-gray-50"
@@ -72,7 +72,7 @@ const SignUp = () => {
           <span className="w-5/6 px-4 py-3 font-bold text-center">
             Sign up with Google
           </span>
-        </button>
+        </button> */}
 
         {/* Email/password form */}
         <div className="flex items-center justify-between mt-4">
