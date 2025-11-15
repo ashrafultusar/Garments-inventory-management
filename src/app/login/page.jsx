@@ -98,7 +98,7 @@ const SignIn = () => {
               Email
             </label>
             <input
-              defaultValue={"admin@gmail.com"}
+              
               id="email"
               name="email"
               type="email"
@@ -115,7 +115,7 @@ const SignIn = () => {
               Password
             </label>
             <input
-              defaultValue={"123456"}
+             
               id="password"
               name="password"
               type="password"
