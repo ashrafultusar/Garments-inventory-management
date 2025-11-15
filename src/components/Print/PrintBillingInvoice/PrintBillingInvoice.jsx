@@ -158,7 +158,7 @@ export default function PrintBillingInvoice({ order }) {
                   </div>
 
                   <div className="text-center border-b border-black py-1 text-[11px] leading-tight">
-                    ডাইং- {batch?.finishingType} - {batch?.colour}
+                    {batch?.finishingType} - {batch?.colour}
                   </div>
 
                   {/* 2 Table Layout */}
