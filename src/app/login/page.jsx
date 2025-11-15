@@ -33,9 +33,9 @@ const SignIn = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    signIn("google", { callbackUrl: "/dashboard/order" });
-  };
+  // const handleGoogleLogin = () => {
+  //   signIn("google", { callbackUrl: "/dashboard/order" });
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
@@ -63,7 +63,7 @@ const SignIn = () => {
           <p className="mt-3 text-xl text-center text-gray-600 dark:text-gray-200">
             Welcome back!
           </p>
-
+{/* 
           <button
             onClick={handleGoogleLogin}
             type="button"
@@ -80,7 +80,7 @@ const SignIn = () => {
             <span className="w-5/6 px-4 py-3 font-bold text-center">
               Sign in with Google
             </span>
-          </button>
+          </button> */}
 
           <div className="flex items-center justify-between mt-4">
             <span className="w-1/5 border-b dark:border-gray-600 lg:w-1/4"></span>
