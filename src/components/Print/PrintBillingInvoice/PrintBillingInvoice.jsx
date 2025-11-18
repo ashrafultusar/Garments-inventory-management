@@ -87,9 +87,9 @@ export default function PrintBillingInvoice({ order }) {
       {/* Order Info */}
       <div className="grid grid-cols-3 text-sm font-medium border-b border-gray-400 pb-2 mb-4">
         <div className="space-y-1">
-          <p>
+          <p className="text-md">
             Client:{" "}
-            <span className="font-normal">{orderInfo?.companyName}</span>
+            <span className="font-normal ">{orderInfo?.companyName}</span>
           </p>
           <p>
             Cloth Type:{" "}
