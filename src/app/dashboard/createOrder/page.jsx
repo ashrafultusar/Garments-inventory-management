@@ -35,7 +35,10 @@ const Page = () => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    const formatted = `${year}-${month}-${day}`;
+
+    // const formatted = `${year}-${month}-${day}`;
+    const formatted = `${day}/${month}/${year}`;
+
     setToday(formatted);
     setFormData((prev) => ({ ...prev, date: formatted }));
   }, []);
@@ -145,12 +148,20 @@ const Page = () => {
               Date
             </label>
             <input
-              type="date"
               id="date"
+              type="text"
+              placeholder="DD/MM/YYYY"
+              required
               value={formData.date}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
+              onChange={(e) => {
+                const input = e.target.value;
+                const formatted = input
+                  .replace(/[^0-9]/g, "") 
+                  .replace(/(.{2})(.{2})(.{4})/, "$1/$2/$3") 
+                  .slice(0, 10); 
+
+                setFormData({ ...formData, date: formatted });
+              }}
               className="border px-2 py-1"
             />
           </div>

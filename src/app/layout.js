@@ -18,7 +18,12 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Garments Inventory",
   description: "Garments Inventory Application",
+  icons: {
+    icon: "/Image/fav-icon.png", 
+    apple: "/Image/fav-icon.png",
+  },
 };
+
 
 export default function RootLayout({ children }) {
   return (
