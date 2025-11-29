@@ -36,6 +36,8 @@ const DyeingPage = () => {
     }
   };
 
+console.log(dyeings);
+
   return (
     <div className="py-6 mt-10 md:-mt-4 space-y-8">
       {/* Create Button */}

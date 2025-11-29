@@ -130,10 +130,19 @@ export default function OrderPrint({ order }) {
         </tfoot>
       </table>
 
-      {/* SIGNATURE */}
-      <div className="mt-24 text-sm text-center">
-        <div className="border-t border-gray-500 border-dashed pt-1 w-40">
-          কর্তৃপক্ষের স্বাক্ষর
+        {/* Signatures */}
+        <div className="flex justify-between items-center  text-xs">
+        <div
+          className="text-center pt-4"
+          style={{ width: "120px", borderTop: "1px solid black" }}
+        >
+          <p>গ্রহীতার স্বাক্ষর</p>
+        </div>
+        <div
+          className="text-center pt-4"
+          style={{ width: "120px", borderTop: "1px solid black" }}
+        >
+          <p>পক্ষে - মেসার্স এম.এন ডাইং</p>
         </div>
       </div>
     </div>
