@@ -37,7 +37,6 @@ const CustomerPage = () => {
   };
 
 
-console.log(customers);
 
   return (
     <div className="py-6 mt-10 md:-mt-4 space-y-8">
