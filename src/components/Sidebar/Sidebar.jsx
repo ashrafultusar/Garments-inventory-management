@@ -17,7 +17,7 @@ const Sidebar = () => {
   const { data: session } = useSession();
   const pathname = usePathname();
   const imageSrc = session?.user?.image
-    ? session.user.image
+    ? session?.user?.image
     : "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=634&q=80";
 
   // Close dropdown on outside click
@@ -46,7 +46,7 @@ const Sidebar = () => {
         {/* Logo */}
         <Link href="/dashboard/order">
           <Image
-            src="https://merakiui.com/images/logo.svg"
+            src="/Image/logo.png"
             alt="Logo"
             width={100}
             height={30}
@@ -69,7 +69,7 @@ const Sidebar = () => {
           <Link href="/dashboard/order">
             <Image
               className="w-auto h-8"
-              src="https://merakiui.com/images/logo.svg"
+              src="/Image/logo.png"
               alt="Logo"
               width={100}
               height={30}
