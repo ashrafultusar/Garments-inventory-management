@@ -16,7 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Garments Inventory",
+  title: {
+    default: "NM",
+    template: "%s | NM",
+  },
   description: "Garments Inventory Application",
 };
 

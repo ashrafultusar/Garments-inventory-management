@@ -1,5 +1,6 @@
 "use client";
 
+import SearchableSelect from "@/components/OrderCreate/SearchableSelect";
 import useAppData from "@/hook/useAppData";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -35,7 +36,10 @@ const Page = () => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    const formatted = `${year}-${month}-${day}`;
+
+    // const formatted = `${year}-${month}-${day}`;
+    const formatted = `${day}/${month}/${year}`;
+
     setToday(formatted);
     setFormData((prev) => ({ ...prev, date: formatted }));
   }, []);
@@ -131,6 +135,11 @@ const Page = () => {
     }
   };
 
+
+  console.log(
+    data.customers
+  );
+
   return (
     <section className="max-w-4xl mt-14 md:mt-2 mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
       <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
@@ -145,12 +154,20 @@ const Page = () => {
               Date
             </label>
             <input
-              type="date"
               id="date"
+              type="text"
+              placeholder="DD/MM/YYYY"
+              required
               value={formData.date}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
+              onChange={(e) => {
+                const input = e.target.value;
+                const formatted = input
+                  .replace(/[^0-9]/g, "")
+                  .replace(/(.{2})(.{2})(.{4})/, "$1/$2/$3")
+                  .slice(0, 10);
+
+                setFormData({ ...formData, date: formatted });
+              }}
               className="border px-2 py-1"
             />
           </div>
@@ -172,44 +189,44 @@ const Page = () => {
 
           {/* Company Name */}
           <div className="flex flex-col">
-            <label htmlFor="companyName" className="mb-1 font-medium text-sm">
-              Company Name
-            </label>
-            <select
-              id="companyName"
-              value={formData.companyName}
-              required
-              onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            >
-              <option value="">Select Company</option>
-              {data?.customers?.map((item) => (
-                <option key={item._id} value={item.companyName}>
-                  {item.companyName}
-                </option>
-              ))}
-            </select>
+            <label className="mb-1 font-medium text-sm">Company Name</label>
+
+            <SearchableSelect
+  id="companyName"
+  value={formData.companyName}
+  onChange={(e) => {
+    const selected = data.customers.find(
+      (c) => c.companyName === e.target.value
+    );
+    setFormData({
+      ...formData,
+      companyName: selected?.companyName,
+      customerId: selected?._id,  
+    });
+  }}
+  placeholder="Select Company"
+  options={data?.customers?.map((item) => ({
+    value: item.companyName,
+    label: item.companyName,
+  }))}
+/>
+
           </div>
 
           {/* Clothe Type */}
           <div className="flex flex-col">
-            <label htmlFor="clotheType" className="mb-1 font-medium text-sm">
-              Clothe Type
-            </label>
-            <select
+            <label className="mb-1 font-medium text-sm">Cloth Type</label>
+
+            <SearchableSelect
               id="clotheType"
               value={formData.clotheType}
-              required
               onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            >
-              <option value="">Select Type</option>
-              {data?.clotheTypes?.map((item) => (
-                <option key={item.id || item.name} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Select Type"
+              options={data?.clotheTypes?.map((item) => ({
+                value: item.name,
+                label: item.name,
+              }))}
+            />
           </div>
 
           {/* Finishing Width */}
@@ -231,24 +248,19 @@ const Page = () => {
           </div>
 
           {/* Quality */}
-          <div className="flex flex-col">
-            <label htmlFor="quality" className="mb-1 font-medium text-sm">
-              Quality
-            </label>
-            <select
+          <div>
+            <label className="mb-1 font-medium text-sm">
+            Quality</label>
+            <SearchableSelect
               id="quality"
               value={formData.quality}
-              required
               onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            >
-              <option value="">Select Quality</option>
-              {data?.qualities?.map((item) => (
-                <option key={item.id || item.name} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Select Quality"
+              options={data?.qualities?.map((item) => ({
+                value: item.name,
+                label: item.name,
+              }))}
+            />
           </div>
 
           {/* Sill Name */}
@@ -256,20 +268,17 @@ const Page = () => {
             <label htmlFor="sillName" className="mb-1 font-medium text-sm">
               Sill Name
             </label>
-            <select
+
+            <SearchableSelect
               id="sillName"
               value={formData.sillName}
-              required
               onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            >
-              <option value="">Select Sill Name</option>
-              {data?.sillNames?.map((item) => (
-                <option key={item.id || item.name} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Select Sill Name"
+              options={data?.sillNames?.map((item) => ({
+                value: item.name,
+                label: item.name,
+              }))}
+            />
           </div>
 
           {/* Colour */}
@@ -277,20 +286,16 @@ const Page = () => {
             <label htmlFor="colour" className="mb-1 font-medium text-sm">
               Colour
             </label>
-            <select
+            <SearchableSelect
               id="colour"
               value={formData.colour}
-              required
               onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            >
-              <option value="">Select Colour</option>
-              {data?.colours?.map((item) => (
-                <option key={item.id || item.name} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Select Colour"
+              options={data?.colours?.map((item) => ({
+                value: item.name,
+                label: item.name,
+              }))}
+            />
           </div>
 
           {/* Finishing Type */}
@@ -298,20 +303,16 @@ const Page = () => {
             <label htmlFor="finishingType" className="mb-1 font-medium text-sm">
               Finishing Type
             </label>
-            <select
+            <SearchableSelect
               id="finishingType"
               value={formData.finishingType}
-              required
               onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            >
-              <option value="">Select Finishing</option>
-              {data?.finishingTypes?.map((item) => (
-                <option key={item.id || item.name} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Select Finishing"
+              options={data?.finishingTypes?.map((item) => ({
+                value: item.name,
+                label: item.name,
+              }))}
+            />
           </div>
 
           {/* Total Goj */}
@@ -351,20 +352,16 @@ const Page = () => {
             <label htmlFor="dyeingName" className="mb-1 font-medium text-sm">
               Dyeing Name
             </label>
-            <select
+            <SearchableSelect
               id="dyeingName"
               value={formData.dyeingName}
-              required
               onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            >
-              <option value="">Select Dyeings</option>
-              {data?.dyeings?.map((item) => (
-                <option key={item.id || item.name} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Select Dyeing Name"
+              options={data?.dyeings?.map((item) => ({
+                value: item.name,
+                label: item.name,
+              }))}
+            />
           </div>
 
           {/* Transporter Name */}
