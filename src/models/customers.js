@@ -6,7 +6,10 @@ const CustomerSchema = new mongoose.Schema({
   address: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   employeeList: { type: [String], default: [] },
+  searchText: { type: String, default: "" },
 }, { timestamps: true });
 
 
-export default mongoose.models.Customer || mongoose.model("Customer", CustomerSchema);
+mongoose.models = {};
+
+export default mongoose.model("Customer", CustomerSchema);
