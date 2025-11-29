@@ -83,6 +83,7 @@ const Orders = () => {
     }
   };
 
+  console.log(orders);
 
   return (
     <div className="py-6 text-black relative mt-10 md:-mt-4">

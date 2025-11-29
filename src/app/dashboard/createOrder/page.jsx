@@ -135,6 +135,11 @@ const Page = () => {
     }
   };
 
+
+  console.log(
+    data.customers
+  );
+
   return (
     <section className="max-w-4xl mt-14 md:mt-2 mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
       <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
@@ -187,15 +192,25 @@ const Page = () => {
             <label className="mb-1 font-medium text-sm">Company Name</label>
 
             <SearchableSelect
-              id="companyName"
-              value={formData.companyName}
-              onChange={handleChange}
-              placeholder="Select Company"
-              options={data?.customers?.map((item) => ({
-                value: item.companyName,
-                label: item.companyName,
-              }))}
-            />
+  id="companyName"
+  value={formData.companyName}
+  onChange={(e) => {
+    const selected = data.customers.find(
+      (c) => c.companyName === e.target.value
+    );
+    setFormData({
+      ...formData,
+      companyName: selected?.companyName,
+      customerId: selected?._id,  
+    });
+  }}
+  placeholder="Select Company"
+  options={data?.customers?.map((item) => ({
+    value: item.companyName,
+    label: item.companyName,
+  }))}
+/>
+
           </div>
 
           {/* Clothe Type */}
@@ -234,7 +249,8 @@ const Page = () => {
 
           {/* Quality */}
           <div>
-            <label className="mb-1 font-medium text-sm">Cloth Type</label>
+            <label className="mb-1 font-medium text-sm">
+            Quality</label>
             <SearchableSelect
               id="quality"
               value={formData.quality}
