@@ -76,13 +76,13 @@ console.log(customers);
                 <td className="px-4 py-2 text-sm flex gap-2">
                   <Link
                     href={`/dashboard/customer/edit/${c._id}`}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded cursor-pointer"
                   >
                     Edit
                   </Link>
                   <button
                     onClick={() => handleDelete(c._id)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded cursor-pointer"
                   >
                     Delete
                   </button>

@@ -86,7 +86,7 @@ const CreateCustomerPage = () => {
           <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
             >
               Save Customer
             </button>
@@ -94,7 +94,7 @@ const CreateCustomerPage = () => {
             <button
               type="button"
               onClick={() => router.push("/dashboard/customer")}
-              className="bg-gray-500 hover:bg-gray-600 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
+              className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
             >
               Cancel
             </button>
