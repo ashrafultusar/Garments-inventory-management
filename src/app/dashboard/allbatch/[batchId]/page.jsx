@@ -345,7 +345,7 @@ export default function BatchEditPage() {
         {/* Save Button */}
         <div className="flex justify-between">
           <button
-            onClick={() => router.push(`/dashboard/order`)}
+            onClick={() => router.back()}
             className="bg-red-600 text-white px-5 py-2 rounded-md hover:bg-red-700"
           >
             Cancle

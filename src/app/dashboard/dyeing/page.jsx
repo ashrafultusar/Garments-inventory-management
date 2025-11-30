@@ -36,6 +36,8 @@ const DyeingPage = () => {
     }
   };
 
+
+
   return (
     <div className="py-6 mt-10 md:-mt-4 space-y-8">
       {/* Create Button */}
@@ -71,6 +73,12 @@ const DyeingPage = () => {
                   {d.employees?.map((e) => e.employeeName).join(", ") || "N/A"}
                 </td>
                 <td className="px-4 py-2 text-sm flex gap-2">
+                <Link
+  href={`/dashboard/dyeing/profile/${d._id}`}
+  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+>
+  View
+</Link>
                   <Link
                     href={`/dashboard/dyeing/edit/${d._id}`}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"

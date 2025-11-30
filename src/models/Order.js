@@ -15,6 +15,17 @@ const orderSchema = new mongoose.Schema(
         return `#ord-${year}-${month}${day}-${random}`;
       },
     },
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+      required: true,
+    },
+
+    dyeingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Dyeing",
+    },
+
     status: {
       type: String,
       enum: [

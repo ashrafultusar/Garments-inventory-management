@@ -15,14 +15,16 @@ const EditCustomerPage = () => {
     address: "",
     phoneNumber: "",
     employeeList: "",
+    searchText: "",
   });
 
-  // fetch existing data
+  // fetch existing customer
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
         const res = await fetch(`/api/customers/${id}`);
         if (!res.ok) throw new Error("Failed to fetch customer");
+
         const data = await res.json();
         setFormData({
           companyName: data.companyName,
@@ -30,12 +32,14 @@ const EditCustomerPage = () => {
           address: data.address,
           phoneNumber: data.phoneNumber,
           employeeList: data.employeeList?.join(", "),
+          searchText: data.searchText || "",
         });
       } catch (err) {
         console.error(err);
-        toast.error("Failed to load customer");
+        toast.error("Failed to load customer data");
       }
     };
+
     if (id) fetchCustomer();
   }, [id]);
 
@@ -52,6 +56,7 @@ const EditCustomerPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+
       if (!res.ok) throw new Error("Failed to update customer");
 
       toast.success("Customer updated!");
@@ -66,12 +71,14 @@ const EditCustomerPage = () => {
     <div className="py-6 mt-10 md:-mt-4 space-y-8">
       <section className="bg-white p-6 rounded-2xl shadow-md max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">✏ Edit Customer</h2>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {[
             ["companyName", "Company Name", "text"],
             ["ownerName", "Owner Name", "text"],
             ["address", "Address", "text"],
             ["phoneNumber", "Phone Number", "tel"],
+            ["searchText", "Search Text", "text"],
           ].map(([id, label, type]) => (
             <div key={id} className="flex flex-col">
               <label htmlFor={id} className="mb-1 font-medium">{label}</label>
@@ -81,7 +88,7 @@ const EditCustomerPage = () => {
                 value={formData[id]}
                 onChange={handleChange}
                 required
-                className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           ))}
@@ -93,21 +100,22 @@ const EditCustomerPage = () => {
               value={formData.employeeList}
               onChange={handleChange}
               placeholder="Enter employee names separated by commas"
-              className="rounded-lg border border-gray-300 px-4 py-2 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="rounded-lg border border-gray-300 px-4 py-2 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg cursor-pointer font-medium"
             >
               Update Customer
             </button>
+
             <button
               type="button"
               onClick={() => router.push("/dashboard/customer")}
-              className="bg-gray-400 hover:bg-gray-500 text-white font-medium px-6 py-3 rounded-lg transition duration-200 cursor-pointer"
+              className="bg-gray-500 text-white px-6 py-3 rounded-lg font-medium cursor-pointer"
             >
               Cancel
             </button>

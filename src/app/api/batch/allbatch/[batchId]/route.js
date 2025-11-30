@@ -2,7 +2,7 @@ import connectDB from "@/lib/db";
 import Batch from "@/models/Batch"; // আপনার Batch মডেল
 import Order from "@/models/Order"; // আপনার Order মডেল
 
-// ডেটা ফেচ করার জন্য (GET)
+
 export async function GET(req, { params }) {
   await connectDB();
   // এই batchId টি হলো Embedded Batch-এর _id, পুরো Batch Document-এর নয়

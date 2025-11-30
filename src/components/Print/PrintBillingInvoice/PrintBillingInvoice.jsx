@@ -1,8 +1,11 @@
 "use client";
 
+import { IoLogoWhatsapp } from "react-icons/io";
+
+import Image from "next/image";
+
 export default function PrintBillingInvoice({ order }) {
   const orderInfo = order?.orderInfo;
-
   const batches = order?.batches || [];
 
   // Chunk batches 3 per row
@@ -11,34 +14,34 @@ export default function PrintBillingInvoice({ order }) {
     chunkedBatches.push(batches.slice(i, i + 3));
   }
 
-  // --- GRAND TOTAL CALCULATION (Finishing অনুযায়ী) ---
+  // --- GRAND TOTAL CALCULATION ---
   let grandTotalFinishGoj = 0;
   let grandTotalFinishRolls = 0;
 
-  batches.forEach((batch) => {
-    const finishingMainRows =
-      batch.rows?.map((r) => ({
-        rollNo: r.rollNo,
-        goj: Number(r.idx?.[0] || 0),
-      })) || [];
+  batches?.forEach((batch) => {
+    const finishingRows =
+      batch.rows?.map((r) => {
+        const idxValue = Number(r.idx?.[0] || 0);
 
-    const finishingExtraRows =
-      batch.rows?.flatMap(
-        (r) =>
-          r.extraInputs?.map((ex, exIndex) => ({
-            rollNo: `${r.rollNo}.${exIndex + 1}`,
-            goj: Number(r.idx?.[0] || 0) + Number(ex.value || 0),
-          })) || []
-      ) || [];
+        const extras = r.extraInputs
+          ? r.extraInputs.map((v) => Number(v || 0))
+          : [];
 
-    const finishingRows = [...finishingMainRows, ...finishingExtraRows];
+        const totalGoj = idxValue + extras.reduce((s, v) => s + v, 0);
+        const rollCount = 1 + extras.length;
+        
+        // MODIFIED LOGIC: Return the calculated row info
+        return { goj: totalGoj, rollCount };
+      }) || [];
 
     grandTotalFinishGoj += finishingRows.reduce((s, r) => s + r.goj, 0);
-    grandTotalFinishRolls += finishingRows.length;
+    
+    // MODIFIED LOGIC HERE: Only count rolls where total 'goj' > 0
+    grandTotalFinishRolls += finishingRows.reduce((s, r) => {
+      // যদি 'goj' 0 এর বেশি হয় তবেই rollCount যোগ হবে
+      return s + (r.goj > 0 ? r.rollCount : 0);
+    }, 0);
   });
-
-  console.log(chunkedBatches.finishingType);
-  console.log(chunkedBatches.colour);
 
   return (
     <div
@@ -51,19 +54,42 @@ export default function PrintBillingInvoice({ order }) {
         boxSizing: "border-box",
       }}
     >
-      {/* Header */}
-      <div className="text-center border-b-2 border-black pb-3 mb-4">
-        <h1 className="text-2xl font-bold">
-          মেসার্স এস.এন ডাইং এন্ড ফিনিশিং এজেন্ট
-        </h1>
-        <p className="text-sm">ঠিকানা: মাধবদী, নরসিংদী</p>
-      </div>
+       {/* header */}
+     <div className="border-b-2 border-black pb-3 mb-4">
+       <div className="flex flex-col items-center">
+         {/* LOGO + TITLE */}
+         <div className="flex items-center gap-3 justify-center">
+           <Image
+             src="/Image/logo.png"
+             alt="Company Logo"
+             width={60}
+             height={60}
+             className="object-contain"
+           />
+           <h1 className="text-2xl font-bold text-center -mb-3"> 
+             মেসার্স এম.এন ডাইং এন্ড ফিনিশিং এজেন্ট
+           </h1>
+         </div>
+     
+         <p className="text-sm text-center">ঠিকানা: মাধবদী, নরসিংদী</p>
+     
+         {/* Phone Line */}
+         <p className="flex items-center justify-center gap-2 text-base whitespace-nowrap">
+           <span>Phone:</span>
+           <span>01711201870</span>
+           <span>01782155151</span>
+           <IoLogoWhatsapp className="text-green-600 text-xl" />
+           <Image src="/Image/bkash.png" width={18} height={18} alt="bKash" />
+         </p>
+       </div>
+     </div>
 
+      {/* Order Info */}
       <div className="grid grid-cols-3 text-sm font-medium border-b border-gray-400 pb-2 mb-4">
         <div className="space-y-1">
-          <p>
-            পার্টির নাম:{" "}
-            <span className="font-normal">{orderInfo?.companyName}</span>
+          <p className="text-md">
+            Client:{" "}
+            <span className="font-normal ">{orderInfo?.companyName}</span>
           </p>
           <p>
             Cloth Type:{" "}
@@ -106,9 +132,9 @@ export default function PrintBillingInvoice({ order }) {
       {/* Batch Boxes */}
       <div className="mt-4 space-y-6">
         {chunkedBatches?.map((row, rowIndex) => (
-          <div key={rowIndex} className="grid grid-cols-3 gap-4">
+          <div key={rowIndex} className="grid grid-cols-3 gap-4 items-start">
             {row.map((batch, index) => {
-              // --- GRAY SECTION (Same as original) ---
+              // GRAY rows
               const grayRows =
                 batch.rows?.map((r) => ({
                   rollNo: r.rollNo,
@@ -120,29 +146,37 @@ export default function PrintBillingInvoice({ order }) {
                 0
               );
 
-              // --- FINISHING SECTION (Updated Logic) ---
-              const finishingMainRows =
-                batch.rows?.map((r) => ({
-                  rollNo: r.rollNo,
-                  goj: Number(r.idx?.[0] || 0),
-                })) || [];
+              // --- UPDATED FINISHING LOGIC ---
+              const finishingRows =
+                batch.rows?.map((r) => {
+                  const idxValue = Number(r.idx?.[0] || 0);
+                  const extras = r.extraInputs
+                    ? r.extraInputs.map((v) => Number(v || 0))
+                    : [];
 
-              const finishingExtraRows =
-                batch.rows?.flatMap(
-                  (r) =>
-                    r.extraInputs?.map((ex, exIndex) => ({
-                      rollNo: `${r.rollNo}.${exIndex + 1}`,
-                      goj: Number(r.idx?.[0] || 0) + Number(ex.value || 0),
-                    })) || []
-                ) || [];
+                  const calcText =
+                    extras.length > 0
+                      ? `${idxValue} + ${extras.join(" + ")}`
+                      : `${idxValue}`;
 
-              const finishingRows = [
-                ...finishingMainRows,
-                ...finishingExtraRows,
-              ];
+                  const totalGoj = idxValue + extras.reduce((s, v) => s + v, 0);
+                  const rollCount = 1 + extras.length; // number of values
+
+                  return {
+                    goj: totalGoj,
+                    calcText,
+                    rollCount,
+                  };
+                }) || [];
 
               const totalFinish = finishingRows.reduce(
-                (sum, r) => sum + (r.goj || 0),
+                (sum, r) => sum + r.goj,
+                0
+              );
+              
+              // MODIFIED LOGIC HERE: Calculate total rolls for the batch, excluding 0 goj entries
+              const totalFinishRolls = finishingRows.reduce(
+                (sum, r) => sum + (r.goj > 0 ? r.rollCount : 0),
                 0
               );
 
@@ -152,13 +186,13 @@ export default function PrintBillingInvoice({ order }) {
                   className="border border-black"
                   style={{ pageBreakInside: "avoid" }}
                 >
-                  {/* Header */}
+                  {/* Batch Header */}
                   <div className="text-center font-bold border-b border-black py-1">
                     {batch?.batchName} - {batch?.sillName}
                   </div>
 
                   <div className="text-center border-b border-black py-1 text-[11px] leading-tight">
-                    ডাইং- {batch?.finishingType} - {batch?.colour}
+                    {batch?.colour} - {batch?.finishingType}
                   </div>
 
                   {/* 2 Table Layout */}
@@ -211,15 +245,15 @@ export default function PrintBillingInvoice({ order }) {
                           className="grid grid-cols-2 border-b border-gray-300 text-[10px] text-center"
                         >
                           <div className="border-r border-black py-1">
-                            {r.rollNo}
+                            {r.rollCount}
                           </div>
-                          <div className="py-1">{r.goj}</div>
+                          <div className="py-1">{r.calcText}</div>
                         </div>
                       ))}
 
                       <div className="grid grid-cols-2 text-center text-[11px] font-bold border-t border-black">
                         <div className="border-r border-black py-1">
-                          রোল: {finishingRows.length}
+                          রোল: {totalFinishRolls} {/* Uses the updated total */}
                         </div>
                         <div className="py-1">গজ: {totalFinish}</div>
                       </div>
@@ -243,32 +277,23 @@ export default function PrintBillingInvoice({ order }) {
             {grandTotalFinishGoj}
           </div>
           <div className="py-2 border-r border-black">মোট রোল:</div>
-          <div className="py-2">{grandTotalFinishRolls}</div>
+          <div className="py-2">{grandTotalFinishRolls}</div> {/* Uses the updated grand total */}
         </div>
       </div>
 
       {/* Signatures */}
       <div className="flex justify-between items-center mt-24 text-xs">
-        {/* Left Signature */}
         <div
           className="text-center pt-4"
-          style={{
-            width: "120px",
-            borderTop: "1px solid black",
-          }}
-        >
-          <p>প্রদানকারীর স্বাক্ষর</p>
-        </div>
-
-        {/* Right Signature */}
-        <div
-          className="text-center pt-4"
-          style={{
-            width: "120px",
-            borderTop: "1px solid black",
-          }}
+          style={{ width: "120px", borderTop: "1px solid black" }}
         >
           <p>গ্রহীতার স্বাক্ষর</p>
+        </div>
+        <div
+          className="text-center pt-4"
+          style={{ width: "120px", borderTop: "1px solid black" }}
+        >
+          <p>পক্ষে - মেসার্স এম.এন ডাইং</p>
         </div>
       </div>
     </div>
