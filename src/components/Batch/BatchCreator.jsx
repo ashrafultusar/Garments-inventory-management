@@ -9,7 +9,7 @@ export default function BatchCreator({
   setBatchData,
   keys,
   setUsedRowIndexes,
-  selectedOrder, 
+  selectedOrder,
 }) {
   const [loading, setLoading] = useState(false);
   const { data } = useAppData();
@@ -19,16 +19,31 @@ export default function BatchCreator({
   const [selectedSill, setSelectedSill] = useState("");
   const [selectedDyeing, setSelectedDyeing] = useState("");
   const [selectedCalender, setSelectedCalender] = useState("");
+  
+  const [selectedCalenderId, setSelectedCalenderId] = useState(null);
+
+  
   const [selectedProcesses, setSelectedProcesses] = useState([]);
 
-  // ✅ Auto-fill dropdowns from selectedOrder when it changes
+  // useEffect to handle pre-selected order data
   useEffect(() => {
     if (selectedOrder) {
       setSelectedColour(selectedOrder?.colour || "");
       setSelectedFinishing(selectedOrder?.finishingType || "");
       setSelectedSill(selectedOrder?.sillName || "");
       setSelectedDyeing(selectedOrder?.dyeingName || "");
-      setSelectedCalender(selectedOrder?.calender || "");
+      
+      const calName = selectedOrder?.calender || "";
+      setSelectedCalender(calName);
+
+      // Find ID and Full Object if name exists
+      if (calName && data?.calender) {
+        const calObj = data.calender.find(c => c.name === calName);
+        if (calObj) {
+            setSelectedCalenderId(calObj._id);
+        
+        }
+      }
 
       if (selectedOrder?.selectedProcesses?.length > 0) {
         setSelectedProcesses(
@@ -38,11 +53,10 @@ export default function BatchCreator({
         );
       }
     }
-  }, [selectedOrder]);
+  }, [selectedOrder, data?.calender]);
 
   if (!batchData?.length) return null;
 
-  // 🔹 Dropdown Components
   const Dropdown = ({ label, options, selected, setSelected, optional }) => (
     <div className="w-40 mb-1">
       <label className="block mb-2 text-sm font-medium text-gray-700">
@@ -50,7 +64,16 @@ export default function BatchCreator({
       </label>
       <select
         value={selected}
-        onChange={(e) => setSelected(e.target.value)}
+        onChange={(e) => {
+          setSelected(e.target.value);
+          
+          // Logic to capture Calender ID AND Full Data
+          if (label === "Calender") {
+            const cal = options.find((opt) => opt.name === e.target.value);
+            setSelectedCalenderId(cal?._id || null);
+         
+          }
+        }}
         className="block w-full py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 cursor-pointer"
       >
         <option value="">{optional ? "None" : "Select"}</option>
@@ -96,7 +119,6 @@ export default function BatchCreator({
     );
   };
 
-  // 🔹 Create Batch (POST only)
   const confirmBatch = async () => {
     if (
       !selectedColour ||
@@ -119,8 +141,11 @@ export default function BatchCreator({
 
       const processesPayload = selectedProcesses.map((pname) => {
         const p = data.process.find((pr) => pr.name === pname);
-        return { name: p.name, price: p.price };
+        return { name: p.name, price: p?.price || 0 };
       });
+
+      const customerId = selectedOrder?.customerId?._id || selectedOrder?.customerId || null;
+      const dyeingId = selectedOrder?.dyeingId?._id || selectedOrder?.dyeingId || null;
 
       const payload = {
         orderId,
@@ -128,7 +153,14 @@ export default function BatchCreator({
         sillName: selectedSill,
         finishingType: selectedFinishing,
         dyeing: selectedDyeing,
+        
         calender: selectedCalender || null,
+        calenderId: selectedCalenderId || null,
+      
+
+        customerId: customerId,
+        dyeingId: dyeingId,
+
         rows: batchData.map((row) => ({
           rollNo: row.rollNo,
           goj: row.goj,
@@ -152,13 +184,9 @@ export default function BatchCreator({
 
       if (res.ok) {
         toast.success("Batch created successfully!");
-
-        // Used index update
         setUsedRowIndexes((prev) =>
           Array.from(new Set([...prev, ...batchData.map((r) => r.idx)]))
         );
-
-        // Reset batchData but keep autofill values
         setBatchData([]);
       } else {
         toast.error(newBatch?.message || "Batch creation failed");
@@ -225,55 +253,53 @@ export default function BatchCreator({
           </tbody>
         </table>
       </div>
-{/* Dropdowns */}
-<div className="flex justify-center gap-4 mt-4 flex-wrap py-4 border rounded-lg bg-gray-50 shadow-sm">
-  <Dropdown
-    label="Colour"
-    options={data?.colours || []}
-    selected={selectedColour}
-    setSelected={setSelectedColour}
-  />
-  <Dropdown
-    label="Sill Name"
-    options={data?.sillNames || []}
-    selected={selectedSill}
-    setSelected={setSelectedSill}
-  />
-  <Dropdown
-    label="Finishing Type"
-    options={data?.finishingTypes || []}
-    selected={selectedFinishing}
-    setSelected={setSelectedFinishing}
-  />
-  <Dropdown
-    label="Dyeing"
-    options={data?.dyeings || []}
-    selected={selectedDyeing}
-    setSelected={setSelectedDyeing}
-  />
 
-  
-{selectedProcesses.some(
-  (p) => p.toLowerCase() === "calender"
-) && (
-  <Dropdown
-    label="Calender"
-    options={data?.calender || []}
-    selected={selectedCalender}
-    setSelected={setSelectedCalender}
-    optional={true}
-  />
-)}
+      {/* Dropdowns */}
+      <div className="flex justify-center gap-4 mt-4 flex-wrap py-4 border rounded-lg bg-gray-50 shadow-sm">
+        <Dropdown
+          label="Colour"
+          options={data?.colours || []}
+          selected={selectedColour}
+          setSelected={setSelectedColour}
+        />
+        <Dropdown
+          label="Sill Name"
+          options={data?.sillNames || []}
+          selected={selectedSill}
+          setSelected={setSelectedSill}
+        />
+        <Dropdown
+          label="Finishing Type"
+          options={data?.finishingTypes || []}
+          selected={selectedFinishing}
+          setSelected={setSelectedFinishing}
+        />
+        <Dropdown
+          label="Dyeing"
+          options={data?.dyeings || []}
+          selected={selectedDyeing}
+          setSelected={setSelectedDyeing}
+        />
 
+        {/* Process List */}
+        <MultiSelectDropdown
+          label="Process List"
+          options={data?.process || []}
+          selected={selectedProcesses}
+          setSelected={setSelectedProcesses}
+        />
 
-  <MultiSelectDropdown
-    label="Process List"
-    options={data?.process || []}
-    selected={selectedProcesses}
-    setSelected={setSelectedProcesses}
-  />
-</div>
-
+        {/* Conditionally show Calender ONLY if 'Calender' is selected */}
+        {selectedProcesses.some((p) => p.toLowerCase() === "calender") && (
+          <Dropdown
+            label="Calender"
+            options={data?.calender || []}
+            selected={selectedCalender}
+            setSelected={setSelectedCalender}
+            optional={true}
+          />
+        )}
+      </div>
     </div>
   );
 }
