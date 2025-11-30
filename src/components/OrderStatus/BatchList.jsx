@@ -5,35 +5,35 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 
+
+
 export default function BatchList({ orderId }) {
   const router = useRouter();
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null);
+// Local Storage Key
+const STORAGE_KEY = `batch-data-${orderId}`;
 
-  const storageKey = `batches-${orderId}`;
-
+  // Load data from localStorage on component mount
   useEffect(() => {
-    const savedData = localStorage.getItem(storageKey);
+    const savedData = localStorage.getItem(STORAGE_KEY);
     if (savedData) {
       try {
-        const parsed = JSON.parse(savedData);
-        if (Array.isArray(parsed)) {
-          setBatches(parsed);
-        }
-      } catch (e) {
-        console.error("Error parsing localStorage data", e);
+        const parsedData = JSON.parse(savedData);
+        setBatches(parsedData);
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
       }
     }
   }, [orderId]);
 
+  // Save to localStorage whenever batches change
   useEffect(() => {
     if (batches.length > 0) {
-      localStorage.setItem(storageKey, JSON.stringify(batches));
-    } else {
-      localStorage.removeItem(storageKey);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(batches));
     }
-  }, [batches, storageKey]);
+  }, [batches]);
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -46,19 +46,16 @@ export default function BatchList({ orderId }) {
           const pendingBatches = (data.batches || []).filter(
             (batch) => batch.status === "pending"
           );
-
-          const savedData = localStorage.getItem(storageKey);
+          
+          // Merge with localStorage data
+          const savedData = localStorage.getItem(STORAGE_KEY);
           if (savedData) {
-            try {
-              const parsed = JSON.parse(savedData);
-              if (Array.isArray(parsed)) {
-                setBatches(parsed);
-              } else {
-                setBatches(pendingBatches);
-              }
-            } catch {
-              setBatches(pendingBatches);
-            }
+            const localBatches = JSON.parse(savedData);
+            const mergedBatches = pendingBatches.map(batch => {
+              const localBatch = localBatches.find(lb => lb._id === batch._id);
+              return localBatch ? { ...batch, ...localBatch } : batch;
+            });
+            setBatches(mergedBatches);
           } else {
             setBatches(pendingBatches);
           }
@@ -74,7 +71,7 @@ export default function BatchList({ orderId }) {
     };
 
     if (orderId) fetchBatches();
-  }, [orderId, storageKey]);
+  }, [orderId]);
 
   const handleInputChange = (batchIndex, rowIndex, value) => {
     const updated = [...batches];
@@ -134,11 +131,16 @@ export default function BatchList({ orderId }) {
         toast.success(
           `Batch "${updatedBatch.batchName}" status updated to "${newStatus}"!`
         );
-        setBatches((prev) => {
-          const filtered = prev.filter((b) => b._id !== batch._id);
-          localStorage.setItem(storageKey, JSON.stringify(filtered));
-          return filtered;
-        });
+        
+        // Remove from localStorage and state
+        const updatedBatches = batches.filter((b) => b._id !== batch._id);
+        setBatches(updatedBatches);
+        
+        if (updatedBatches.length > 0) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedBatches));
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
       } else {
         toast.error(data.message || "Failed to update batch");
       }
@@ -163,8 +165,16 @@ export default function BatchList({ orderId }) {
         const filtered = (data.batches || []).filter(
           (batch) => batch.status === "pending"
         );
-        setBatches(filtered);
-        localStorage.setItem(storageKey, JSON.stringify(filtered));
+        
+        // Also remove from localStorage
+        const updatedBatches = batches.filter((b) => b._id !== batchId);
+        setBatches(updatedBatches);
+        
+        if (updatedBatches.length > 0) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedBatches));
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
       } else {
         toast.error(data.message || "Delete failed");
       }
@@ -173,6 +183,14 @@ export default function BatchList({ orderId }) {
       toast.error("Server error while deleting batch");
     }
   };
+
+  // Clear localStorage when component unmounts or orderId changes
+  useEffect(() => {
+    return () => {
+      // Optional: Clear localStorage when component unmounts
+      // localStorage.removeItem(STORAGE_KEY);
+    };
+  }, [orderId]);
 
   return (
     <div className="mt-6">
@@ -231,7 +249,7 @@ export default function BatchList({ orderId }) {
                   </div>
                 </div>
 
-                {/* Note Section */}
+                {/* Note */}
                 <div className="mb-3">
                   <label className="block text-sm text-gray-600 mb-1">
                     Note:
@@ -255,21 +273,23 @@ export default function BatchList({ orderId }) {
                           <th className="px-3 py-2 border">Extra Input(s)</th>
                         </tr>
                       </thead>
+
                       <tbody>
                         {batch?.rows?.map((row, rIdx) => (
                           <tr key={rIdx} className="text-center">
-                            <td className="px-3 py-2 border">{row?.rollNo}</td>
-                            <td className="px-3 py-2 border">{row?.goj}</td>
+                            <td className="px-3 py-2 border">{row.rollNo}</td>
+                            <td className="px-3 py-2 border">{row.goj}</td>
                             <td className="px-3 py-2 border">
                               <input
                                 type="number"
                                 className="w-24 border rounded px-2 py-1 text-center"
-                               
+                                value={row.idx || ""}
                                 onChange={(e) =>
                                   handleInputChange(bIdx, rIdx, e.target.value)
                                 }
                               />
                             </td>
+
                             <td className="px-3 py-2 border">
                               <div className="space-y-1">
                                 {row.extraInputs?.map((input, idx) => (
@@ -289,6 +309,7 @@ export default function BatchList({ orderId }) {
                                     }
                                   />
                                 ))}
+
                                 <button
                                   type="button"
                                   onClick={() => addExtraInput(bIdx, rIdx)}
@@ -303,44 +324,42 @@ export default function BatchList({ orderId }) {
                         ))}
                       </tbody>
 
-                      {batch?.rows?.length > 0 && (
-                        <tfoot>
-                          <tr className="text-center font-semibold bg-gray-50">
-                            <td className="px-3 py-2 border">
-                              {batch?.rows?.length}
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch.rows.reduce(
-                                (sum, row) => sum + (Number(row.goj) || 0),
-                                0
-                              )}
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch?.rows?.reduce(
-                                (sum, row) => sum + (Number(row.idx) || 0),
-                                0
-                              )}
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch?.rows?.reduce(
-                                (sum, row) =>
-                                  sum + (row.extraInputs?.length || 0),
-                                0
-                              )}
-                            </td>
-                          </tr>
-                        </tfoot>
-                      )}
+                      <tfoot>
+                        <tr className="text-center font-semibold bg-gray-50">
+                          <td className="px-3 py-2 border">
+                            {batch.rows.length}
+                          </td>
+                          <td className="px-3 py-2 border">
+                            {batch.rows.reduce(
+                              (sum, row) => sum + (Number(row.goj) || 0),
+                              0
+                            )}
+                          </td>
+                          <td className="px-3 py-2 border">
+                            {batch.rows.reduce(
+                              (sum, row) => sum + (Number(row.idx) || 0),
+                              0
+                            )}
+                          </td>
+                          <td className="px-3 py-2 border">
+                            {batch.rows.reduce(
+                              (sum, row) =>
+                                sum + (row.extraInputs?.length || 0),
+                              0
+                            )}
+                          </td>
+                        </tr>
+                      </tfoot>
                     </table>
 
-                    {/* ✅ COLLAPSIBLE SECTION BELOW */}
+                    {/* Collapsible Section */}
                     <button
                       onClick={() =>
                         setExpandedIndex(expandedIndex === bIdx ? null : bIdx)
                       }
                       className="flex items-center justify-between w-full px-3 py-2 mt-3 bg-gray-100 border rounded text-sm text-gray-700 cursor-pointer"
                     >
-                      <span className="cursor-pointer">Show Batch Details</span>
+                      <span>Show Batch Details</span>
                       {expandedIndex === bIdx ? (
                         <ChevronUp className="w-4 h-4" />
                       ) : (
@@ -370,6 +389,7 @@ export default function BatchList({ orderId }) {
                                   </th>
                                 </tr>
                               </thead>
+
                               <tbody>
                                 <tr>
                                   <td className="px-3 py-2 border font-medium">
@@ -415,6 +435,7 @@ export default function BatchList({ orderId }) {
                                       : "—"}
                                   </td>
                                 </tr>
+
                                 {batch.calender && (
                                   <tr>
                                     <td className="px-3 py-2 border font-medium">
@@ -431,7 +452,6 @@ export default function BatchList({ orderId }) {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                 
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 mt-2">

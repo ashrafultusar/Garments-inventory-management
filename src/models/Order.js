@@ -13,14 +13,19 @@ const orderSchema = new mongoose.Schema(
         const day = String(now.getDate()).padStart(2, "0");
         const random = Math.floor(Math.random() * 900) + 100;
         return `#ord-${year}-${month}${day}-${random}`;
-      }, 
+      },
     },
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       required: true,
     },
-    
+
+    dyeingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Dyeing",
+    },
+
     status: {
       type: String,
       enum: [

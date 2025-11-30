@@ -2,13 +2,16 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
-import { FaEye, FaPrint, FaFileInvoiceDollar } from "react-icons/fa";
+import { FaEye, FaFileInvoiceDollar } from "react-icons/fa";
+import { Edit } from "lucide-react";
+import { useRouter } from 'next/navigation'
 
 export default function DeliveredBatchList({ orderId }) {
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBatches, setSelectedBatches] = useState([]);
 
+  const router = useRouter()
   // ✅ fetch batches
   const fetchDeliveredBatches = async () => {
     try {
@@ -52,37 +55,6 @@ export default function DeliveredBatchList({ orderId }) {
     }
   };
 
-  // ✅ single batch billing
-  // const handleSingleBilling = async (batchId) => {
-  //   try {
-  //     const res = await fetch("/api/batch/invoice/create", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ orderId, batchIds: [batchId] }),
-  //     });
-  //     const data = await res.json();
-
-  //     if (res.ok) {
-  //       toast.success(`Invoice ${data.invoiceNumber} created for batch`);
-
-  //       setBatches((prev) =>
-  //         prev.map((b) =>
-  //           b._id === batchId
-  //             ? {
-  //                 ...b,
-  //                 status: "billing",
-  //                 invoiceNumber: data.invoiceNumber,
-  //                 isExpanded: b.isExpanded,
-  //               }
-  //             : b
-  //         )
-  //       );
-  //     } else toast.error(data.error || "Billing failed");
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Server error during billing");
-  //   }
-  // };
 
 
   const handleSingleBilling = async (batchId) => {
@@ -105,44 +77,7 @@ export default function DeliveredBatchList({ orderId }) {
       toast.error("Server error during billing");
     }
   };
-  
 
-
-  // ✅ multiple batch billing
-  // const handleMultiBilling = async () => {
-  //   if (selectedBatches.length === 0) return;
-  //   try {
-  //     const res = await fetch("/api/batch/invoice/create", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ orderId, batchIds: selectedBatches }),
-  //     });
-  //     const data = await res.json();
-
-  //     if (res.ok) {
-  //       toast.success(
-  //         `Invoice ${data.invoiceNumber} created for ${selectedBatches.length} batches`
-  //       );
-
-  //       setBatches((prev) =>
-  //         prev.map((b) =>
-  //           selectedBatches.includes(b._id)
-  //             ? {
-  //                 ...b,
-  //                 status: "billing",
-  //                 invoiceNumber: data.invoiceNumber,
-  //                 isExpanded: b.isExpanded,
-  //               }
-  //             : b
-  //         )
-  //       );
-  //       setSelectedBatches([]);
-  //     } else toast.error(data.error || "Billing failed");
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Server error during multi billing");
-  //   }
-  // };
 
 
   const handleMultiBilling = async () => {
@@ -260,11 +195,14 @@ export default function DeliveredBatchList({ orderId }) {
                     </button>
 
                     <button
-                      className="hover:text-green-600 transition cursor-pointer"
-                      title="Print Batch"
-                    >
-                      <FaPrint size={18} />
-                    </button>
+  className="hover:text-green-600 transition cursor-pointer"
+  title="Edit Batch"
+  onClick={() => router.push(`/dashboard/deliveredBatch/${batch._id}`)}
+>
+  <Edit size={18} />
+</button>
+
+
 
                     <button
                       className="hover:text-orange-500 transition cursor-pointer"

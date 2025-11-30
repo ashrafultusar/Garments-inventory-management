@@ -2,11 +2,13 @@ import connectDB from "@/lib/db";
 import Batch from "@/models/Batch";
 import { NextResponse } from "next/server";
 
-// CREATE Batch
+
 export async function POST(req) {
   await connectDB();
+
   try {
     const body = await req.json();
+
     const {
       orderId,
       colour,
@@ -14,11 +16,13 @@ export async function POST(req) {
       finishingType,
       dyeing,
       calender,
+      customerId,
+      dyeingId,
+      calenderId,
       rows,
       selectedProcesses,
     } = body;
 
-    // ✅ Required field validation
     if (
       !orderId ||
       !colour ||
@@ -34,24 +38,27 @@ export async function POST(req) {
       );
     }
 
-    // ✅ Find existing batch doc by orderId
     let existing = await Batch.findOne({ orderId });
 
-    // ✅ Prepare new batch object with default status
     const newBatch = {
-      batchName: "Batch 1", // default, will update below
-      status: "pending", // ✅ auto set
+      batchName: "Batch 1",
+      status: "pending",
       colour,
       sillName,
       finishingType,
       dyeing,
       calender: calender || null,
+      
+      customerId: customerId || null,
+      dyeingId: dyeingId || null,
+      calenderId: calenderId || null,
+      
+      
       rows,
       selectedProcesses,
     };
 
     if (existing) {
-      // ✅ Auto-increment batch number
       const lastBatchNumber =
         existing.batches.length > 0
           ? Math.max(
@@ -68,11 +75,11 @@ export async function POST(req) {
 
       return NextResponse.json(existing, { status: 200 });
     } else {
-      // ✅ First batch for this order
       const created = await Batch.create({
         orderId,
         batches: [newBatch],
       });
+
       return NextResponse.json(created, { status: 201 });
     }
   } catch (error) {

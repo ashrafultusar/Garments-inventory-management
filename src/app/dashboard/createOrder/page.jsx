@@ -25,7 +25,7 @@ const Page = () => {
     finishingType: "",
     totalGoj: "",
     totalBundle: "",
-    dyeingName: "",
+    dyeingName: "",dyeingId:"",
     transporterName: "",
   });
 
@@ -101,6 +101,9 @@ const Page = () => {
     e.preventDefault();
     try {
       const payload = { ...formData, tableData };
+
+ 
+
       const res = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -352,16 +355,29 @@ const Page = () => {
             <label htmlFor="dyeingName" className="mb-1 font-medium text-sm">
               Dyeing Name
             </label>
-            <SearchableSelect
-              id="dyeingName"
-              value={formData.dyeingName}
-              onChange={handleChange}
-              placeholder="Select Dyeing Name"
-              options={data?.dyeings?.map((item) => ({
-                value: item.name,
-                label: item.name,
-              }))}
-            />
+          
+
+<SearchableSelect
+  id="dyeingName"
+  value={formData.dyeingId}
+  onChange={(e) => {
+    const selected = data.dyeings.find(
+      (d) => d.name === e.target.value
+    );
+    setFormData({
+      ...formData,
+      dyeingName: selected?.name,   // name optional
+      dyeingId: selected?._id,      // ✅ Dyeing _id add
+    });
+  }}
+  placeholder="Select Dyeing Name"
+  options={data?.dyeings?.map((item) => ({
+    value: item.name,
+    label: item.name,
+  }))}
+/>
+
+
           </div>
 
           {/* Transporter Name */}
