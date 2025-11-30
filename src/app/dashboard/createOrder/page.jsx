@@ -149,38 +149,30 @@ const Page = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">
           {/* Date */}
     
+       
           <div className="flex flex-col">
   <label htmlFor="date" className="mb-1 font-medium text-sm">
     Date
   </label>
 
-  <div className="relative">
-    {/* Visible input (DD/MM/YYYY) */}
-    <input
-      type="text"
-      readOnly
-      value={formData.date}
-      className="border px-2 py-2 w-full cursor-pointer bg-white"
-      onClick={() => document.getElementById("hiddenDate").showPicker()}
-    />
+  <input
+    id="date"
+    type="date"
+    required
+    value={
+      formData.date
+        ? formData.date.split("/").reverse().join("-") // DD/MM/YYYY → YYYY-MM-DD
+        : ""
+    }
+    onChange={(e) => {
+      const value = e.target.value;            // YYYY-MM-DD
+      const [y, m, d] = value.split("-");
+      const formatted = `${d}/${m}/${y}`;      // → DD/MM/YYYY
 
-    {/* Real HTML5 date picker */}
-    <input
-      id="hiddenDate"
-      type="date"
-      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-      value={
-        formData.date
-          ? formData.date.split("/").reverse().join("-")
-          : ""
-      }
-      onChange={(e) => {
-        const [y, m, d] = e.target.value.split("-");
-        const formatted = `${d}/${m}/${y}`; // DD/MM/YYYY
-        setFormData({ ...formData, date: formatted });
-      }}
-    />
-  </div>
+      setFormData({ ...formData, date: formatted });
+    }}
+    className="border px-2 py-1"
+  />
 </div>
 
 

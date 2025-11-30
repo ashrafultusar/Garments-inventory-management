@@ -34,35 +34,38 @@ export default function OrderPrint({ order }) {
 
   return (
     <div className="print-area font-sans mt-12 text-gray-900 bg-white p-10 max-w-3xl mx-auto border border-gray-300 rounded-lg shadow-md print:shadow-none print:border-none print:p-0">
-     {/* header */}
-<div className="border-b-2 border-black pb-3 mb-4">
-  <div className="flex flex-col items-center">
-    {/* LOGO + TITLE */}
-    <div className="flex items-center gap-3 justify-center">
-      <Image
-        src="/Image/logo.png"
-        alt="Company Logo"
-        width={60}
-        height={60}
-        className="object-contain"
-      />
-      <h1 className="text-2xl font-bold text-center -mb-3"> 
-        মেসার্স এম.এন ডাইং এন্ড ফিনিশিং এজেন্ট
-      </h1>
-    </div>
+      {/* header */}
+      <div className="border-b-2 border-black pb-3 mb-4">
+        <div className="flex flex-col items-center">
+          {/* LOGO + TITLE */}
+          <div className="flex items-center gap-3 justify-center">
+            <Image
+              src="/Image/logo.png"
+              alt="Company Logo"
+              width={60}
+              height={60}
+              priority
+              loading="eager"
+              className="object-contain"
+            />
+            <h1 className="text-2xl font-bold text-center -mb-3">
+              মেসার্স এম.এন ডাইং এন্ড ফিনিশিং এজেন্ট
+            </h1>
+          </div>
 
-    <p className="text-sm text-center">ঠিকানা: মাধবদী, নরসিংদী</p>
+          <p className="text-sm text-center">ঠিকানা: মাধবদী, নরসিংদী</p>
 
-    {/* Phone Line */}
-    <p className="flex items-center justify-center gap-2 text-base whitespace-nowrap">
-      <span>Phone:</span>
-      <span>01711201870</span>
-      <span>01782155151</span>
-      <IoLogoWhatsapp className="text-green-600 text-xl" />
-      <Image src="/Image/bkash.png" width={18} height={18} alt="bKash" />
-    </p>
-  </div>
-</div>
+          {/* Phone Line */}
+          <p className="flex items-center justify-center gap-2 text-base whitespace-nowrap">
+            <span>Phone:</span>
+            <span>01711201870</span>
+            <span>01782155151</span>
+            <IoLogoWhatsapp className="text-green-600 text-xl" />
+            <Image src="/Image/bkash.png" width={18} height={18} alt="bKash"  priority
+  loading="eager"/>
+          </p>
+        </div>
+      </div>
 
       {/* ORDER INFO */}
       <div className="grid grid-cols-3 text-sm font-medium border-b border-gray-400 pb-2 mb-4">
@@ -130,8 +133,8 @@ export default function OrderPrint({ order }) {
         </tfoot>
       </table>
 
-        {/* Signatures */}
-        <div className="flex justify-between items-center  text-xs">
+      {/* Signatures */}
+      <div className="flex justify-between items-center  text-xs">
         <div
           className="text-center pt-4"
           style={{ width: "120px", borderTop: "1px solid black" }}

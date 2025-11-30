@@ -59,13 +59,15 @@ export default function PrintBillingInvoice({ order }) {
        <div className="flex flex-col items-center">
          {/* LOGO + TITLE */}
          <div className="flex items-center gap-3 justify-center">
-           <Image
-             src="/Image/logo.png"
-             alt="Company Logo"
-             width={60}
-             height={60}
-             className="object-contain"
-           />
+          <Image
+                       src="/Image/logo.png"
+                       alt="Company Logo"
+                       width={60}
+                       height={60}
+                       priority
+                       loading="eager"
+                       className="object-contain"
+                     />
            <h1 className="text-2xl font-bold text-center -mb-3"> 
              মেসার্স এম.এন ডাইং এন্ড ফিনিশিং এজেন্ট
            </h1>
@@ -79,7 +81,8 @@ export default function PrintBillingInvoice({ order }) {
            <span>01711201870</span>
            <span>01782155151</span>
            <IoLogoWhatsapp className="text-green-600 text-xl" />
-           <Image src="/Image/bkash.png" width={18} height={18} alt="bKash" />
+          <Image src="/Image/bkash.png" width={18} height={18} alt="bKash"  priority
+            loading="eager"/>
          </p>
        </div>
      </div>

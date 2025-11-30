@@ -127,7 +127,30 @@
   }
 }
 
+/* inpute up down value off css */
 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* image force load */
+@media print {
+  img {
+    display: block !important;
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+
+/* print page css code */
 
 @media print {
   /* Hide everything except .print-only */
