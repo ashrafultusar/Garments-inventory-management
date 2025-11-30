@@ -36,8 +36,6 @@ const CustomerPage = () => {
     }
   };
 
-
-
   return (
     <div className="py-6 mt-10 md:-mt-4 space-y-8">
       {/* Create Button */}
@@ -56,12 +54,24 @@ const CustomerPage = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">#</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Company</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Owner</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Phone</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Employees</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                #
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Company
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Owner
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Phone
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Employees
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -71,8 +81,17 @@ const CustomerPage = () => {
                 <td className="px-4 py-2 text-sm">{c.companyName}</td>
                 <td className="px-4 py-2 text-sm">{c.ownerName}</td>
                 <td className="px-4 py-2 text-sm">{c.phoneNumber}</td>
-                <td className="px-4 py-2 text-sm">{c.employeeList.join(", ") || "N/A"}</td>
+                <td className="px-4 py-2 text-sm">
+                  {c.employeeList.join(", ") || "N/A"}
+                </td>
                 <td className="px-4 py-2 text-sm flex gap-2">
+                <Link
+  href={`/dashboard/customer/profile/${c._id}`}
+  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+>
+  View
+</Link>
+
                   <Link
                     href={`/dashboard/customer/edit/${c._id}`}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded cursor-pointer"
@@ -85,6 +104,7 @@ const CustomerPage = () => {
                   >
                     Delete
                   </button>
+
                 </td>
               </tr>
             ))}
