@@ -11,30 +11,6 @@ export default function BatchList({ orderId }) {
   const [loading, setLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null);
 
-  const storageKey = `batches-${orderId}`;
-
-  useEffect(() => {
-    const savedData = localStorage.getItem(storageKey);
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        if (Array.isArray(parsed)) {
-          setBatches(parsed);
-        }
-      } catch (e) {
-        console.error("Error parsing localStorage data", e);
-      }
-    }
-  }, [orderId]);
-
-  useEffect(() => {
-    if (batches.length > 0) {
-      localStorage.setItem(storageKey, JSON.stringify(batches));
-    } else {
-      localStorage.removeItem(storageKey);
-    }
-  }, [batches, storageKey]);
-
   useEffect(() => {
     const fetchBatches = async () => {
       try {
@@ -46,22 +22,7 @@ export default function BatchList({ orderId }) {
           const pendingBatches = (data.batches || []).filter(
             (batch) => batch.status === "pending"
           );
-
-          const savedData = localStorage.getItem(storageKey);
-          if (savedData) {
-            try {
-              const parsed = JSON.parse(savedData);
-              if (Array.isArray(parsed)) {
-                setBatches(parsed);
-              } else {
-                setBatches(pendingBatches);
-              }
-            } catch {
-              setBatches(pendingBatches);
-            }
-          } else {
-            setBatches(pendingBatches);
-          }
+          setBatches(pendingBatches);
         } else {
           toast.error(data.error || "Failed to load batches");
         }
@@ -74,7 +35,7 @@ export default function BatchList({ orderId }) {
     };
 
     if (orderId) fetchBatches();
-  }, [orderId, storageKey]);
+  }, [orderId]);
 
   const handleInputChange = (batchIndex, rowIndex, value) => {
     const updated = [...batches];
@@ -134,11 +95,7 @@ export default function BatchList({ orderId }) {
         toast.success(
           `Batch "${updatedBatch.batchName}" status updated to "${newStatus}"!`
         );
-        setBatches((prev) => {
-          const filtered = prev.filter((b) => b._id !== batch._id);
-          localStorage.setItem(storageKey, JSON.stringify(filtered));
-          return filtered;
-        });
+        setBatches((prev) => prev.filter((b) => b._id !== batch._id));
       } else {
         toast.error(data.message || "Failed to update batch");
       }
@@ -164,7 +121,6 @@ export default function BatchList({ orderId }) {
           (batch) => batch.status === "pending"
         );
         setBatches(filtered);
-        localStorage.setItem(storageKey, JSON.stringify(filtered));
       } else {
         toast.error(data.message || "Delete failed");
       }
@@ -231,7 +187,7 @@ export default function BatchList({ orderId }) {
                   </div>
                 </div>
 
-                {/* Note Section */}
+                {/* Note */}
                 <div className="mb-3">
                   <label className="block text-sm text-gray-600 mb-1">
                     Note:
@@ -255,21 +211,22 @@ export default function BatchList({ orderId }) {
                           <th className="px-3 py-2 border">Extra Input(s)</th>
                         </tr>
                       </thead>
+
                       <tbody>
                         {batch?.rows?.map((row, rIdx) => (
                           <tr key={rIdx} className="text-center">
-                            <td className="px-3 py-2 border">{row?.rollNo}</td>
-                            <td className="px-3 py-2 border">{row?.goj}</td>
+                            <td className="px-3 py-2 border">{row.rollNo}</td>
+                            <td className="px-3 py-2 border">{row.goj}</td>
                             <td className="px-3 py-2 border">
                               <input
                                 type="number"
                                 className="w-24 border rounded px-2 py-1 text-center"
-                               
                                 onChange={(e) =>
                                   handleInputChange(bIdx, rIdx, e.target.value)
                                 }
                               />
                             </td>
+
                             <td className="px-3 py-2 border">
                               <div className="space-y-1">
                                 {row.extraInputs?.map((input, idx) => (
@@ -289,6 +246,7 @@ export default function BatchList({ orderId }) {
                                     }
                                   />
                                 ))}
+
                                 <button
                                   type="button"
                                   onClick={() => addExtraInput(bIdx, rIdx)}
@@ -303,44 +261,42 @@ export default function BatchList({ orderId }) {
                         ))}
                       </tbody>
 
-                      {batch?.rows?.length > 0 && (
-                        <tfoot>
-                          <tr className="text-center font-semibold bg-gray-50">
-                            <td className="px-3 py-2 border">
-                              {batch?.rows?.length}
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch.rows.reduce(
-                                (sum, row) => sum + (Number(row.goj) || 0),
-                                0
-                              )}
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch?.rows?.reduce(
-                                (sum, row) => sum + (Number(row.idx) || 0),
-                                0
-                              )}
-                            </td>
-                            <td className="px-3 py-2 border">
-                              {batch?.rows?.reduce(
-                                (sum, row) =>
-                                  sum + (row.extraInputs?.length || 0),
-                                0
-                              )}
-                            </td>
-                          </tr>
-                        </tfoot>
-                      )}
+                      <tfoot>
+                        <tr className="text-center font-semibold bg-gray-50">
+                          <td className="px-3 py-2 border">
+                            {batch.rows.length}
+                          </td>
+                          <td className="px-3 py-2 border">
+                            {batch.rows.reduce(
+                              (sum, row) => sum + (Number(row.goj) || 0),
+                              0
+                            )}
+                          </td>
+                          <td className="px-3 py-2 border">
+                            {batch.rows.reduce(
+                              (sum, row) => sum + (Number(row.idx) || 0),
+                              0
+                            )}
+                          </td>
+                          <td className="px-3 py-2 border">
+                            {batch.rows.reduce(
+                              (sum, row) =>
+                                sum + (row.extraInputs?.length || 0),
+                              0
+                            )}
+                          </td>
+                        </tr>
+                      </tfoot>
                     </table>
 
-                    {/* ✅ COLLAPSIBLE SECTION BELOW */}
+                    {/* Collapsible Section */}
                     <button
                       onClick={() =>
                         setExpandedIndex(expandedIndex === bIdx ? null : bIdx)
                       }
                       className="flex items-center justify-between w-full px-3 py-2 mt-3 bg-gray-100 border rounded text-sm text-gray-700 cursor-pointer"
                     >
-                      <span className="cursor-pointer">Show Batch Details</span>
+                      <span>Show Batch Details</span>
                       {expandedIndex === bIdx ? (
                         <ChevronUp className="w-4 h-4" />
                       ) : (
@@ -370,6 +326,7 @@ export default function BatchList({ orderId }) {
                                   </th>
                                 </tr>
                               </thead>
+
                               <tbody>
                                 <tr>
                                   <td className="px-3 py-2 border font-medium">
@@ -415,6 +372,7 @@ export default function BatchList({ orderId }) {
                                       : "—"}
                                   </td>
                                 </tr>
+
                                 {batch.calender && (
                                   <tr>
                                     <td className="px-3 py-2 border font-medium">
@@ -431,7 +389,6 @@ export default function BatchList({ orderId }) {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                 
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 mt-2">

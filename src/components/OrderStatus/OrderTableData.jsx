@@ -34,7 +34,7 @@ export default function OrderTableData({
             .flatMap((b) =>
               (b.rows || [])
                 .map((r) => r.idx)
-                .flat() // <-- important: this flattens nested [idx] arrays
+                .flat() 
                 .filter((x) => typeof x === "number")
             );
   
