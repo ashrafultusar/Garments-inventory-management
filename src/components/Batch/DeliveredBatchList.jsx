@@ -4,12 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import { FaEye, FaFileInvoiceDollar } from "react-icons/fa";
 import { Edit } from "lucide-react";
+import { useRouter } from 'next/navigation'
 
 export default function DeliveredBatchList({ orderId }) {
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBatches, setSelectedBatches] = useState([]);
 
+  const router = useRouter()
   // ✅ fetch batches
   const fetchDeliveredBatches = async () => {
     try {
@@ -193,11 +195,14 @@ export default function DeliveredBatchList({ orderId }) {
                     </button>
 
                     <button
-                      className="hover:text-green-600 transition cursor-pointer"
-                      title="Print Batch"
-                    >
-                      <Edit size={18} />
-                    </button>
+  className="hover:text-green-600 transition cursor-pointer"
+  title="Edit Batch"
+  onClick={() => router.push(`/dashboard/deliveredBatch/${batch._id}`)}
+>
+  <Edit size={18} />
+</button>
+
+
 
                     <button
                       className="hover:text-orange-500 transition cursor-pointer"
