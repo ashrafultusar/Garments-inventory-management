@@ -36,13 +36,12 @@ const Page = () => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-
-    // const formatted = `${year}-${month}-${day}`;
+  
     const formatted = `${day}/${month}/${year}`;
-
     setToday(formatted);
     setFormData((prev) => ({ ...prev, date: formatted }));
   }, []);
+  
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -139,9 +138,6 @@ const Page = () => {
   };
 
 
-  console.log(
-    data.customers
-  );
 
   return (
     <section className="max-w-4xl mt-14 md:mt-2 mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
@@ -152,28 +148,42 @@ const Page = () => {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">
           {/* Date */}
+    
           <div className="flex flex-col">
-            <label htmlFor="date" className="mb-1 font-medium text-sm">
-              Date
-            </label>
-            <input
-              id="date"
-              type="text"
-              placeholder="DD/MM/YYYY"
-              required
-              value={formData.date}
-              onChange={(e) => {
-                const input = e.target.value;
-                const formatted = input
-                  .replace(/[^0-9]/g, "")
-                  .replace(/(.{2})(.{2})(.{4})/, "$1/$2/$3")
-                  .slice(0, 10);
+  <label htmlFor="date" className="mb-1 font-medium text-sm">
+    Date
+  </label>
 
-                setFormData({ ...formData, date: formatted });
-              }}
-              className="border px-2 py-1"
-            />
-          </div>
+  <div className="relative">
+    {/* Visible input (DD/MM/YYYY) */}
+    <input
+      type="text"
+      readOnly
+      value={formData.date}
+      className="border px-2 py-2 w-full cursor-pointer bg-white"
+      onClick={() => document.getElementById("hiddenDate").showPicker()}
+    />
+
+    {/* Real HTML5 date picker */}
+    <input
+      id="hiddenDate"
+      type="date"
+      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+      value={
+        formData.date
+          ? formData.date.split("/").reverse().join("-")
+          : ""
+      }
+      onChange={(e) => {
+        const [y, m, d] = e.target.value.split("-");
+        const formatted = `${d}/${m}/${y}`; // DD/MM/YYYY
+        setFormData({ ...formData, date: formatted });
+      }}
+    />
+  </div>
+</div>
+
+
 
           {/* Invoice Number */}
           <div className="flex flex-col">
