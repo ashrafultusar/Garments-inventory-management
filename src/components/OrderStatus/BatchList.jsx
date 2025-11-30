@@ -5,11 +5,35 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 
+
+
 export default function BatchList({ orderId }) {
   const router = useRouter();
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null);
+// Local Storage Key
+const STORAGE_KEY = `batch-data-${orderId}`;
+
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setBatches(parsedData);
+      } catch (error) {
+        console.error("Error parsing localStorage data:", error);
+      }
+    }
+  }, [orderId]);
+
+  // Save to localStorage whenever batches change
+  useEffect(() => {
+    if (batches.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(batches));
+    }
+  }, [batches]);
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -22,7 +46,19 @@ export default function BatchList({ orderId }) {
           const pendingBatches = (data.batches || []).filter(
             (batch) => batch.status === "pending"
           );
-          setBatches(pendingBatches);
+          
+          // Merge with localStorage data
+          const savedData = localStorage.getItem(STORAGE_KEY);
+          if (savedData) {
+            const localBatches = JSON.parse(savedData);
+            const mergedBatches = pendingBatches.map(batch => {
+              const localBatch = localBatches.find(lb => lb._id === batch._id);
+              return localBatch ? { ...batch, ...localBatch } : batch;
+            });
+            setBatches(mergedBatches);
+          } else {
+            setBatches(pendingBatches);
+          }
         } else {
           toast.error(data.error || "Failed to load batches");
         }
@@ -95,7 +131,16 @@ export default function BatchList({ orderId }) {
         toast.success(
           `Batch "${updatedBatch.batchName}" status updated to "${newStatus}"!`
         );
-        setBatches((prev) => prev.filter((b) => b._id !== batch._id));
+        
+        // Remove from localStorage and state
+        const updatedBatches = batches.filter((b) => b._id !== batch._id);
+        setBatches(updatedBatches);
+        
+        if (updatedBatches.length > 0) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedBatches));
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
       } else {
         toast.error(data.message || "Failed to update batch");
       }
@@ -120,7 +165,16 @@ export default function BatchList({ orderId }) {
         const filtered = (data.batches || []).filter(
           (batch) => batch.status === "pending"
         );
-        setBatches(filtered);
+        
+        // Also remove from localStorage
+        const updatedBatches = batches.filter((b) => b._id !== batchId);
+        setBatches(updatedBatches);
+        
+        if (updatedBatches.length > 0) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedBatches));
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
       } else {
         toast.error(data.message || "Delete failed");
       }
@@ -129,6 +183,14 @@ export default function BatchList({ orderId }) {
       toast.error("Server error while deleting batch");
     }
   };
+
+  // Clear localStorage when component unmounts or orderId changes
+  useEffect(() => {
+    return () => {
+      // Optional: Clear localStorage when component unmounts
+      // localStorage.removeItem(STORAGE_KEY);
+    };
+  }, [orderId]);
 
   return (
     <div className="mt-6">
@@ -221,6 +283,7 @@ export default function BatchList({ orderId }) {
                               <input
                                 type="number"
                                 className="w-24 border rounded px-2 py-1 text-center"
+                                value={row.idx || ""}
                                 onChange={(e) =>
                                   handleInputChange(bIdx, rIdx, e.target.value)
                                 }
