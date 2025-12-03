@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 const Page = () => {
   const { data } = useAppData();
   const router = useRouter();
-  console.log(data);
+
   const [tableData, setTableData] = useState([{ goj: "" }]);
   const inputRefs = useRef([]);
   const [formData, setFormData] = useState({
