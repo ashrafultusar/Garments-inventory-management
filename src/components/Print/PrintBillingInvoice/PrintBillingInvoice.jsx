@@ -64,7 +64,7 @@ export default function PrintBillingInvoice({ order }) {
                        alt="Company Logo"
                        width={60}
                        height={60}
-                       priority
+                       priority unoptimized   
                        loading="eager"
                        className="object-contain"
                      />
@@ -81,7 +81,7 @@ export default function PrintBillingInvoice({ order }) {
            <span>01711201870</span>
            <span>01782155151</span>
            <IoLogoWhatsapp className="text-green-600 text-xl" />
-          <Image src="/Image/bkash.png" width={18} height={18} alt="bKash"  priority
+          <Image src="/Image/bkash.png" width={18} unoptimized    height={18} alt="bKash"  priority
             loading="eager"/>
          </p>
        </div>
