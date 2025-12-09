@@ -198,7 +198,9 @@ console.log(batches);
                     <button
   className="hover:text-green-600 transition cursor-pointer"
   title="Edit Batch"
-  onClick={() => router.push(`/dashboard/deliveredBatch/${batch._id}`)}
+  onClick={() =>
+    router.push(`/dashboard/allbatch/${batch._id}`)
+  }
 >
   <Edit size={18} />
 </button>
