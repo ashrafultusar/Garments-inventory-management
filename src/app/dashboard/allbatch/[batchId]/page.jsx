@@ -307,7 +307,7 @@ export default function BatchEditPage() {
         <div className="mb-4">
           <button
             onClick={() => setAddingRow(!addingRow)}
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-blue-700"
           >
             <Plus className="w-4 h-4 mr-1" />
             {addingRow ? "Cancel Add" : "Add Row from Order"}
@@ -346,13 +346,13 @@ export default function BatchEditPage() {
         <div className="flex justify-between">
           <button
             onClick={() => router.back()}
-            className="bg-red-600 text-white px-5 py-2 rounded-md hover:bg-red-700"
+            className="bg-red-600 text-white px-5 py-2 rounded-md cursor-pointer hover:bg-red-700"
           >
             Cancle
           </button>
           <button
             onClick={handleSave}
-            className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700"
+            className="bg-green-600 text-white px-5 py-2 rounded-md cursor-pointer hover:bg-green-700"
             disabled={loading}
           >
             {loading ? "Saving..." : "Save Changes"}

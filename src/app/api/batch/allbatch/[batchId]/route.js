@@ -5,51 +5,61 @@ import Order from "@/models/Order"; // আপনার Order মডেল
 
 export async function GET(req, { params }) {
   await connectDB();
-  // এই batchId টি হলো Embedded Batch-এর _id, পুরো Batch Document-এর নয়
   const { batchId: embeddedBatchId } = params;
 
   try {
-    // 1. সেই Batch ডকুমেন্টটি খুঁজে বের করুন যার batches অ্যারের মধ্যে এই embeddedBatchId টি আছে
+    // 1️⃣ এই embeddedBatchId যে Batch ডকুমেন্টের ভেতরে আছে, সেই পুরো ডকুমেন্ট আনো
     const batchDocument = await Batch.findOne(
       { "batches._id": embeddedBatchId },
-      // শুধু প্রয়োজনীয় ফিল্ডগুলো প্রজেক্ট করুন
-      { orderId: 1, batches: { $elemMatch: { _id: embeddedBatchId } } }
+      { orderId: 1, batches: 1 } // ❗ এখানে আর $elemMatch ব্যবহার করছিনা, full batches দরকার
     ).lean();
 
-    if (
-      !batchDocument ||
-      !batchDocument.batches ||
-      batchDocument.batches.length === 0
-    ) {
+    if (!batchDocument || !Array.isArray(batchDocument.batches)) {
       return new Response(JSON.stringify({ error: "Batch not found" }), {
         status: 404,
       });
     }
 
-    // 2. Embedded Batch এবং Parent Order ID এক্সট্রাক্ট করুন
-    const embeddedBatch = batchDocument.batches[0];
+    // 2️⃣ ওই embedded batch টা বের করো
+    const embeddedBatch = batchDocument.batches.find(
+      (b) => String(b._id) === String(embeddedBatchId)
+    );
+
+    if (!embeddedBatch) {
+      return new Response(JSON.stringify({ error: "Embedded batch not found" }), {
+        status: 404,
+      });
+    }
+
     const parentOrderId = batchDocument.orderId;
 
-    // 3. Parent Order থেকে সমস্ত tableData (rows) খুঁজে বের করুন
+    // 3️⃣ সব batches থেকে used rollNo collect করো
+    const usedRollNos = new Set();
+
+    batchDocument.batches.forEach((b) => {
+      (b.rows || []).forEach((r) => {
+        if (r?.rollNo != null) {
+          usedRollNos.add(r.rollNo);
+        }
+      });
+    });
+
+    // 4️⃣ Order থেকে সব tableData আনো
     const order = await Order.findById(parentOrderId).lean();
 
     let availableRows = [];
     if (order && Array.isArray(order.tableData)) {
-      // এই Embedded Batch-এ ইতিমধ্যেই থাকা rollNo সংগ্রহ করা (rollNo Unique ধরে নেওয়া হলো)
-      const batchRollNos = new Set(embeddedBatch.rows.map((row) => row.rollNo));
-
-      // 4. Order-এর tableData থেকে যেগুলো এই ব্যাচে নেই, সেগুলোকে filtering করা
+      // ❗ যেসব rollNo কোনো batch-এই use হয়নি, শুধু সেগুলো available
       availableRows = order.tableData.filter(
-        (row) => !batchRollNos.has(row.rollNo)
+        (row) => !usedRollNos.has(row.rollNo)
       );
     }
 
-    // 5. Embedded Batch ডেটা এবং যোগ করার জন্য উপলব্ধ row গুলি একসাথে পাঠানো
+    // 5️⃣ ডেটা পাঠিয়ে দাও
     return new Response(
       JSON.stringify({
         embeddedBatch,
         availableRows,
-        // সুবিধার জন্য পুরো Batch Document-এর _id ও পাঠিয়ে দেওয়া হলো
         parentBatchDocId: batchDocument._id,
       }),
       { status: 200 }
@@ -58,9 +68,7 @@ export async function GET(req, { params }) {
     console.error(err);
     return new Response(
       JSON.stringify({ error: err.message || "Server error" }),
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }
