@@ -472,7 +472,7 @@
 "use client";
 import { Delete, Edit, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef  } from "react";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -481,6 +481,7 @@ export default function BatchList({ orderId }) {
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null);
+  const indexRefs = useRef([]);
 
   // Local Storage Key
   const STORAGE_KEY = `batch-data-${orderId}`;
@@ -779,9 +780,27 @@ export default function BatchList({ orderId }) {
                                 type="number"
                                 className="w-24 border rounded px-2 py-1 text-center"
                                 value={row.idx || ""}
+                                ref={(el) => {
+                                  if (!indexRefs.current[bIdx]) {
+                                    indexRefs.current[bIdx] = [];
+                                  }
+                                  indexRefs.current[bIdx][rIdx] = el;
+                                }}
                                 onChange={(e) =>
                                   handleInputChange(bIdx, rIdx, e.target.value)
-                                }
+                                } onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                              
+                                    const nextInput =
+                                      indexRefs.current?.[bIdx]?.[rIdx + 1];
+                              
+                                    if (nextInput) {
+                                      nextInput.focus();
+                                    }
+                                  }
+                                }}
+                                onWheel={(e) => e.target.blur()}
                               />
                             </td>
 

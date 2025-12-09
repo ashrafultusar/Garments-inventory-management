@@ -34,7 +34,7 @@ export default function BillingBatch({ orderId }) {
           }))
         );
       } else {
-        toast.error(invoiceData.error || "Failed to load invoice data");
+        // toast.error(invoiceData.error || "Failed to load invoice data");
       }
 
       if (orderRes.ok) {

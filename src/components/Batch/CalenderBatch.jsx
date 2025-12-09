@@ -108,8 +108,8 @@ export default function CalendarBatch({ orderId }) {
                 </h4>
                 <div className="flex gap-2">
                   <button
-                    onClick={() =>
-                      router.push(`/dashboard/calenderbatch/${batch._id}`)
+                     onClick={() =>
+                      router.push(`/dashboard/allbatch/${batch._id}`)
                     }
                     className="text-blue-500 hover:text-blue-700 cursor-pointer"
                     title="Edit Batch"

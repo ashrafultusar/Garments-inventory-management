@@ -274,7 +274,7 @@ export default function BatchEditPage() {
                       <input
                         type="number"
                         value={getIndexValue(row)}
-                        onChange={(e) => handleIndexChange(e, row.rollNo)}
+                        onChange={(e) => handleIndexChange(e, row.rollNo)}onWheel={(e) => e.target.blur()}
                         className="w-20 border rounded px-2 py-1 text-center"
                       />
                     </td>
