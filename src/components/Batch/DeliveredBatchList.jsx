@@ -117,6 +117,7 @@ export default function DeliveredBatchList({ orderId }) {
       )
     );
   };
+console.log(batches);
 
   return (
     <div className="mt-6">
