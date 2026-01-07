@@ -13,6 +13,10 @@
 //   const printRef = useRef();
 //   const [selectedInvoiceToPrint, setSelectedInvoiceToPrint] = useState(null);
 
+//   // ✅ NEW: per invoice price inputs (Client/Dyeing/Calender)
+//   const [priceByInvoice, setPriceByInvoice] = useState({});
+//   // shape: { [invoiceNumber]: { client: "", dyeing: "", calender: "" } }
+
 //   // ✅ Fetch invoice-wise batches
 //   const fetchBillingData = async () => {
 //     try {
@@ -27,12 +31,28 @@
 //       const orderData = await orderRes.json();
 
 //       if (invoiceRes.ok) {
-//         setInvoices(
-//           invoiceData.invoices.map((inv) => ({
-//             ...inv,
-//             isExpanded: false,
-//           }))
-//         );
+//         const mapped = invoiceData.invoices.map((inv) => ({
+//           ...inv,
+//           isExpanded: false,
+//         }));
+//         setInvoices(mapped);
+
+//         // ✅ init input state for each invoice
+//         setPriceByInvoice((prev) => {
+//           const next = { ...prev };
+//           mapped.forEach((inv) => {
+//             const key = inv.invoiceNumber;
+//             if (!next[key]) {
+//               next[key] = {
+//                 client: { price: "", total: "" },
+//                 dyeing: { price: "", total: "" },
+//                 calender: { price: "", total: "" },
+//               };
+//             }
+            
+//           });
+//           return next;
+//         });
 //       } else {
 //         // toast.error(invoiceData.error || "Failed to load invoice data");
 //       }
@@ -52,6 +72,7 @@
 
 //   useEffect(() => {
 //     if (orderId) fetchBillingData();
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
 //   }, [orderId]);
 
 //   const toggleExpand = (invoiceNumber) => {
@@ -78,6 +99,11 @@
 //         setInvoices((prev) =>
 //           prev.filter((inv) => inv.invoiceNumber !== invoiceNumber)
 //         );
+//         setPriceByInvoice((prev) => {
+//           const next = { ...prev };
+//           delete next[invoiceNumber];
+//           return next;
+//         });
 //       } else {
 //         toast.error(data.error || "Failed to delete invoice");
 //       }
@@ -87,18 +113,15 @@
 //     }
 //   };
 
-//   // 1. ⚠️ পরিবর্তন: এই ফাংশনটি এখন শুধুমাত্র state আপডেট করবে।
+//   // ✅ Print state set only
 //   const handlePrint = (invoice) => {
 //     if (!invoice) return;
-
-//     // সঠিক ডেটা merge করে state আপডেট করা হলো
-//     setSelectedInvoiceToPrint({ ...invoice, orderInfo: orderInfo });
+//     setSelectedInvoiceToPrint({ ...invoice, orderInfo });
 //   };
 
-//   // 2. ✅ নতুন useEffect: যখনই selectedInvoiceToPrint আপডেট হবে, তখনই প্রিন্ট ফাংশন কল হবে।
+//   // ✅ Print when state ready
 //   useEffect(() => {
 //     if (selectedInvoiceToPrint) {
-//       // DOM ক্লোনিং এবং প্রিন্টিং লজিক
 //       const printArea = printRef.current.cloneNode(true);
 //       const tempDiv = document.createElement("div");
 //       tempDiv.style.position = "absolute";
@@ -114,15 +137,69 @@
 
 //       setTimeout(() => {
 //         document.body.removeChild(tempDiv);
-//         // প্রিন্ট শেষ হওয়ার পর state null করে দেওয়া ভালো অনুশীলন।
 //         setSelectedInvoiceToPrint(null);
 //       }, 500);
 //     }
 //   }, [selectedInvoiceToPrint]);
 
+//   // =========================
+//   // ✅ Helpers for sum/calc
+//   // =========================
+//   const toNumber = (v) => {
+//     const n = parseFloat(v);
+//     return Number.isFinite(n) ? n : 0;
+//   };
+
+//   const sumIdx = (idx) => {
+//     if (Array.isArray(idx)) return idx.reduce((s, x) => s + toNumber(x), 0);
+//     return toNumber(idx);
+//   };
+
+//   const sumExtras = (extraInputs) => {
+//     if (!Array.isArray(extraInputs)) return 0;
+//     return extraInputs.reduce((s, x) => s + toNumber(x), 0);
+//   };
+
+//   // Index sum + Extras sum (per invoice)
+//   const getInvoiceTotals = (inv) => {
+//     let idxTotal = 0;
+//     let extrasTotal = 0;
+
+//     (inv?.batches || []).forEach((b) => {
+//       (b?.rows || []).forEach((r) => {
+//         idxTotal += sumIdx(r?.idx);
+//         extrasTotal += sumExtras(r?.extraInputs);
+//       });
+//     });
+
+//     const totalQty = idxTotal + extrasTotal;
+//     return { idxTotal, extrasTotal, totalQty };
+//   };
+
+//   // Check if any batch in invoice has calender
+//   const invoiceHasCalender = (inv) => {
+//     return inv?.batches?.some((b) => b?.calender && b.calender.trim() !== "");
+//   };
+
+//   const handlePriceChange = (invoiceNumber, key, value) => {
+//     setPriceByInvoice((prev) => ({
+//       ...prev,
+//       [invoiceNumber]: {
+//         ...(prev[invoiceNumber] || { client: "", dyeing: "", calender: "" }),
+//         [key]: value,
+//       },
+//     }));
+//   };
+
+//   const calcBill = (invoiceNumber, key, totalQty) => {
+//     const price = toNumber(priceByInvoice?.[invoiceNumber]?.[key]);
+//     return price * totalQty;
+//   };
+
 //   if (loading) return <p>Loading billing invoices...</p>;
 //   if (!invoices.length)
 //     return <p className="text-gray-500">No invoice billing data found.</p>;
+//   console.log(invoices);
 
 //   return (
 //     <div className="mt-6 space-y-6">
@@ -141,6 +218,14 @@
 //               }))
 //             )
 //           : [];
+//         const { idxTotal, extrasTotal, totalQty } = getInvoiceTotals(inv);
+//         const hasCalender = invoiceHasCalender(inv);
+
+//         const summaryRows = [
+//           { label: "Client", key: "client" },
+//           { label: "Dyeing", key: "dyeing" },
+//           ...(hasCalender ? [{ label: "Calender", key: "calender" }] : []),
+//         ];
 
 //         return (
 //           <div
@@ -166,7 +251,6 @@
 //                   <FaEye size={18} />
 //                 </button>
 
-//                 {/* ✅ Print Button calling the updated handlePrint */}
 //                 <button
 //                   onClick={() => handlePrint(inv)}
 //                   className="hover:text-green-600 transition cursor-pointer"
@@ -194,7 +278,7 @@
 //                   className="bg-white border-t border-gray-200 overflow-hidden"
 //                 >
 //                   <div className="p-4 overflow-x-auto">
-//                     {/* Same existing batch table logic */}
+//                     {/* ✅ batch table */}
 //                     {isMultiple ? (
 //                       <table className="w-full text-sm border border-gray-200">
 //                         <thead className="bg-gray-100">
@@ -254,19 +338,19 @@
 //                               </tr>
 //                             </thead>
 //                             <tbody>
-//                               {b?.rows.map((r, rIdx) => (
+//                               {b?.rows?.map((r, rIdx) => (
 //                                 <tr key={rIdx} className="text-center">
 //                                   <td className="px-3 py-2 border">
 //                                     {r?.rollNo}
 //                                   </td>
 //                                   <td className="px-3 py-2 border">{r?.goj}</td>
 //                                   <td className="px-3 py-2 border">
-//                                     {Array.isArray(r.idx)
+//                                     {Array.isArray(r?.idx)
 //                                       ? r.idx.join(", ")
-//                                       : r.idx || "-"}
+//                                       : r?.idx || "-"}
 //                                   </td>
 //                                   <td className="px-3 py-2 border">
-//                                     {r.extraInputs?.length
+//                                     {r?.extraInputs?.length
 //                                       ? r.extraInputs.join(", ")
 //                                       : "—"}
 //                                   </td>
@@ -277,6 +361,75 @@
 //                         </div>
 //                       ))
 //                     )}
+//                     {/* Summary rows as TABLE */}
+//                     <div className="mt-4">
+//                       <table className="w-full text-sm border border-gray-200">
+//                         <tbody>
+//                           {/* ✅ Summary info row like table header note */}
+//                           <tr className="bg-gray-50">
+//                             <td
+//                               className="px-3 py-2 border font-medium text-gray-700"
+//                               colSpan={6}
+//                             >
+//                               Index = {idxTotal} | Extras = {extrasTotal} |
+//                               Total Qty = {totalQty}
+//                             </td>
+//                           </tr>
+
+//                           {summaryRows.map((r) => {
+//                             const priceVal =
+//                               priceByInvoice?.[inv.invoiceNumber]?.[r.key] ??
+//                               "";
+//                             const totalBill = calcBill(
+//                               inv.invoiceNumber,
+//                               r.key,
+//                               totalQty
+//                             );
+
+//                             return (
+//                               <tr key={r.key} className="text-center">
+//                                 {/* label */}
+//                                 <td className="px-3 py-2 border text-left font-medium text-gray-700">
+//                                   {r.label}
+//                                 </td>
+
+//                                 {/* × */}
+//                                 <td className="px-3 py-2 border text-red-500 font-bold text-lg">
+//                                   ×
+//                                 </td>
+
+//                                 {/* price input */}
+//                                 <td className="px-3 py-2 border">
+//                                   <input
+//                                     type="number"
+//                                     value={priceVal}
+//                                     onChange={(e) =>
+//                                       handlePriceChange(
+//                                         inv.invoiceNumber,
+//                                         r.key,
+//                                         e.target.value
+//                                       )
+//                                     }
+//                                     placeholder="Price"
+//                                     className="w-full max-w-[90px] mx-auto border border-gray-300 rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200 text-center"
+//                                   />
+//                                 </td>
+
+//                                 {/* = */}
+//                                 <td className="px-3 py-2 border font-bold text-lg text-gray-600">
+//                                   =
+//                                 </td>
+
+//                                 {/* total */}
+//                                 <td className="px-3 py-2 border font-semibold text-gray-700">
+//                                   {totalBill}
+//                                 </td>
+//                               </tr>
+//                             );
+//                           })}
+//                         </tbody>
+//                       </table>
+//                     </div>
 //                   </div>
 //                 </motion.div>
 //               )}
@@ -296,7 +449,6 @@
 //     </div>
 //   );
 // }
-
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -312,11 +464,13 @@ export default function BillingBatch({ orderId }) {
   const printRef = useRef();
   const [selectedInvoiceToPrint, setSelectedInvoiceToPrint] = useState(null);
 
-  // ✅ NEW: per invoice price inputs (Client/Dyeing/Calender)
+  // Price and total per invoice/type
   const [priceByInvoice, setPriceByInvoice] = useState({});
-  // shape: { [invoiceNumber]: { client: "", dyeing: "", calender: "" } }
+  // shape: { invoiceNumber: { client: {price, total}, dyeing:{}, calender:{} } }
 
-  // ✅ Fetch invoice-wise batches
+  // ------------------------
+  // Fetch invoices and order info
+  // ------------------------
   const fetchBillingData = async () => {
     try {
       setLoading(true);
@@ -336,28 +490,27 @@ export default function BillingBatch({ orderId }) {
         }));
         setInvoices(mapped);
 
-        // ✅ init input state for each invoice
+        // Initialize priceByInvoice
         setPriceByInvoice((prev) => {
           const next = { ...prev };
           mapped.forEach((inv) => {
             const key = inv.invoiceNumber;
-            if (!next[key])
-              next[key] = { client: "", dyeing: "", calender: "" };
+            if (!next[key]) {
+              next[key] = {
+                client: { price: "", total: "" },
+                dyeing: { price: "", total: "" },
+                calender: { price: "", total: "" },
+              };
+            }
           });
           return next;
         });
-      } else {
-        // toast.error(invoiceData.error || "Failed to load invoice data");
       }
 
-      if (orderRes.ok) {
-        setOrderInfo(orderData);
-      } else {
-        toast.error(orderData.error || "Failed to load order info");
-      }
+      if (orderRes.ok) setOrderInfo(orderData);
     } catch (err) {
       console.error(err);
-      toast.error("Server error while fetching order/invoice data");
+      toast.error("Server error while fetching data");
     } finally {
       setLoading(false);
     }
@@ -368,6 +521,36 @@ export default function BillingBatch({ orderId }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
+  // ------------------------
+  // Helpers
+  // ------------------------
+  const toNumber = (v) => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const sumIdx = (idx) => (Array.isArray(idx) ? idx.reduce((s, x) => s + toNumber(x), 0) : toNumber(idx));
+  const sumExtras = (extraInputs) => (Array.isArray(extraInputs) ? extraInputs.reduce((s, x) => s + toNumber(x), 0) : 0);
+
+  const getInvoiceTotals = (inv) => {
+    let idxTotal = 0;
+    let extrasTotal = 0;
+    (inv?.batches || []).forEach((b) => {
+      (b?.rows || []).forEach((r) => {
+        idxTotal += sumIdx(r?.idx);
+        extrasTotal += sumExtras(r?.extraInputs);
+      });
+    });
+    const totalQty = idxTotal + extrasTotal;
+    return { idxTotal, extrasTotal, totalQty };
+  };
+
+  const invoiceHasCalender = (inv) =>
+    inv?.batches?.some((b) => b?.calender && b.calender.trim() !== "");
+
+  // ------------------------
+  // Expand / Collapse
+  // ------------------------
   const toggleExpand = (invoiceNumber) => {
     setInvoices((prev) =>
       prev.map((inv) =>
@@ -378,200 +561,131 @@ export default function BillingBatch({ orderId }) {
     );
   };
 
+  // ------------------------
+  // Delete invoice
+  // ------------------------
   const handleDeleteInvoice = async (invoiceNumber) => {
     if (!confirm("Are you sure you want to delete this invoice?")) return;
-
     try {
       const res = await fetch(`/api/batch/invoice/delete/${invoiceNumber}`, {
         method: "DELETE",
       });
       const data = await res.json();
-
       if (res.ok) {
-        toast.success("Invoice deleted and batches reverted to Delivered!");
-        setInvoices((prev) =>
-          prev.filter((inv) => inv.invoiceNumber !== invoiceNumber)
-        );
+        toast.success("Invoice deleted!");
+        setInvoices((prev) => prev.filter((inv) => inv.invoiceNumber !== invoiceNumber));
         setPriceByInvoice((prev) => {
           const next = { ...prev };
           delete next[invoiceNumber];
           return next;
         });
-      } else {
-        toast.error(data.error || "Failed to delete invoice");
-      }
+      } else toast.error(data.error || "Failed to delete invoice");
     } catch (err) {
       console.error(err);
       toast.error("Server error while deleting invoice");
     }
   };
 
-  // ✅ Print state set only
+  // ------------------------
+  // Print invoice
+  // ------------------------
   const handlePrint = (invoice) => {
     if (!invoice) return;
     setSelectedInvoiceToPrint({ ...invoice, orderInfo });
   };
 
-  // ✅ Print when state ready
   useEffect(() => {
-    if (selectedInvoiceToPrint) {
-      const printArea = printRef.current.cloneNode(true);
-      const tempDiv = document.createElement("div");
-      tempDiv.style.position = "absolute";
-      tempDiv.style.top = "0";
-      tempDiv.style.left = "0";
-      tempDiv.style.width = "100%";
-      tempDiv.style.background = "white";
-      tempDiv.style.zIndex = "9999";
-      tempDiv.appendChild(printArea);
-
-      document.body.appendChild(tempDiv);
-      window.print();
-
-      setTimeout(() => {
-        document.body.removeChild(tempDiv);
-        setSelectedInvoiceToPrint(null);
-      }, 500);
-    }
+    if (!selectedInvoiceToPrint) return;
+    const printArea = printRef.current.cloneNode(true);
+    const tempDiv = document.createElement("div");
+    tempDiv.style.position = "absolute";
+    tempDiv.style.top = "0";
+    tempDiv.style.left = "0";
+    tempDiv.style.width = "100%";
+    tempDiv.style.background = "white";
+    tempDiv.style.zIndex = "9999";
+    tempDiv.appendChild(printArea);
+    document.body.appendChild(tempDiv);
+    window.print();
+    setTimeout(() => {
+      document.body.removeChild(tempDiv);
+      setSelectedInvoiceToPrint(null);
+    }, 500);
   }, [selectedInvoiceToPrint]);
 
-  // =========================
-  // ✅ Helpers for sum/calc
-  // =========================
-  const toNumber = (v) => {
-    const n = parseFloat(v);
-    return Number.isFinite(n) ? n : 0;
-  };
+  // ------------------------
+  // Billing logic (bidirectional)
+  // ------------------------
+  const handleBillingChange = (invoiceNumber, type, field, value, totalQty) => {
+    setPriceByInvoice((prev) => {
+      const current = prev[invoiceNumber]?.[type] || { price: "", total: "" };
+      let price = current.price;
+      let total = current.total;
 
-  const sumIdx = (idx) => {
-    if (Array.isArray(idx)) return idx.reduce((s, x) => s + toNumber(x), 0);
-    return toNumber(idx);
-  };
+      if (field === "price") {
+        price = value;
+        total = totalQty > 0 ? (toNumber(value) * totalQty).toFixed(2) : "";
+      } else if (field === "total") {
+        total = value;
+        price = totalQty > 0 ? (toNumber(value) / totalQty).toFixed(2) : "";
+      }
 
-  const sumExtras = (extraInputs) => {
-    if (!Array.isArray(extraInputs)) return 0;
-    return extraInputs.reduce((s, x) => s + toNumber(x), 0);
-  };
-
-  // ✅ Index sum + Extras sum (per invoice)
-  const getInvoiceTotals = (inv) => {
-    let idxTotal = 0;
-    let extrasTotal = 0;
-
-    (inv?.batches || []).forEach((b) => {
-      (b?.rows || []).forEach((r) => {
-        idxTotal += sumIdx(r?.idx);
-        extrasTotal += sumExtras(r?.extraInputs);
-      });
+      return {
+        ...prev,
+        [invoiceNumber]: {
+          ...prev[invoiceNumber],
+          [type]: { price, total },
+        },
+      };
     });
-
-    const totalQty = idxTotal + extrasTotal;
-    return { idxTotal, extrasTotal, totalQty };
   };
-
-  const handlePriceChange = (invoiceNumber, key, value) => {
-    setPriceByInvoice((prev) => ({
-      ...prev,
-      [invoiceNumber]: {
-        ...(prev[invoiceNumber] || { client: "", dyeing: "", calender: "" }),
-        [key]: value,
-      },
-    }));
-  };
-
-  const calcBill = (invoiceNumber, key, totalQty) => {
-    const price = toNumber(priceByInvoice?.[invoiceNumber]?.[key]);
-    return price * totalQty;
-  };
-
 
   if (loading) return <p>Loading billing invoices...</p>;
-  if (!invoices.length)
-    return <p className="text-gray-500">No invoice billing data found.</p>;
+  if (!invoices.length) return <p className="text-gray-500">No invoice billing data found.</p>;
 
   return (
     <div className="mt-6 space-y-6">
-      {invoices?.map((inv) => {
-        const isExpanded = inv.isExpanded;
-        const isMultiple = inv.batchCount > 1;
-
-        const mergedRows = isMultiple
-          ? inv.batches.flatMap((b) =>
-              (b.rows || []).map((r) => ({
-                ...r,
-                batchName: b.batchName,
-                sillName: b.sillName,
-                colour: b.colour,
-                finishingType: b.finishingType,
-              }))
-            )
-          : [];
-
+      {invoices.map((inv) => {
         const { idxTotal, extrasTotal, totalQty } = getInvoiceTotals(inv);
-
+        const hasCalender = invoiceHasCalender(inv);
         const summaryRows = [
           { label: "Client", key: "client" },
           { label: "Dyeing", key: "dyeing" },
-          { label: "Calender", key: "calender" },
+          ...(hasCalender ? [{ label: "Calender", key: "calender" }] : []),
         ];
 
+        // For merged rows UI
+        const isMultiple = inv.batchCount > 1;
+        const mergedRows = isMultiple
+          ? inv.batches.flatMap((b) =>
+              (b.rows || []).map((r) => ({ ...r, batchName: b.batchName, sillName: b.sillName, colour: b.colour, finishingType: b.finishingType }))
+            )
+          : [];
+
         return (
-          <div
-            key={inv.invoiceNumber}
-            className="border rounded-lg shadow-sm border-gray-200 overflow-hidden"
-          >
+          <div key={inv.invoiceNumber} className="border rounded-lg shadow-sm border-gray-200 overflow-hidden">
             <div className="flex justify-between items-center bg-gray-100 px-4 py-3 no-print">
               <h4 className="font-medium text-gray-700">
-                Invoice:{" "}
-                <span className="text-blue-600 font-semibold">
-                  {inv.invoiceNumber}
-                </span>{" "}
-                <span className="text-sm text-orange-500">
-                  ({isMultiple ? "Merged" : "Single"})
-                </span>
+                Invoice: <span className="text-blue-600 font-semibold">{inv.invoiceNumber}</span>{" "}
+                <span className="text-sm text-orange-500">({isMultiple ? "Merged" : "Single"})</span>
               </h4>
               <div className="flex items-center gap-3 text-gray-600">
-                <button
-                  onClick={() => toggleExpand(inv.invoiceNumber)}
-                  className="hover:text-blue-600 transition cursor-pointer"
-                  title="View Details"
-                >
-                  <FaEye size={18} />
-                </button>
-
-                <button
-                  onClick={() => handlePrint(inv)}
-                  className="hover:text-green-600 transition cursor-pointer"
-                  title="Print Invoice"
-                >
-                  <FaPrint size={18} />
-                </button>
-
-                <MdDelete
-                  size={20}
-                  onClick={() => handleDeleteInvoice(inv?.invoiceNumber)}
-                  className="text-red-500 hover:text-red-600 cursor-pointer transition"
-                  title="Delete Invoice"
-                />
+                <FaEye className="cursor-pointer hover:text-blue-600" onClick={() => toggleExpand(inv.invoiceNumber)} title="View Details" />
+                <FaPrint className="cursor-pointer hover:text-green-600" onClick={() => handlePrint(inv)} title="Print Invoice" />
+                <MdDelete className="cursor-pointer text-red-500 hover:text-red-600" onClick={() => handleDeleteInvoice(inv.invoiceNumber)} title="Delete Invoice" />
               </div>
             </div>
 
             <AnimatePresence>
-              {isExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className="bg-white border-t border-gray-200 overflow-hidden"
-                >
+              {inv.isExpanded && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="bg-white border-t border-gray-200 overflow-hidden">
                   <div className="p-4 overflow-x-auto">
-                    {/* ✅ batch table */}
+                    {/* Batches table */}
                     {isMultiple ? (
                       <table className="w-full text-sm border border-gray-200">
                         <thead className="bg-gray-100">
                           <tr>
-                            <th className="px-3 py-2 border">Batch Name</th>
+                            <th className="px-3 py-2 border">Batch</th>
                             <th className="px-3 py-2 border">Roll No</th>
                             <th className="px-3 py-2 border">Goj</th>
                             <th className="px-3 py-2 border">Index</th>
@@ -582,40 +696,24 @@ export default function BillingBatch({ orderId }) {
                           </tr>
                         </thead>
                         <tbody>
-                          {mergedRows?.map((row, idx) => (
+                          {mergedRows.map((row, idx) => (
                             <tr key={idx} className="text-center">
-                              <td className="px-3 py-2 border">
-                                {row.batchName}
-                              </td>
+                              <td className="px-3 py-2 border">{row.batchName}</td>
                               <td className="px-3 py-2 border">{row.rollNo}</td>
                               <td className="px-3 py-2 border">{row.goj}</td>
-                              <td className="px-3 py-2 border">
-                                {Array.isArray(row.idx)
-                                  ? row.idx.join(", ")
-                                  : row.idx || "-"}
-                              </td>
-                              <td className="px-3 py-2 border">
-                                {row.extraInputs?.length
-                                  ? row.extraInputs.join(", ")
-                                  : "—"}
-                              </td>
-                              <td className="px-3 py-2 border">
-                                {row.sillName}
-                              </td>
+                              <td className="px-3 py-2 border">{Array.isArray(row.idx) ? row.idx.join(", ") : row.idx || "-"}</td>
+                              <td className="px-3 py-2 border">{row.extraInputs?.length ? row.extraInputs.join(", ") : "—"}</td>
+                              <td className="px-3 py-2 border">{row.sillName}</td>
                               <td className="px-3 py-2 border">{row.colour}</td>
-                              <td className="px-3 py-2 border">
-                                {row.finishingType}
-                              </td>
+                              <td className="px-3 py-2 border">{row.finishingType}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     ) : (
-                      inv?.batches?.map((b, bIdx) => (
+                      inv.batches.map((b, bIdx) => (
                         <div key={bIdx} className="mb-4">
-                          <h5 className="text-gray-700 font-medium mb-2">
-                            {b?.batchName}
-                          </h5>
+                          <h5 className="text-gray-700 font-medium mb-2">{b.batchName}</h5>
                           <table className="w-full text-sm border border-gray-200">
                             <thead className="bg-gray-100">
                               <tr>
@@ -626,22 +724,12 @@ export default function BillingBatch({ orderId }) {
                               </tr>
                             </thead>
                             <tbody>
-                              {b?.rows?.map((r, rIdx) => (
+                              {b.rows.map((r, rIdx) => (
                                 <tr key={rIdx} className="text-center">
-                                  <td className="px-3 py-2 border">
-                                    {r?.rollNo}
-                                  </td>
-                                  <td className="px-3 py-2 border">{r?.goj}</td>
-                                  <td className="px-3 py-2 border">
-                                    {Array.isArray(r?.idx)
-                                      ? r.idx.join(", ")
-                                      : r?.idx || "-"}
-                                  </td>
-                                  <td className="px-3 py-2 border">
-                                    {r?.extraInputs?.length
-                                      ? r.extraInputs.join(", ")
-                                      : "—"}
-                                  </td>
+                                  <td className="px-3 py-2 border">{r.rollNo}</td>
+                                  <td className="px-3 py-2 border">{r.goj}</td>
+                                  <td className="px-3 py-2 border">{Array.isArray(r.idx) ? r.idx.join(", ") : r.idx || "-"}</td>
+                                  <td className="px-3 py-2 border">{r.extraInputs?.length ? r.extraInputs.join(", ") : "—"}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -649,71 +737,46 @@ export default function BillingBatch({ orderId }) {
                         </div>
                       ))
                     )}
-                    {/* Summary rows as TABLE */}
+
+                    {/* Billing Summary */}
                     <div className="mt-4">
                       <table className="w-full text-sm border border-gray-200">
                         <tbody>
-                          {/* ✅ Summary info row like table header note */}
                           <tr className="bg-gray-50">
-                            <td
-                              className="px-3 py-2 border font-medium text-gray-700"
-                              colSpan={6}
-                            >
-                              Index = {idxTotal} | Extras = {extrasTotal} |
-                              Total Qty = {totalQty}
+                            <td className="px-3 py-2 border font-medium text-gray-700" colSpan={6}>
+                              Index = {idxTotal} | Extras = {extrasTotal} | Total Qty = {totalQty}
                             </td>
                           </tr>
 
                           {summaryRows.map((r) => {
-                            const priceVal =
-                              priceByInvoice?.[inv.invoiceNumber]?.[r.key] ??
-                              "";
-                            const totalBill = calcBill(
-                              inv.invoiceNumber,
-                              r.key,
-                              totalQty
-                            );
+                            const billing = priceByInvoice?.[inv.invoiceNumber]?.[r.key] || { price: "", total: "" };
 
                             return (
                               <tr key={r.key} className="text-center">
-                                {/* label */}
-                                <td className="px-3 py-2 border text-left font-medium text-gray-700">
-                                  {r.label}
-                                </td>
+                                <td className="px-3 py-2 border text-left font-medium">{r.label}</td>
+                                <td className="px-3 py-2 border text-red-500 font-bold text-lg">×</td>
 
-                                {/* × */}
-                                <td className="px-3 py-2 border text-red-500 font-bold text-lg">
-                                  ×
-                                </td>
-
-                                {/* price input */}
                                 <td className="px-3 py-2 border">
                                   <input
                                     type="number"
-                                    value={priceVal}
-                                    onChange={(e) =>
-                                      handlePriceChange(
-                                        inv.invoiceNumber,
-                                        r.key,
-                                        e.target.value
-                                      )
-                                    }
+                                    value={billing.price}
+                                    onChange={(e) => handleBillingChange(inv.invoiceNumber, r.key, "price", e.target.value, totalQty)}
                                     placeholder="Price"
                                     className="w-full max-w-[90px] mx-auto border border-gray-300 rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200 text-center"
                                   />
                                 </td>
 
-                                {/* = */}
-                                <td className="px-3 py-2 border font-bold text-lg text-gray-600">
-                                  =
-                                </td>
+                                <td className="px-3 py-2 border font-bold text-lg text-gray-600">=</td>
 
-                                {/* total */}
                                 <td className="px-3 py-2 border font-semibold text-gray-700">
-                                  {totalBill}
+                                  <input
+                                    type="number"
+                                    value={billing.total}
+                                    onChange={(e) => handleBillingChange(inv.invoiceNumber, r.key, "total", e.target.value, totalQty)}
+                                    placeholder="Total"
+                                    className="w-full max-w-[120px] mx-auto border border-gray-300 rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200 text-center"
+                                  />
                                 </td>
-
-                             
                               </tr>
                             );
                           })}
@@ -728,12 +791,10 @@ export default function BillingBatch({ orderId }) {
         );
       })}
 
-      {/* ✅ Hidden printable area */}
+      {/* Hidden printable area */}
       <div style={{ display: "none" }}>
         <div ref={printRef} className="print-only">
-          {selectedInvoiceToPrint && (
-            <PrintBillingInvoice order={selectedInvoiceToPrint} />
-          )}
+          {selectedInvoiceToPrint && <PrintBillingInvoice order={selectedInvoiceToPrint} />}
         </div>
       </div>
     </div>
