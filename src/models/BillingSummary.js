@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const BillingSummarySchema = new mongoose.Schema(
   {
+    orderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Order",
+    required: true,
+  },
     invoiceNumber: { type: String, required: true },
 
     summaryType: {

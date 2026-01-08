@@ -663,6 +663,7 @@ export default function BillingBatch({ orderId }) {
       const batch = inv.batches[0]; // single batch ধরে নিচ্ছি
 
       const payload = {
+        orderId: orderId,
         invoiceNumber: inv.invoiceNumber,
         summaryType: r.key,
         price: Number(billing.price),
