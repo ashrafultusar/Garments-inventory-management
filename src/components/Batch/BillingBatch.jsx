@@ -661,14 +661,14 @@ export default function BillingBatch({ orderId }) {
   const handleSaveSummary = async (inv, r, billing) => {
     try {
       const batch = inv.batches[0]; // single batch ধরে নিচ্ছি
-
+      const { totalQty } = getInvoiceTotals(inv);
       const payload = {
         orderId: orderId,
         invoiceNumber: inv.invoiceNumber,
         summaryType: r.key,
         price: Number(billing.price),
         total: Number(billing.total),
-
+        totalQty: Number(totalQty),
         batchName: batch.batchName,
         colour: batch.colour,
         sillName: batch.sillName,

@@ -17,7 +17,7 @@ const BillingSummarySchema = new mongoose.Schema(
 
     price: { type: Number, required: true },
     total: { type: Number, required: true },
-
+    totalQty: { type: Number, required: true },
     batchName: { type: String, required: true },
 
     colour: String,

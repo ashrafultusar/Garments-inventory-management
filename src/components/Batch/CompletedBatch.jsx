@@ -32,7 +32,7 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
 
     loadSummaries();
   }, [orderId]);
-console.log(summaries);
+  console.log(summaries);
   const handleCreateBill = (item) => {
     console.log("Creating bill for:", item);
     toast.success(`Creating bill for ${item.batchName}`);
@@ -88,15 +88,16 @@ console.log(summaries);
                   {/* Goj Total */}
                   <div className="w-20 bg-[#b0b4b8] p-2 rounded-xl border border-gray-600 text-center flex flex-col justify-center min-h-[60px]">
                     <span className="text-xs">গজ</span>
-                    <span className="font-bold text-sm">total</span>
+                    <span className="font-bold text-sm">{item?.totalQty}</span>
                   </div>
 
                   {/* Multiply */}
                   <div className="text-red-600 text-4xl font-bold">×</div>
 
                   {/* Price */}
-                  <div className="w-20 bg-[#b0b4b8] p-2 rounded-2xl border border-gray-600 text-center flex items-center justify-center min-h-[60px]">
-                    <span className="font-semibold">{item?.price}</span>
+                  <div className="w-20 bg-[#b0b4b8] p-2 rounded-xl border border-gray-600 text-center flex flex-col justify-center min-h-[60px]">
+                    <span className="text-xs">Price</span>
+                    <span className="font-bold text-sm">{item?.price}</span>
                   </div>
 
                   {/* Equal */}
