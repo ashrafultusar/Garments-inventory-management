@@ -8,6 +8,7 @@ import BatchList from "./BatchList";
 import DeliveredBatchList from "../Batch/DeliveredBatchList";
 import CalendarBatch from "../Batch/CalenderBatch";
 import BillingBatch from "../Batch/BillingBatch";
+import CompletedBatch from "../Batch/CompletedBatch";
 
 // ✅ Steps for UI
 const steps = [
@@ -126,6 +127,9 @@ export default function OrderStatus({
       )}
       {steps[currentStep - 1]?.title === "Billing" && (
         <BillingBatch orderId={orderId} />
+      )}
+      {steps[currentStep - 1]?.title === "Completed" && (
+        <CompletedBatch orderId={orderId} />
       )}
 
       {/* Confirmation modal only for first change */}
