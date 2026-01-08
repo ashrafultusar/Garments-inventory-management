@@ -314,7 +314,7 @@ export default function BatchCreator({
   batchData,
   setBatchData,
   keys,
-  setUsedRowIndexes,   // এখানে আমরা used rowKey আপডেট করব
+  setUsedRowIndexes,   
   selectedOrder,
 }) {
   const [loading, setLoading] = useState(false);
@@ -333,7 +333,7 @@ export default function BatchCreator({
     if (!row) return "";
     return `${row.rollNo ?? ""}-${row.goj ?? ""}`;
   };
-
+console.log(orderId);
   // pre-fill from selectedOrder
   useEffect(() => {
     if (selectedOrder) {
