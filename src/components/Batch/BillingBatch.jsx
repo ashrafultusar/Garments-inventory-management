@@ -471,6 +471,7 @@ export default function BillingBatch({ orderId }) {
   const [priceByInvoice, setPriceByInvoice] = useState({});
   // shape: { [invoiceNumber]: { client: "", dyeing: "", calender: "" } }
 
+
   // Fetch invoices and order info
   const fetchBillingData = async () => {
     try {
