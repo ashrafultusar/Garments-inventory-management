@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import CompletedBatch from "@/models/CompletedBatch";
+import CompletedBatch from "@/components/Batch/CompletedBatch";
+
 
 export async function PUT(req, { params }) {
   await connectDB();
