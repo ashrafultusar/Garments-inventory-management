@@ -1,60 +1,31 @@
 
-// import connectDB from "@/lib/db";
-// import BillingSummary from "@/models/BillingSummary";
-// import mongoose from "mongoose";
-
-// export async function GET(req, { params }) {
-//   await connectDB();
-
-//   const { orderId } = params;
-
-
-//   if (!mongoose.Types.ObjectId.isValid(orderId)) {
-//     return Response.json({ error: "Invalid orderId" }, { status: 400 });
-//   }
-
-//   try {
-//     const summaries = await BillingSummary.find({ orderId })
-//       .populate("customerId", "name")
-//       .populate("dyeingId", "name")
-//       .populate("calenderId", "name")
-//       .sort({ createdAt: -1 });
-
-//     return Response.json(summaries, { status: 200 });
-//   } catch (error) {
-//     console.error(error);
-//     return Response.json(
-//       { error: "Failed to load billing summaries" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-
 import connectDB from "@/lib/db";
 import BillingSummary from "@/models/BillingSummary";
 import mongoose from "mongoose";
 
 export async function GET(req, { params }) {
+  await connectDB();
+
+  const { orderId } = params;
+
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    return Response.json({ error: "Invalid orderId" }, { status: 400 });
+  }
+
   try {
-    await connectDB();
-
-    const { orderId } = params;
-
-    // Safety: invalid ObjectId হলেও crash করবে না
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      return Response.json([], { status: 200 });
-    }
-
     const summaries = await BillingSummary.find({ orderId })
-      .populate({ path: "customerId", select: "name", strictPopulate: false })
-      .populate({ path: "dyeingId", select: "name", strictPopulate: false })
-      .populate({ path: "calenderId", select: "name", strictPopulate: false })
+      .populate("customerId", "name")
+      .populate("dyeingId", "name")
+      .populate("calenderId", "name")
       .sort({ createdAt: -1 });
 
-    return Response.json(summaries || [], { status: 200 });
+    return Response.json(summaries, { status: 200 });
   } catch (error) {
-    console.error("BILLING SUMMARY ERROR:", error);
-    return Response.json([], { status: 200 });
+    console.error(error);
+    return Response.json(
+      { error: "Failed to load billing summaries" },
+      { status: 500 }
+    );
   }
 }
