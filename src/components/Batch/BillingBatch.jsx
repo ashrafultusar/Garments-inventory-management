@@ -710,7 +710,7 @@ export default function BillingBatch({ orderId }) {
   if (loading) return <p>Loading billing invoices...</p>;
   if (!invoices.length)
     return <p className="text-gray-500">No invoice billing data found.</p>;
-  console.log(invoices);
+  // console.log(invoices);
 
   return (
     <div className="mt-6 space-y-6">
@@ -797,7 +797,7 @@ export default function BillingBatch({ orderId }) {
                           </tr>
                         </thead>
                         <tbody>
-                          {mergedRows.map((row, idx) => (
+                          {mergedRows?.map((row, idx) => (
                             <tr key={idx} className="text-center">
                               <td className="px-3 py-2 border">
                                 {row.batchName}
