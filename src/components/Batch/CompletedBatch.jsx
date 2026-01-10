@@ -17,31 +17,29 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
 
   // Fetch summaries
   useEffect(() => {
-    if (!orderId) return;
-
-    const loadSummaries = async () => {
+    const fetchSummaries = async () => {
       try {
-        setLoading(true);
         const res = await fetch(
           `/api/batch/completed/billing-summary/${orderId}`
         );
         const data = await res.json();
 
-        if (!res.ok) throw new Error(data.error || "Failed to load summaries");
-        setSummaries(data);
-      } catch (err) {
-        toast.error(err.message || "Failed to load billing summaries");
+        if (!res.ok) throw new Error();
+
+        setSummaries(data.data);
+      } catch {
+        toast.error("Failed to load billing summaries");
       } finally {
         setLoading(false);
       }
     };
 
-    loadSummaries();
+    if (orderId) fetchSummaries();
   }, [orderId]);
 
   // Group by summaryType
   const groupedSummaries = useMemo(() => {
-    return summaries.reduce((acc, item) => {
+    return summaries?.reduce((acc, item) => {
       if (!acc[item.summaryType]) acc[item.summaryType] = [];
       acc[item.summaryType].push(item);
       return acc;
@@ -80,9 +78,6 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
     }
   };
 
-  /* =========================
-      UI
-  ========================== */
   return (
     <div className="p-6 min-h-screen">
       <div className="max-w-6xl mx-auto">
@@ -123,7 +118,9 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
                       {/* Qty */}
                       <div className="w-20 bg-[#b0b4b8] p-2 rounded-xl border text-center min-h-[60px] flex flex-col justify-center">
                         <span className="text-xs">গজ</span>
-                        <span className="font-bold text-sm">{item.totalQty}</span>
+                        <span className="font-bold text-sm">
+                          {item.totalQty}
+                        </span>
                       </div>
 
                       <div className="text-red-600 text-4xl font-bold">×</div>
@@ -139,10 +136,10 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
                               const val = e.target.value;
                               const newPrice = parseFloat(val);
                               // Price চেঞ্জ করলে Total অটো আপডেট হবে এবং ১ ঘর দশমিক থাকবে
-                              const calculatedTotal = isNaN(newPrice) 
-                                ? "" 
+                              const calculatedTotal = isNaN(newPrice)
+                                ? ""
                                 : (newPrice * item.totalQty).toFixed(1);
-                              
+
                               setEditValues({
                                 price: val, // ইনপুট যেমন আছে তেমনই থাকবে (টাইপিং এর সুবিধার জন্য)
                                 total: calculatedTotal,
@@ -151,7 +148,9 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
                             className="w-full text-sm text-center rounded"
                           />
                         ) : (
-                          <span className="font-bold text-sm">{item.price}</span>
+                          <span className="font-bold text-sm">
+                            {item.price}
+                          </span>
                         )}
                       </div>
 
@@ -171,20 +170,22 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
                             onChange={(e) => {
                               const val = e.target.value;
                               const newTotal = parseFloat(val);
-                              // Total চেঞ্জ করলে Price অটো আপডেট হবে এবং ১ ঘর দশমিক থাকবে
-                              const calculatedPrice = (isNaN(newTotal) || !item.totalQty) 
-                                ? "" 
-                                : (newTotal / item.totalQty).toFixed(1);
+                              const calculatedPrice =
+                                isNaN(newTotal) || !item.totalQty
+                                  ? ""
+                                  : (newTotal / item.totalQty).toFixed(1);
 
                               setEditValues({
-                                total: val, // ইনপুট যেমন আছে তেমনই থাকবে
+                                total: val,
                                 price: calculatedPrice,
                               });
                             }}
                             className="w-full text-sm text-center rounded"
                           />
                         ) : (
-                          <span className="font-bold text-sm">{item.total}</span>
+                          <span className="font-bold text-sm">
+                            {item.total}
+                          </span>
                         )}
                       </div>
 
