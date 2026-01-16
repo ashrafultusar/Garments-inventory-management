@@ -25,9 +25,7 @@ export async function POST(req) {
   try {
     await connectDB();
     const body = await req.json();
-    console.log("Incoming Data:", body); // এটি চেক করুন আপনার টার্মিনালে
-
-    // ডাটা যদি না আসে তবে body.userId চেক করুন
+   
     if (!body.userId || !body.amount) {
        return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400 });
     }
@@ -42,7 +40,7 @@ export async function POST(req) {
 
     return new Response(JSON.stringify(payment), { status: 201 });
   } catch (error) {
-    console.error("POST Error:", error); // এররটি এখানে দেখতে পাবেন
+    console.error("POST Error:", error); 
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
