@@ -13,3 +13,4 @@ const CustomerSchema = new mongoose.Schema({
 mongoose.models = {};
 
 export default mongoose.model("Customer", CustomerSchema);
+ 
