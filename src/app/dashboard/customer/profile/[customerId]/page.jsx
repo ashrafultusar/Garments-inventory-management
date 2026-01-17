@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useEffect, useState, use } from "react";
+import { toast } from "react-toastify";
 
 export default function CustomerProfileLedger({ params }) {
   const resolvedParams = use(params);
   const customerId = resolvedParams?.customerId;
 
   const [customer, setCustomer] = useState(null);
-  const [ledger, setLedger] = useState([]);
+  const [billings, setBillings] = useState([]); // Billing API data
+  const [payments, setPayments] = useState([]); // Payment API data
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,124 +17,141 @@ export default function CustomerProfileLedger({ params }) {
       try {
         setLoading(true);
         
-        // ১. কাস্টমার ডাটা ফেচ করা (এই পার্টটি আপনার কোডে ছিল না)
+        // 1. Customer Details Fetch
         const custRes = await fetch(`/api/customers/${customerId}`);
-        if (!custRes.ok) throw new Error("Customer not found");
         const custData = await custRes.json();
         setCustomer(custData);
 
-        // ২. পেমেন্ট ডাটা ফেচ করা
+        // 2. Billing Summary Fetch (Using your provided API)
+        const billingRes = await fetch(`/api/customers/ledger/${customerId}`);
+        const billData = await billingRes.json();
+        if (billData.success) {
+          let runningBill = 0;
+          // Purono theke natun e sort kore running balance calculate kora
+          const formattedBill = billData.data
+            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+            .map((b) => {
+              runningBill += b.total;
+              return { ...b, cumulativeBill: runningBill };
+            });
+          setBillings(formattedBill.reverse()); // Reverse kore table-e latest upore rakha holo
+        }
+
+        // 3. Payment Data Fetch
         const payRes = await fetch(`/api/payments?userId=${customerId}`);
         const payData = await payRes.json();
-  
         if (payData && payData.length > 0) {
-          // ৩. ব্যালেন্স ক্যালকুলেশন
-          const chronologicalData = [...payData].sort((a, b) => new Date(a.date) - new Date(b.date));
-  
-          let currentRunningBalance = 0;
-          const calculated = chronologicalData.map((item) => {
-            currentRunningBalance += item.amount;
-            return {
-              ...item,
-              balance: currentRunningBalance,
-            };
-          });
-  
-          setLedger(calculated.reverse());
-        } else {
-          setLedger([]);
+          let runningPay = 0;
+          const formattedPay = payData
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .map((p) => {
+              runningPay += p.amount;
+              return { ...p, cumulativePay: runningPay };
+            });
+          setPayments(formattedPay.reverse());
         }
       } catch (err) {
-        console.error("Data Load Error:", err);
+        console.error("Load Error:", err);
+        toast.error("Failed to load data");
       } finally {
         setLoading(false);
       }
     };
-  
+
     if (customerId) fetchAllData();
   }, [customerId]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  // এখন customer ডাটা না থাকলে এটি দেখাবে
-  if (!customer)
-    return (
-      <div className="p-10 text-center text-red-500 font-bold">
-        Customer Not Found! (ID: {customerId})
-      </div>
-    );
+  if (loading) return <div className="p-10 text-center font-bold">Loading Statement...</div>;
+console.log(customer);
+console.log(billings);
+console.log(payments);
+  // Final Calculations for the Summary Card
+  const totalBill = billings.length > 0 ? billings[0].cumulativeBill : 0;
+  const totalPaid = payments.length > 0 ? payments[0].cumulativePay : 0;
+  const netDue = totalBill - totalPaid;
 
   return (
-    <div className="bg-white p-8 mt-4 rounded-xl shadow-lg max-w-6xl mx-auto border border-gray-100">
-      {/* হেডার */}
-      <div className="flex justify-between items-start border-b pb-6">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 uppercase">
-            Client Ledger Statement
-          </h1>
-          <div className="mt-4 space-y-1">
-            <p className="text-sm">
-              <strong className="text-gray-500">CLIENT:</strong>{" "}
-              <span className="px-3 py-1 border rounded bg-gray-50 font-bold text-blue-700">
-                {customer?.companyName}
-              </span>
-            </p>
-            <p className="text-xs font-medium text-gray-500">
-              OWNER: {customer?.ownerName} | PHONE: {customer?.phoneNumber}
-            </p>
-          </div>
+    <div className="max-w-6xl mx-auto p-4 space-y-8">
+      
+      {/* --- Section 1: Top Summary Card --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-blue-600 text-white p-6 rounded-2xl shadow-lg">
+          <p className="text-xs uppercase opacity-80 font-bold">Total Bill Amount</p>
+          <h2 className="text-3xl font-black">৳ {totalBill.toLocaleString()}</h2>
         </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => window.print()}
-            className="border px-4 py-2 rounded-lg bg-gray-900 text-white font-bold text-xs hover:bg-gray-800 shadow-sm transition-all"
-          >
-            PRINT STATEMENT
-          </button>
+        <div className="bg-green-600 text-white p-6 rounded-2xl shadow-lg">
+          <p className="text-xs uppercase opacity-80 font-bold">Total Received</p>
+          <h2 className="text-3xl font-black">৳ {totalPaid.toLocaleString()}</h2>
+        </div>
+        <div className={`${netDue >= 0 ? 'bg-red-600' : 'bg-teal-600'} text-white p-6 rounded-2xl shadow-lg`}>
+          <p className="text-xs uppercase opacity-80 font-bold">{netDue >= 0 ? "Current Net Due" : "Advance Balance"}</p>
+          <h2 className="text-3xl font-black">৳ {Math.abs(netDue).toLocaleString()}</h2>
         </div>
       </div>
 
-      {/* টেবিল অংশ আপনার কোড অনুযায়ী ঠিক থাকবে... */}
-      <div className="border mt-8 rounded-xl overflow-hidden shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100 border-b">
-            <tr className="text-gray-700">
-              <th className="px-4 py-4 text-left font-bold uppercase tracking-tighter">Date</th>
-              <th className="px-4 py-4 text-left font-bold uppercase tracking-tighter">Description</th>
-              <th className="px-4 py-4 text-center font-bold uppercase tracking-tighter">Method</th>
-              <th className="px-4 py-4 text-right font-bold uppercase tracking-tighter">Payment (Credit)</th>
-              <th className="px-4 py-4 text-right font-bold uppercase tracking-tighter bg-blue-50/50">Running Balance</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {ledger.length > 0 ? (
-              ledger.map((row, idx) => (
-                <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-4">{new Date(row.date).toLocaleDateString("en-GB")}</td>
-                  <td className="px-4 py-4 italic">{row.description || "Payment received"}</td>
-                  <td className="px-4 py-4 text-center">{row.method}</td>
-                  <td className="px-4 py-4 text-right font-bold text-green-700">৳ {row.amount.toLocaleString()}</td>
-                  <td className="px-4 py-4 text-right font-black bg-gray-50/30">৳ {row.balance.toLocaleString()}</td>
-                </tr>
-              ))
-            ) : (
-              <tr><td colSpan={5} className="px-4 py-20 text-center">No transactions found.</td></tr>
-            )}
-          </tbody>
-          <tfoot>
-             <tr className="bg-gray-900 text-white font-bold">
-               <td colSpan={3} className="px-4 py-5 text-right uppercase text-xs">Total Cash Received:</td>
-               <td colSpan={2} className="px-4 py-5 text-right text-xl">৳ {ledger.length > 0 ? ledger[0].balance.toLocaleString() : "0"}</td>
-             </tr>
-          </tfoot>
-        </table>
+      <div className="bg-white p-6 rounded-xl border shadow-sm">
+         <div className="flex justify-between items-center border-b pb-4 mb-4">
+            <h1 className="text-xl font-black uppercase text-gray-800">Statement: {customer?.companyName}</h1>
+            <button onClick={() => window.print()} className="bg-gray-100 px-4 py-2 rounded text-xs font-bold border hover:bg-gray-200">PRINT</button>
+         </div>
+
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* --- Left Column: Billing History --- */}
+            <div>
+               <h3 className="text-sm font-bold text-red-600 mb-3 uppercase tracking-wider">Billing History (Debit)</h3>
+               <div className="overflow-x-auto border rounded-lg">
+                  <table className="w-full text-xs text-left">
+                     <thead className="bg-gray-50 border-b">
+                        <tr>
+                           <th className="p-3">Date</th>
+                           <th className="p-3">Invoice</th>
+                           <th className="p-3 text-right">Amount</th>
+                        </tr>
+                     </thead>
+                     <tbody className="divide-y">
+                        {billings.map((b) => (
+                           <tr key={b._id} className="hover:bg-gray-50">
+                              <td className="p-3 whitespace-nowrap">{new Date(b.createdAt).toLocaleDateString("en-GB")}</td>
+                              <td className="p-3 font-medium">{b.invoiceNumber} <br/><span className="text-[10px] text-gray-400">{b.colour}</span></td>
+                              <td className="p-3 text-right font-bold text-gray-700">৳ {b.total.toLocaleString()}</td>
+                           </tr>
+                        ))}
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+
+            {/* --- Right Column: Payment History --- */}
+            <div>
+               <h3 className="text-sm font-bold text-green-600 mb-3 uppercase tracking-wider">Payment History (Credit)</h3>
+               <div className="overflow-x-auto border rounded-lg">
+                  <table className="w-full text-xs text-left">
+                     <thead className="bg-gray-50 border-b">
+                        <tr>
+                           <th className="p-3">Date</th>
+                           <th className="p-3">Method</th>
+                           <th className="p-3 text-right">Received</th>
+                        </tr>
+                     </thead>
+                     <tbody className="divide-y">
+                        {payments.map((p) => (
+                           <tr key={p._id} className="hover:bg-gray-50">
+                              <td className="p-3 whitespace-nowrap">{new Date(p.date).toLocaleDateString("en-GB")}</td>
+                              <td className="p-3 uppercase font-bold text-gray-400">{p.method}</td>
+                              <td className="p-3 text-right font-bold text-green-700">৳ {p.amount.toLocaleString()}</td>
+                           </tr>
+                        ))}
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+
+         </div>
+      </div>
+
+      <div className="text-center text-xs text-gray-400 italic">
+        Report Generated on {new Date().toLocaleString()}
       </div>
     </div>
   );

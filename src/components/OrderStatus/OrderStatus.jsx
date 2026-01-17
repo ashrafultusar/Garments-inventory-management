@@ -21,7 +21,6 @@ const steps = [
   { id: 7, title: "Completed" },
 ];
 
-
 const statusMap = {
   Pending: "pending",
   Process: "inprocess",
@@ -71,15 +70,12 @@ export default function OrderStatus({
     }
   };
 
- 
   const confirmChange = async () => {
     await updateStatusDirectly(selectedStep);
     setShowModal(false);
   };
 
-  
   const handleStepClick = async (step) => {
-    
     if (currentStep === 1 && step.id === 2) {
       setSelectedStep(step);
       setShowModal(true);
