@@ -7,151 +7,165 @@ export default function CustomerProfileLedger({ params }) {
   const resolvedParams = use(params);
   const customerId = resolvedParams?.customerId;
 
-  const [customer, setCustomer] = useState(null);
-  const [billings, setBillings] = useState([]); // Billing API data
-  const [payments, setPayments] = useState([]); // Payment API data
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    customer: null,
+    combinedLedger: [],
+    loading: true,
+  });
 
   useEffect(() => {
-    const fetchAllData = async () => {
+    const fetchLedgerData = async () => {
       try {
-        setLoading(true);
-        
-        // 1. Customer Details Fetch
-        const custRes = await fetch(`/api/customers/${customerId}`);
-        const custData = await custRes.json();
-        setCustomer(custData);
+        const res = await fetch(`/api/customers/ledger/${customerId}`);
+        const result = await res.json();
 
-        // 2. Billing Summary Fetch (Using your provided API)
-        const billingRes = await fetch(`/api/customers/ledger/${customerId}`);
-        const billData = await billingRes.json();
-        if (billData.success) {
-          let runningBill = 0;
-          // Purono theke natun e sort kore running balance calculate kora
-          const formattedBill = billData.data
-            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-            .map((b) => {
-              runningBill += b.total;
-              return { ...b, cumulativeBill: runningBill };
-            });
-          setBillings(formattedBill.reverse()); // Reverse kore table-e latest upore rakha holo
-        }
+        if (result.success) {
+          const { customer, billings, payments } = result.data;
 
-        // 3. Payment Data Fetch
-        const payRes = await fetch(`/api/payments?userId=${customerId}`);
-        const payData = await payRes.json();
-        if (payData && payData.length > 0) {
-          let runningPay = 0;
-          const formattedPay = payData
-            .sort((a, b) => new Date(a.date) - new Date(b.date))
-            .map((p) => {
-              runningPay += p.amount;
-              return { ...p, cumulativePay: runningPay };
-            });
-          setPayments(formattedPay.reverse());
+          // ১. সব ডাটাকে একটি এরেতে নিয়ে আসা
+          const combined = [
+            ...billings.map(b => ({
+              date: b.createdAt,
+              provider: "BILLING",
+              description: `Invoice: ${b.invoiceNumber} (${b.colour || ''})`,
+              charge: b.total,
+              payment: 0,
+              type: 'debit'
+            })),
+            ...payments.map(p => ({
+              date: p.date,
+              provider: p.method, 
+              description: p.description || "Payment Received",
+              charge: 0,
+              payment: p.amount,
+              type: 'credit'
+            }))
+          ];
+
+          // ২. তারিখ অনুযায়ী সর্ট করা (Oldest First)
+          combined.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+          // ৩. রানিং ব্যালেন্স ক্যালকুলেট করা (Charge প্লাস, Payment মাইনাস)
+          let currentBalance = 0;
+          const ledgerWithBalance = combined.map(item => {
+            currentBalance += (item.charge - item.payment);
+            return { ...item, balance: currentBalance };
+          });
+
+          setData({
+            customer,
+            combinedLedger: ledgerWithBalance, // পুরাতন উপরে, নতুন নিচে
+            loading: false
+          });
         }
       } catch (err) {
-        console.error("Load Error:", err);
-        toast.error("Failed to load data");
-      } finally {
-        setLoading(false);
+        toast.error("Failed to load ledger data");
+        setData(prev => ({ ...prev, loading: false }));
       }
     };
 
-    if (customerId) fetchAllData();
+    if (customerId) fetchLedgerData();
   }, [customerId]);
 
-  if (loading) return <div className="p-10 text-center font-bold">Loading Statement...</div>;
-console.log(customer);
-console.log(billings);
-console.log(payments);
-  // Final Calculations for the Summary Card
-  const totalBill = billings.length > 0 ? billings[0].cumulativeBill : 0;
-  const totalPaid = payments.length > 0 ? payments[0].cumulativePay : 0;
-  const netDue = totalBill - totalPaid;
+  if (data.loading) return <div className="p-10 text-center font-bold text-gray-500 tracking-widest animate-pulse">GENERATING STATEMENT...</div>;
+
+  const totalCharge = data.combinedLedger.reduce((sum, item) => sum + item.charge, 0);
+  const totalPayment = data.combinedLedger.reduce((sum, item) => sum + item.payment, 0);
+  const finalBalance = totalCharge - totalPayment;
 
   return (
-    <div className="max-w-6xl mx-auto p-4 space-y-8">
-      
-      {/* --- Section 1: Top Summary Card --- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-blue-600 text-white p-6 rounded-2xl shadow-lg">
-          <p className="text-xs uppercase opacity-80 font-bold">Total Bill Amount</p>
-          <h2 className="text-3xl font-black">৳ {totalBill.toLocaleString()}</h2>
-        </div>
-        <div className="bg-green-600 text-white p-6 rounded-2xl shadow-lg">
-          <p className="text-xs uppercase opacity-80 font-bold">Total Received</p>
-          <h2 className="text-3xl font-black">৳ {totalPaid.toLocaleString()}</h2>
-        </div>
-        <div className={`${netDue >= 0 ? 'bg-red-600' : 'bg-teal-600'} text-white p-6 rounded-2xl shadow-lg`}>
-          <p className="text-xs uppercase opacity-80 font-bold">{netDue >= 0 ? "Current Net Due" : "Advance Balance"}</p>
-          <h2 className="text-3xl font-black">৳ {Math.abs(netDue).toLocaleString()}</h2>
-        </div>
-      </div>
-
-      <div className="bg-white p-6 rounded-xl border shadow-sm">
-         <div className="flex justify-between items-center border-b pb-4 mb-4">
-            <h1 className="text-xl font-black uppercase text-gray-800">Statement: {customer?.companyName}</h1>
-            <button onClick={() => window.print()} className="bg-gray-100 px-4 py-2 rounded text-xs font-bold border hover:bg-gray-200">PRINT</button>
-         </div>
-
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            {/* --- Left Column: Billing History --- */}
-            <div>
-               <h3 className="text-sm font-bold text-red-600 mb-3 uppercase tracking-wider">Billing History (Debit)</h3>
-               <div className="overflow-x-auto border rounded-lg">
-                  <table className="w-full text-xs text-left">
-                     <thead className="bg-gray-50 border-b">
-                        <tr>
-                           <th className="p-3">Date</th>
-                           <th className="p-3">Invoice</th>
-                           <th className="p-3 text-right">Amount</th>
-                        </tr>
-                     </thead>
-                     <tbody className="divide-y">
-                        {billings.map((b) => (
-                           <tr key={b._id} className="hover:bg-gray-50">
-                              <td className="p-3 whitespace-nowrap">{new Date(b.createdAt).toLocaleDateString("en-GB")}</td>
-                              <td className="p-3 font-medium">{b.invoiceNumber} <br/><span className="text-[10px] text-gray-400">{b.colour}</span></td>
-                              <td className="p-3 text-right font-bold text-gray-700">৳ {b.total.toLocaleString()}</td>
-                           </tr>
-                        ))}
-                     </tbody>
-                  </table>
-               </div>
+    <div className="max-w-6xl mx-auto p-4 space-y-6">
+      <div className="bg-white p-8 rounded-xl shadow-sm border print:border-none print:shadow-none">
+        
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-2xl font-black text-gray-800 uppercase tracking-tight">Ledger Statement</h1>
+            <div className="mt-4 flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-gray-400 uppercase">Client Name:</span>
+                <span className="font-bold text-blue-700">{data.customer?.companyName || "N/A"}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span className="font-bold uppercase tracking-tighter">Report Period:</span>
+                <span>Lifetime Statement</span>
+              </div>
             </div>
+          </div>
+          <button 
+            onClick={() => window.print()} 
+            className="bg-gray-800 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-black transition-all shadow-md print:hidden"
+          >
+            PRINT STATEMENT
+          </button>
+        </div>
 
-            {/* --- Right Column: Payment History --- */}
-            <div>
-               <h3 className="text-sm font-bold text-green-600 mb-3 uppercase tracking-wider">Payment History (Credit)</h3>
-               <div className="overflow-x-auto border rounded-lg">
-                  <table className="w-full text-xs text-left">
-                     <thead className="bg-gray-50 border-b">
-                        <tr>
-                           <th className="p-3">Date</th>
-                           <th className="p-3">Method</th>
-                           <th className="p-3 text-right">Received</th>
-                        </tr>
-                     </thead>
-                     <tbody className="divide-y">
-                        {payments.map((p) => (
-                           <tr key={p._id} className="hover:bg-gray-50">
-                              <td className="p-3 whitespace-nowrap">{new Date(p.date).toLocaleDateString("en-GB")}</td>
-                              <td className="p-3 uppercase font-bold text-gray-400">{p.method}</td>
-                              <td className="p-3 text-right font-bold text-green-700">৳ {p.amount.toLocaleString()}</td>
-                           </tr>
-                        ))}
-                     </tbody>
-                  </table>
-               </div>
+        {/* Ledger Table */}
+        <div className="border rounded-xl overflow-hidden shadow-sm">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-4 py-3 text-left font-bold text-gray-600 uppercase text-[10px]">Date</th>
+                <th className="px-4 py-3 text-left font-bold text-gray-600 uppercase text-[10px]">Method</th>
+                <th className="px-4 py-3 text-left font-bold text-gray-600 uppercase text-[10px]">Description</th>
+                <th className="px-4 py-3 text-right font-bold text-gray-600 uppercase text-[10px]">Charge (+)</th>
+                <th className="px-4 py-3 text-right font-bold text-gray-600 uppercase text-[10px]">Payment (-)</th>
+                <th className="px-4 py-3 text-right font-bold text-gray-600 uppercase text-[10px]">Running Balance</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {data.combinedLedger.map((row, idx) => (
+                <tr key={idx} className="hover:bg-blue-50/20 transition-colors">
+                  <td className="px-4 py-3 whitespace-nowrap text-gray-600 text-xs">
+                    {new Date(row.date).toLocaleDateString("en-GB")}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${row.type === 'credit' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                      {row.provider}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-700 font-medium text-xs">{row.description}</td>
+                  <td className="px-4 py-3 text-right text-gray-600 font-semibold">
+                    {row.charge > 0 ? `৳${row.charge.toLocaleString()}` : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right text-green-700 font-bold">
+                    {row.payment > 0 ? `৳${row.payment.toLocaleString()}` : "—"}
+                  </td>
+                  <td className={`px-4 py-3 text-right font-black text-xs`}>
+                    <span className={row.balance > 0 ? 'text-red-600' : row.balance < 0 ? 'text-teal-600' : 'text-gray-400'}>
+                      ৳{Math.abs(row.balance).toLocaleString()} 
+                      <span className="ml-1 text-[9px] uppercase">
+                        {row.balance > 0 ? "-" : row.balance < 0 ? "+" : ""}
+                      </span>
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            {/* Summary Footer */}
+            <tfoot className="bg-gray-900 text-white font-bold">
+              <tr>
+                <td colSpan={3} className="px-4 py-4 text-right text-[10px] uppercase tracking-widest">Net Summary:</td>
+                <td className="px-4 py-4 text-right">৳{totalCharge.toLocaleString()}</td>
+                <td className="px-4 py-4 text-right">৳{totalPayment.toLocaleString()}</td>
+                <td className={`px-4 py-4 text-right ${finalBalance <= 0 ? 'bg-teal-600' : 'bg-red-700'}`}>
+                    ৳{Math.abs(finalBalance).toLocaleString()} {finalBalance > 0 ? "-" : "+"}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {/* Footer Info */}
+        <div className="mt-8 flex justify-between items-end border-t pt-6">
+            <div className="text-[10px] text-gray-400 italic uppercase">
+                Generated by System • {new Date().toLocaleString()}
             </div>
-
-         </div>
-      </div>
-
-      <div className="text-center text-xs text-gray-400 italic">
-        Report Generated on {new Date().toLocaleString()}
+            <div className="flex flex-col items-center gap-2">
+                <div className="w-32 h-px bg-gray-300"></div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase">Authorized Signature</div>
+            </div>
+        </div>
       </div>
     </div>
   );

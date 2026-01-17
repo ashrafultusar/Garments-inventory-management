@@ -78,19 +78,10 @@ export default function DummyLedger() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="border px-3 py-1 rounded bg-gray-100">
-            Date Presets
+          <button className="border px-3 py-1 rounded bg-gray-200">
+            Print
           </button>
-          <button className="border px-3 py-1 rounded bg-gray-200">Print</button>
         </div>
-      </div>
-
-      {/* Date Range */}
-      <div className="flex items-center gap-4 mt-4">
-        <span className="font-medium">Date range:</span>
-        <input type="date" className="border p-1 rounded" />
-        <span className="font-medium">to</span>
-        <input type="date" className="border p-1 rounded" />
       </div>
 
       {/* Table */}
@@ -99,9 +90,6 @@ export default function DummyLedger() {
           <thead className="bg-gray-200 border-b">
             <tr>
               <th className="px-3 py-2 text-left">Date</th>
-              <th className="px-3 py-2 text-left">CPT®</th>
-              <th className="px-3 py-2 text-left">Loc</th>
-              <th className="px-3 py-2 text-left">Class</th>
               <th className="px-3 py-2 text-left">Provider</th>
               <th className="px-3 py-2 text-left">Description</th>
               <th className="px-3 py-2 text-right">Charge</th>
@@ -114,9 +102,6 @@ export default function DummyLedger() {
             {ledger.map((row, idx) => (
               <tr key={idx} className="border-b">
                 <td className="px-3 py-2">{row.date}</td>
-                <td className="px-3 py-2">{row.cpt}</td>
-                <td className="px-3 py-2">{row.loc}</td>
-                <td className="px-3 py-2">{row.class}</td>
                 <td className="px-3 py-2">{row.provider}</td>
                 <td className="px-3 py-2">{row.description}</td>
                 <td className="px-3 py-2 text-right">
