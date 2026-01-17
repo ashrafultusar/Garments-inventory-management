@@ -12,7 +12,6 @@ export async function GET(req) {
       return new Response(JSON.stringify({ error: "User ID missing" }), { status: 400 });
     }
 
-    // নির্দিষ্ট কাস্টমারের সব পেমেন্ট লিস্ট
     const payments = await Payment.find({ user: userId }).sort({ date: -1 });
     return new Response(JSON.stringify(payments), { status: 200 });
 
@@ -44,8 +43,6 @@ export async function POST(req) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
-
-
 
 export async function PUT(req) {
   try {

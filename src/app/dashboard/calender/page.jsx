@@ -6,9 +6,11 @@ import Link from "next/link";
 
 export default function CalenderPage() {
   const [calenders, setCalenders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchCalenders = async () => {
     try {
+      setLoading(true);
       const res = await fetch("/api/calender");
       if (!res.ok) throw new Error("Failed to fetch calenders");
       const data = await res.json();
@@ -16,6 +18,8 @@ export default function CalenderPage() {
     } catch (err) {
       console.error(err);
       toast.error("Failed to load calenders");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,36 +65,49 @@ export default function CalenderPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {calenders?.map((c, index) => (
-              <tr key={c._id}>
-                <td className="px-4 py-2 text-sm">{index + 1}</td>
-                <td className="px-4 py-2 text-sm">{c.name}</td>
-                <td className="px-4 py-2 text-sm">{c.location}</td>
-                <td className="px-4 py-2 text-sm flex gap-2">
-                <Link
-  href={`/dashboard/calender/profile/${c._id}`}
-  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
->
-  View
-</Link>
-                  <Link
-                    href={`/dashboard/calender/edit/${c._id}`}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(c._id)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                  >
-                    Delete
-                  </button>
+            {loading ? (
+              /* Loading Spinner */
+              <tr>
+                <td colSpan={4} className="py-20">
+                  <div className="flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 border-solid "></div>
+                  </div>
                 </td>
               </tr>
-            ))}
-            {calenders.length === 0 && (
+            ) : calenders.length > 0 ? (
+              calenders.map((c, index) => (
+                <tr key={c._id} className="hover:bg-gray-50">
+                  <td className="px-4 py-2 text-sm">{index + 1}</td>
+                  <td className="px-4 py-2 text-sm font-medium text-gray-900">{c.name}</td>
+                  <td className="px-4 py-2 text-sm text-gray-600">{c.location}</td>
+                  <td className="px-4 py-2 text-sm">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/dashboard/calender/profile/${c._id}`}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition"
+                      >
+                        View
+                      </Link>
+                      <Link
+                        href={`/dashboard/calender/edit/${c._id}`}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded transition"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(c._id)}
+                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              /* No Data State */
               <tr>
-                <td colSpan={4} className="text-center py-4 text-gray-500">
+                <td colSpan={4} className="text-center py-10 text-gray-500">
                   No calenders found
                 </td>
               </tr>
