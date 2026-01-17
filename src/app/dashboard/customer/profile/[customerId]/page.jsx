@@ -1,298 +1,172 @@
-// "use client";
-
-// export default function DummyLedger() {
-//   const customer = {
-//     name: "BRITNEY SPEARS",
-//   };
-
-//   const ledger = [
-//     {
-//       date: "07/16/18",
-//       cpt: "97124.GP",
-//       loc: "—",
-//       class: "—",
-//       provider: "10576",
-//       description: "MASSAGE THERAPY",
-//       charge: 75.0,
-//       payment: "",
-//       balance: 300.0,
-//     },
-//     {
-//       date: "07/16/18",
-//       cpt: "97110.GP",
-//       loc: "—",
-//       class: "—",
-//       provider: "10576",
-//       description: "THERAPEUTIC EXERCISES",
-//       charge: 50.0,
-//       payment: "",
-//       balance: 350.0,
-//     },
-//     {
-//       date: "07/16/18",
-//       cpt: "97010.GP",
-//       loc: "—",
-//       class: "—",
-//       provider: "10576",
-//       description: "HOT OR COLD PACKS THERAPY",
-//       charge: 15.0,
-//       payment: "",
-//       balance: 365.0,
-//     },
-//     {
-//       date: "07/16/18",
-//       cpt: "",
-//       loc: "",
-//       class: "",
-//       provider: "",
-//       description: "Adjustments applied",
-//       charge: "",
-//       payment: 29.5,
-//       balance: 335.5,
-//     },
-//     {
-//       date: "07/16/18",
-//       cpt: "",
-//       loc: "",
-//       class: "",
-//       provider: "",
-//       description: "Insurance payment (Chk #74125)",
-//       charge: "",
-//       payment: 190.5,
-//       balance: 145.0,
-//     },
-//   ];
-
-//   return (
-//     <div className="bg-white p-8 mt-8 rounded-xl shadow">
-//       {/* Header */}
-//       <div className="flex justify-between items-start">
-//         <div>
-//           <h1 className="text-2xl font-bold">Client Ledger Statement</h1>
-//           <p className="mt-2">
-//             <strong>Client:</strong>{" "}
-//             <span className="px-2 py-1 border rounded bg-gray-50">
-//               {customer.name}
-//             </span>
-//           </p>
-//         </div>
-
-//         <div className="flex items-center gap-3">
-//           <button className="border px-3 py-1 rounded bg-gray-100">
-//             Date Presets
-//           </button>
-//           <button className="border px-3 py-1 rounded bg-gray-200">Print</button>
-//         </div>
-//       </div>
-
-//       {/* Date Range
-//       <div className="flex items-center gap-4 mt-4">
-//         <span className="font-medium">Date range:</span>
-//         <input type="date" className="border p-1 rounded" />
-//         <span className="font-medium">to</span>
-//         <input type="date" className="border p-1 rounded" />
-//       </div> */}
-
-//       {/* Table */}
-//       <div className="border mt-6 rounded overflow-x-auto">
-//         <table className="w-full text-sm">
-//           <thead className="bg-gray-200 border-b">
-//             <tr>
-//               <th className="px-3 py-2 text-left">Date</th>
-//               <th className="px-3 py-2 text-left">CPT®</th>
-//               <th className="px-3 py-2 text-left">Loc</th>
-//               <th className="px-3 py-2 text-left">Class</th>
-//               <th className="px-3 py-2 text-left">Provider</th>
-//               <th className="px-3 py-2 text-left">Description</th>
-//               <th className="px-3 py-2 text-right">Charge</th>
-//               <th className="px-3 py-2 text-right">Payment</th>
-//               <th className="px-3 py-2 text-right">Balance</th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {ledger.map((row, idx) => (
-//               <tr key={idx} className="border-b">
-//                 <td className="px-3 py-2">{row.date}</td>
-//                 <td className="px-3 py-2">{row.cpt}</td>
-//                 <td className="px-3 py-2">{row.loc}</td>
-//                 <td className="px-3 py-2">{row.class}</td>
-//                 <td className="px-3 py-2">{row.provider}</td>
-//                 <td className="px-3 py-2">{row.description}</td>
-//                 <td className="px-3 py-2 text-right">
-//                   {row.charge !== "" ? row.charge.toFixed(2) : ""}
-//                 </td>
-//                 <td className="px-3 py-2 text-right">
-//                   {row.payment !== "" ? row.payment.toFixed(2) : ""}
-//                 </td>
-//                 <td className="px-3 py-2 text-right font-medium">
-//                   {row.balance.toFixed(2)}
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-
-//           {/* Totals */}
-//           <tfoot>
-//             <tr className="bg-gray-100 font-bold border-t">
-//               <td colSpan={6} className="px-3 py-2 text-right">
-//                 Totals:
-//               </td>
-//               <td className="px-3 py-2 text-right">155.00</td>
-//               <td className="px-3 py-2 text-right">220.00</td>
-//               <td className="px-3 py-2 text-right">145.00</td>
-//             </tr>
-//           </tfoot>
-//         </table>
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import React, { useEffect, useState, use } from "react";
 import { toast } from "react-toastify";
 
-const CustomerLedger = () => {
-  const { customerid } = useParams();
-  const [customer, setCustomer] = useState(null);
-  const [summaries, setSummaries] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function CustomerProfileLedger({ params }) {
+  const resolvedParams = use(params);
+  const customerId = resolvedParams?.customerId;
+
+  const [data, setData] = useState({
+    customer: null,
+    combinedLedger: [],
+    loading: true,
+  });
 
   useEffect(() => {
     const fetchLedgerData = async () => {
       try {
-        // ১. কাস্টমার ইনফো লোড
-        const resCust = await fetch(`/api/customers/${customerid}`);
-        const custData = await resCust.json();
-        setCustomer(custData);
+        const res = await fetch(`/api/customers/ledger/${customerId}`);
+        const result = await res.json();
 
-        // ২. বিলিং সামারি লোড (আগে তৈরি করা API রাউট থেকে)
-        const resSum = await fetch(`/api/customers/billing-summary/${customerid}`);
-        const sumData = await resSum.json();
-        setSummaries(sumData);
+        if (result.success) {
+          const { customer, billings, payments } = result.data;
+
+          // ১. সব ডাটাকে একটি এরেতে নিয়ে আসা
+          const combined = [
+            ...billings.map(b => ({
+              date: b.createdAt,
+              provider: "BILLING",
+              description: `Invoice: ${b.invoiceNumber} (${b.colour || ''})`,
+              charge: b.total,
+              payment: 0,
+              type: 'debit'
+            })),
+            ...payments.map(p => ({
+              date: p.date,
+              provider: p.method, 
+              description: p.description || "Payment Received",
+              charge: 0,
+              payment: p.amount,
+              type: 'credit'
+            }))
+          ];
+
+          // ২. তারিখ অনুযায়ী সর্ট করা (Oldest First)
+          combined.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+          // ৩. রানিং ব্যালেন্স ক্যালকুলেট করা (Charge প্লাস, Payment মাইনাস)
+          let currentBalance = 0;
+          const ledgerWithBalance = combined.map(item => {
+            currentBalance += (item.charge - item.payment);
+            return { ...item, balance: currentBalance };
+          });
+
+          setData({
+            customer,
+            combinedLedger: ledgerWithBalance, // পুরাতন উপরে, নতুন নিচে
+            loading: false
+          });
+        }
       } catch (err) {
         toast.error("Failed to load ledger data");
-      } finally {
-        setLoading(false);
+        setData(prev => ({ ...prev, loading: false }));
       }
     };
 
-    if (customerid) fetchLedgerData();
-  }, [customerid]);
+    if (customerId) fetchLedgerData();
+  }, [customerId]);
 
-  // ক্যালকুলেশন
-  const totalCharge = summaries.reduce((acc, curr) => acc + curr.total, 0);
-  const totalQty = summaries.reduce((acc, curr) => acc + curr.totalQty, 0);
+  if (data.loading) return <div className="p-10 text-center font-bold text-gray-500 tracking-widest animate-pulse">GENERATING STATEMENT...</div>;
 
-  if (loading) return <div className="p-10 text-center text-gray-500">Loading Ledger Statement...</div>;
+  const totalCharge = data.combinedLedger.reduce((sum, item) => sum + item.charge, 0);
+  const totalPayment = data.combinedLedger.reduce((sum, item) => sum + item.payment, 0);
+  const finalBalance = totalCharge - totalPayment;
 
   return (
-    <div className="bg-white p-8 mt-8 rounded-xl shadow border border-gray-100">
-      {/* Header - আপনার দেওয়া স্টাইল অনুযায়ী */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Client Ledger Statement</h1>
-          <div className="mt-4 flex flex-col gap-2">
-            <p>
-              <strong>Company:</strong>{" "}
-              <span className="px-3 py-1 border rounded bg-gray-50 font-medium">
-                {customer?.companyName || "N/A"}
-              </span>
-            </p>
-            <p className="text-sm text-gray-600">
-              <strong>Owner:</strong> {customer?.ownerName} | <strong>Phone:</strong> {customer?.phoneNumber}
-            </p>
+    <div className="max-w-6xl mx-auto p-4 space-y-6">
+      <div className="bg-white p-8 rounded-xl shadow-sm border print:border-none print:shadow-none">
+        
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-2xl font-black text-gray-800 uppercase tracking-tight">Ledger Statement</h1>
+            <div className="mt-4 flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-gray-400 uppercase">Client Name:</span>
+                <span className="font-bold text-blue-700">{data.customer?.companyName || "N/A"}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span className="font-bold uppercase tracking-tighter">Report Period:</span>
+                <span>Lifetime Statement</span>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3 no-print">
-          <button className="border px-4 py-1.5 rounded bg-gray-100 hover:bg-gray-200 text-sm transition">
-            Date Presets
-          </button>
           <button 
-            onClick={() => window.print()}
-            className="border px-4 py-1.5 rounded bg-gray-800 text-white hover:bg-gray-700 text-sm transition shadow-sm"
+            onClick={() => window.print()} 
+            className="bg-gray-800 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-black transition-all shadow-md print:hidden"
           >
-            Print
+            PRINT STATEMENT
           </button>
         </div>
-      </div>
 
-      {/* Table - আপনার দেওয়া DummyLedger ফরম্যাট অনুযায়ী */}
-      <div className="border mt-8 rounded overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-200 border-b">
-            <tr>
-              <th className="px-4 py-3 text-left font-bold text-gray-700">Date</th>
-              <th className="px-4 py-3 text-left font-bold text-gray-700">Invoice #</th>
-              <th className="px-4 py-3 text-left font-bold text-gray-700">Description</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">Qty (গজ)</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">Price</th>
-              <th className="px-4 py-3 text-right font-bold text-gray-700">Charge/Total</th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-100">
-            {summaries.length > 0 ? (
-              summaries.map((row) => (
-                <tr key={row._id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {new Date(row.createdAt).toLocaleDateString("en-GB")}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-blue-600 font-medium">
-                    {row.invoiceNumber}
+        {/* Ledger Table */}
+        <div className="border rounded-xl overflow-hidden shadow-sm">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-4 py-3 text-left font-bold text-gray-600 uppercase text-[10px]">Date</th>
+                <th className="px-4 py-3 text-left font-bold text-gray-600 uppercase text-[10px]">Method</th>
+                <th className="px-4 py-3 text-left font-bold text-gray-600 uppercase text-[10px]">Description</th>
+                <th className="px-4 py-3 text-right font-bold text-gray-600 uppercase text-[10px]">Charge (+)</th>
+                <th className="px-4 py-3 text-right font-bold text-gray-600 uppercase text-[10px]">Payment (-)</th>
+                <th className="px-4 py-3 text-right font-bold text-gray-600 uppercase text-[10px]">Running Balance</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {data.combinedLedger.map((row, idx) => (
+                <tr key={idx} className="hover:bg-blue-50/20 transition-colors">
+                  <td className="px-4 py-3 whitespace-nowrap text-gray-600 text-xs">
+                    {new Date(row.date).toLocaleDateString("en-GB")}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="font-semibold text-gray-800">{row.batchName}</div>
-                    <div className="text-[11px] text-gray-500 uppercase">
-                      {row.colour} • {row.finishingType}
-                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${row.type === 'credit' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                      {row.provider}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 text-right font-medium">{row.totalQty}</td>
-                  <td className="px-4 py-3 text-right text-gray-600">
-                    {row.price.toFixed(2)}
+                  <td className="px-4 py-3 text-gray-700 font-medium text-xs">{row.description}</td>
+                  <td className="px-4 py-3 text-right text-gray-600 font-semibold">
+                    {row.charge > 0 ? `৳${row.charge.toLocaleString()}` : "—"}
                   </td>
-                  <td className="px-4 py-3 text-right font-bold text-gray-900">
-                    {row.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  <td className="px-4 py-3 text-right text-green-700 font-bold">
+                    {row.payment > 0 ? `৳${row.payment.toLocaleString()}` : "—"}
+                  </td>
+                  <td className={`px-4 py-3 text-right font-black text-xs`}>
+                    <span className={row.balance > 0 ? 'text-red-600' : row.balance < 0 ? 'text-teal-600' : 'text-gray-400'}>
+                      ৳{Math.abs(row.balance).toLocaleString()} 
+                      <span className="ml-1 text-[9px] uppercase">
+                        {row.balance > 0 ? "-" : row.balance < 0 ? "+" : ""}
+                      </span>
+                    </span>
                   </td>
                 </tr>
-              ))
-            ) : (
+              ))}
+            </tbody>
+            {/* Summary Footer */}
+            <tfoot className="bg-gray-900 text-white font-bold">
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-gray-400 italic">
-                  No billing history found for this client.
+                <td colSpan={3} className="px-4 py-4 text-right text-[10px] uppercase tracking-widest">Net Summary:</td>
+                <td className="px-4 py-4 text-right">৳{totalCharge.toLocaleString()}</td>
+                <td className="px-4 py-4 text-right">৳{totalPayment.toLocaleString()}</td>
+                <td className={`px-4 py-4 text-right ${finalBalance <= 0 ? 'bg-teal-600' : 'bg-red-700'}`}>
+                    ৳{Math.abs(finalBalance).toLocaleString()} {finalBalance > 0 ? "-" : "+"}
                 </td>
               </tr>
-            )}
-          </tbody>
+            </tfoot>
+          </table>
+        </div>
 
-          {/* Totals - আপনার দেওয়া স্টাইল অনুযায়ী */}
-          <tfoot>
-            <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
-              <td colSpan={3} className="px-4 py-3 text-right text-gray-700">
-                Summary Totals:
-              </td>
-              <td className="px-4 py-3 text-right border-x border-gray-200">
-                {totalQty}
-              </td>
-              <td className="px-4 py-3 bg-gray-50"></td>
-              <td className="px-4 py-3 text-right text-lg text-blue-700">
-                {totalCharge.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      {/* Footer Note */}
-      <div className="mt-6 text-[10px] text-gray-400 text-center italic uppercase tracking-widest">
-        This is a computer-generated statement
+        {/* Footer Info */}
+        <div className="mt-8 flex justify-between items-end border-t pt-6">
+            <div className="text-[10px] text-gray-400 italic uppercase">
+                Generated by System • {new Date().toLocaleString()}
+            </div>
+            <div className="flex flex-col items-center gap-2">
+                <div className="w-32 h-px bg-gray-300"></div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase">Authorized Signature</div>
+            </div>
+        </div>
       </div>
     </div>
   );
-};
-
-export default CustomerLedger;
+}
