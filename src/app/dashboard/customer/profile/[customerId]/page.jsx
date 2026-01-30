@@ -26,7 +26,6 @@ export default function CustomerProfileLedger({ params }) {
           const { customer, billings, payments } = result.data;
 
           const combined = [
-       
             ...billings
               .filter(b => b.summaryType === "client")
               .map(b => ({
@@ -40,7 +39,6 @@ export default function CustomerProfileLedger({ params }) {
                 type: 'debit',
                 colour: b.colour
               })),
-         
             ...payments.map(p => ({
               date: p.date,
               provider: p.method.toUpperCase(),
@@ -51,11 +49,14 @@ export default function CustomerProfileLedger({ params }) {
             }))
           ];
 
+          // তারিখ অনুযায়ী সাজানো
           combined.sort((a, b) => new Date(a.date) - new Date(b.date));
 
           let currentBalance = 0;
           const ledgerWithBalance = combined.map(item => {
-            currentBalance += (item.charge - item.payment);
+            // আপনার রিকোয়েস্ট অনুযায়ী লজিক: (Payment - Charge)
+            // পেমেন্ট বড় হলে পজিটিভ (+), চার্জ বড় হলে নেগেটিভ (-)
+            currentBalance += (item.payment - item.charge);
             return { ...item, balance: currentBalance };
           });
 
@@ -74,8 +75,8 @@ export default function CustomerProfileLedger({ params }) {
 
   const totalCharge = data.combinedLedger.reduce((sum, item) => sum + item.charge, 0);
   const totalPayment = data.combinedLedger.reduce((sum, item) => sum + item.payment, 0);
-  const finalBalance = totalCharge - totalPayment;
-  
+  const finalBalance = totalPayment - totalCharge;
+
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-6 min-h-screen">
       <button onClick={() => router.back()} className="flex items-center gap-2 bg-blue-100 px-2 py-1 rounded text-gray-600 hover:text-blue-600 font-bold text-sm mb-4 print:hidden">
@@ -112,7 +113,7 @@ export default function CustomerProfileLedger({ params }) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {data?.combinedLedger.map((row, idx) => (
+              {data.combinedLedger.map((row, idx) => (
                 <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
                   <td className="px-4 py-4 whitespace-nowrap text-gray-600 text-[11px] font-medium">{new Date(row.date).toLocaleDateString("en-GB")}</td>
                   <td className="px-4 py-4 whitespace-nowrap">
@@ -123,22 +124,18 @@ export default function CustomerProfileLedger({ params }) {
                     {row.colour && <span className="text-[10px] text-gray-400 italic leading-none">{row.colour}</span>}
                   </td>
                   <td className="px-4 py-4 text-right whitespace-nowrap">
-  {row.charge > 0 ? (
-    <div>
-  
-      <div className="text-gray-900 font-black text-xs">
-        ({row.qty} × {row.price}) = ৳{row.charge.toLocaleString()}
-      </div>
-    </div>
-  ) : (
-    <span className="text-gray-300">—</span>
-  )}
-</td>
-                  <td className="px-4 py-4 text-right text-green-600 font-black text-xs whitespace-nowrap">{row.payment > 0 ? `৳${row.payment.toLocaleString()}` : "—"}</td>
+                    {row.charge > 0 ? (
+                      <div className="text-gray-900 font-bold text-[11px]">
+                        ({row.qty} × {row.price}) = ৳{row.charge.toLocaleString()}
+                      </div>
+                    ) : "—"}
+                  </td>
+                  <td className="px-4 py-4 text-right text-green-600 font-black text-xs whitespace-nowrap">
+                    {row.payment > 0 ? `৳${row.payment.toLocaleString()}` : "—"}
+                  </td>
                   <td className="px-4 py-4 text-right whitespace-nowrap">
-                    <div className={`text-xs font-black ${row.balance > 0 ? 'text-red-600' : 'text-teal-600'}`}>
-                      ৳{Math.abs(row.balance).toLocaleString()} 
-                      <span className="ml-1 text-[9px] opacity-70">{row.balance > 0 ? "Dr" : "Cr"}</span>
+                    <div className={`text-xs font-black px-2 py-1 rounded ${row.balance < 0 ? 'text-red-600 bg-red-50' : 'text-teal-600 bg-teal-50'}`}>
+                      {row.balance < 0 ? `- ৳${Math.abs(row.balance).toLocaleString()}` : `+ ৳${row.balance.toLocaleString()}`}
                     </div>
                   </td>
                 </tr>
@@ -155,14 +152,16 @@ export default function CustomerProfileLedger({ params }) {
               <p className="text-lg font-bold">৳{totalCharge.toLocaleString()}</p>
             </div>
             <div className="space-y-1 text-center sm:text-left border-b sm:border-b-0 sm:border-r border-gray-800 pb-4 sm:pb-0">
-              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Total Paid</p>
+              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Total Received</p>
               <p className="text-lg font-bold text-green-400">৳{totalPayment.toLocaleString()}</p>
             </div>
             <div className="text-center sm:text-right">
-              <p className="text-[10px] text-blue-300 font-black uppercase tracking-widest mb-1">Current Balance</p>
-              <p className={`text-2xl font-black ${finalBalance > 0 ? 'text-red-500' : 'text-teal-400'}`}>
-                ৳{Math.abs(finalBalance).toLocaleString()}
-                <span className="text-xs ml-2 font-bold opacity-80 uppercase">{finalBalance > 0 ? "Payable" : "Surplus"}</span>
+              <p className="text-[10px] text-blue-300 font-black uppercase tracking-widest mb-1">Final Balance</p>
+              <p className={`text-2xl font-black ${finalBalance < 0 ? 'text-red-500' : 'text-teal-400'}`}>
+                {finalBalance < 0 ? `- ৳${Math.abs(finalBalance).toLocaleString()}` : `+ ৳${finalBalance.toLocaleString()}`}
+                <span className="text-xs ml-2 font-bold opacity-80 uppercase">
+                  {finalBalance < 0 ? "Due" : "Advance"}
+                </span>
               </p>
             </div>
           </div>
