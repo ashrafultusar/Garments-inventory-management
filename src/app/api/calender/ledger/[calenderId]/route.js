@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 export async function GET(req, { params }) {
   try {
     await connectDB();
-    const { calenderId } = params;
+    const { calenderId } =await params;
 
     const calender = await Calender.findById(calenderId);
     if (!calender) {
