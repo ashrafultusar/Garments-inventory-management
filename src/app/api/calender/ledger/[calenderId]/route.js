@@ -1,22 +1,39 @@
 import connectDB from "@/lib/db";
 import BillingSummary from "@/models/BillingSummary";
+import Payment from "@/models/Payment";
+import Calender from "@/models/Calender";
 import { NextResponse } from "next/server";
-
 
 export async function GET(req, { params }) {
   try {
     await connectDB();
-    const { dyeingId } = params;
+    const { calenderId } = params;
 
-    const summaries = await BillingSummary.find({
-      dyeingId,
-      summaryType: "dyeing",
-    }).sort({ createdAt: -1 });
+    const calender = await Calender.findById(calenderId);
+    if (!calender) {
+      return NextResponse.json({ success: false });
+    }
 
-    return NextResponse.json(summaries);
-  } catch (error) {
+    const billings = await BillingSummary.find({
+      calenderId,
+      summaryType: "calender",
+    });
+
+    const payments = await Payment.find({
+      calenderId,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        customer: calender,
+        billings,
+        payments,
+      },
+    });
+  } catch (err) {
     return NextResponse.json(
-      { message: "Failed to fetch dyeing summaries" },
+      { success: false, message: "Ledger fetch failed" },
       { status: 500 }
     );
   }
