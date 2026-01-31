@@ -85,7 +85,7 @@ export default function BatchEditPage() {
       if (selected.includes(name)) setSelected(selected.filter((s) => s !== name));
       else setSelected([...selected, name]);
     };
-console.log(embeddedBatch);
+
     return (
       <div className="w-44 mb-2">
         <label className="block mb-2 text-sm font-medium text-gray-700">{label}</label>
@@ -192,7 +192,7 @@ console.log(embeddedBatch);
       const dataRes = await res.json();
       if (res.ok) {
         toast.success("Batch updated successfully!");
-        router.push(`/dashboard/order`);
+        router.back();
       } else {
         toast.error(dataRes.message || "Failed to save batch");
       }
@@ -202,6 +202,10 @@ console.log(embeddedBatch);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    router.back(); 
   };
 
   const getIndexValue = (row) => (row.idx && row.idx.length > 0 ? row.idx[0] : "");
@@ -326,11 +330,23 @@ console.log(embeddedBatch);
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-end">
-          <button onClick={handleSave} disabled={loading} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-60">
-            Save Changes
-          </button>
-        </div>
+        <div className="flex justify-between gap-3 mt-6">
+  <button 
+    onClick={handleCancel}
+    disabled={loading}
+    className="px-6 py-2 rounded-md border border-gray-300 text-white bg-red-500 cursor-pointer hover:bg-red-600 transition-all disabled:opacity-50"
+  >
+    Cancel
+  </button>
+  
+  <button 
+    onClick={handleSave} 
+    disabled={loading} 
+    className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 cursor-pointer transition-all disabled:opacity-60 flex items-center gap-2"
+  >
+    {loading ? "Saving..." : "Save Changes"}
+  </button>
+</div>
       </div>
     </div>
   );

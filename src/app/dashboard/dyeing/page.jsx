@@ -58,11 +58,21 @@ const DyeingPage = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">#</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Location</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Employees</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                #
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Name
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Location
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Employees
+              </th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -75,14 +85,19 @@ const DyeingPage = () => {
                   </div>
                 </td>
               </tr>
-            ) : dyeings.length > 0 ? (
-              dyeings.map((d, index) => (
+            ) : dyeings?.length > 0 ? (
+              dyeings?.map((d, index) => (
                 <tr key={d._id} className="hover:bg-gray-50">
                   <td className="px-4 py-2 text-sm">{index + 1}</td>
-                  <td className="px-4 py-2 text-sm font-medium text-gray-900">{d.name}</td>
-                  <td className="px-4 py-2 text-sm text-gray-600">{d.location}</td>
+                  <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                    {d.name}
+                  </td>
                   <td className="px-4 py-2 text-sm text-gray-600">
-                    {d.employees?.map((e) => e.employeeName).join(", ") || "N/A"}
+                    {d.location}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-600">
+                    {d.employees?.map((e) => e.employeeName).join(", ") ||
+                      "N/A"}
                   </td>
                   <td className="px-4 py-2 text-sm">
                     <div className="flex gap-2">
