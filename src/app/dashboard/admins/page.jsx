@@ -87,7 +87,7 @@ const AdminPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8">
+    <div className="min-h-screen py-12 md:py-16 lg:py-6">
       <div className="max-w-7xl mx-auto">
         
         {/* HEADER SECTION */}
