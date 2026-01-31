@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 export async function GET(req, { params }) {
   await connectDB();
 
-  const { orderId } = params;
+  const { orderId } = await params;
 
   // orderId valid কিনা চেক
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
