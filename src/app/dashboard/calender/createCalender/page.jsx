@@ -30,7 +30,7 @@ export default function CreateCalender() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="max-w-2xl mx-auto mt-16 md:mt-20 lg:mt-8 p-6 bg-white shadow-md rounded-lg">
       <h2 className="text-xl font-bold mb-4">Create Calender</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -53,12 +53,17 @@ export default function CreateCalender() {
           required
         />
 
+
+<div className="flex justify-between">
+<button  className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded  transition duration-200 cursor-pointer" onClick={()=>router.back()}>Cancel</button>
+
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+          className="cursor-pointer px-6  bg-green-600 text-white py-2 rounded hover:bg-green-700"
         >
           Create
         </button>
+        </div>
       </form>
     </div>
   );
