@@ -172,13 +172,18 @@
 
 
 
-import Orders from "@/components/order/OrderMainPage";
+import Orders from "@/components/order/Orders";
 import { Suspense } from "react";
 
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-600"></div>
+        <span className="ml-2">Loading Orders...</span>
+      </div>
+    }>
       <Orders />
     </Suspense>
   );
