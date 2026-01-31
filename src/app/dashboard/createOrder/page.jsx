@@ -25,7 +25,8 @@ const Page = () => {
     finishingType: "",
     totalGoj: "",
     totalBundle: "",
-    dyeingName: "",dyeingId:"",
+    dyeingName: "",
+    dyeingId: "",
     transporterName: "",
   });
 
@@ -36,12 +37,11 @@ const Page = () => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-  
+
     const formatted = `${day}/${month}/${year}`;
     setToday(formatted);
     setFormData((prev) => ({ ...prev, date: formatted }));
   }, []);
-  
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -101,8 +101,6 @@ const Page = () => {
     try {
       const payload = { ...formData, tableData };
 
- 
-
       const res = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -137,10 +135,11 @@ const Page = () => {
     }
   };
 
-
-
   return (
-    <section className="max-w-4xl mt-14 md:mt-2 mx-auto p-8 bg-white border border-gray-200 rounded-2xl shadow-md">
+    <section
+      className="max-w-5xl mx-auto p-8 mt-16 md:mt-14 lg:mt-4
+     bg-white border border-gray-200 rounded-2xl shadow-md"
+    >
       <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
         📝 Order Form
       </h2>
@@ -148,34 +147,31 @@ const Page = () => {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800">
           {/* Date */}
-    
-       
+
           <div className="flex flex-col">
-  <label htmlFor="date" className="mb-1 font-medium text-sm">
-    Date
-  </label>
+            <label htmlFor="date" className="mb-1 font-medium text-sm">
+              Date
+            </label>
 
-  <input
-    id="date"
-    type="date"
-    required
-    value={
-      formData.date
-        ? formData.date.split("/").reverse().join("-") // DD/MM/YYYY → YYYY-MM-DD
-        : ""
-    }
-    onChange={(e) => {
-      const value = e.target.value;            // YYYY-MM-DD
-      const [y, m, d] = value.split("-");
-      const formatted = `${d}/${m}/${y}`;      // → DD/MM/YYYY
+            <input
+              id="date"
+              type="date"
+              required
+              value={
+                formData.date
+                  ? formData.date.split("/").reverse().join("-") // DD/MM/YYYY → YYYY-MM-DD
+                  : ""
+              }
+              onChange={(e) => {
+                const value = e.target.value; // YYYY-MM-DD
+                const [y, m, d] = value.split("-");
+                const formatted = `${d}/${m}/${y}`; // → DD/MM/YYYY
 
-      setFormData({ ...formData, date: formatted });
-    }}
-    className="border px-2 py-1"
-  />
-</div>
-
-
+                setFormData({ ...formData, date: formatted });
+              }}
+              className="border px-2 py-1"
+            />
+          </div>
 
           {/* Invoice Number */}
           <div className="flex flex-col">
@@ -197,25 +193,24 @@ const Page = () => {
             <label className="mb-1 font-medium text-sm">Company Name</label>
 
             <SearchableSelect
-  id="companyName"
-  value={formData.companyName}
-  onChange={(e) => {
-    const selected = data.customers.find(
-      (c) => c.companyName === e.target.value
-    );
-    setFormData({
-      ...formData,
-      companyName: selected?.companyName,
-      customerId: selected?._id,  
-    });
-  }}
-  placeholder="Select Company"
-  options={data?.customers?.map((item) => ({
-    value: item.companyName,
-    label: item.companyName,
-  }))}
-/>
-
+              id="companyName"
+              value={formData.companyName}
+              onChange={(e) => {
+                const selected = data.customers.find(
+                  (c) => c.companyName === e.target.value
+                );
+                setFormData({
+                  ...formData,
+                  companyName: selected?.companyName,
+                  customerId: selected?._id,
+                });
+              }}
+              placeholder="Select Company"
+              options={data?.customers?.map((item) => ({
+                value: item.companyName,
+                label: item.companyName,
+              }))}
+            />
           </div>
 
           {/* Clothe Type */}
@@ -254,8 +249,7 @@ const Page = () => {
 
           {/* Quality */}
           <div>
-            <label className="mb-1 font-medium text-sm">
-            Quality</label>
+            <label className="mb-1 font-medium text-sm">Quality</label>
             <SearchableSelect
               id="quality"
               value={formData.quality}
@@ -357,29 +351,26 @@ const Page = () => {
             <label htmlFor="dyeingName" className="mb-1 font-medium text-sm">
               Dyeing Name
             </label>
-          
 
-<SearchableSelect
-  id="dyeingName"
-  value={formData.dyeingId}
-  onChange={(e) => {
-    const selected = data.dyeings.find(
-      (d) => d.name === e.target.value
-    );
-    setFormData({
-      ...formData,
-      dyeingName: selected?.name,   // name optional
-      dyeingId: selected?._id,      // ✅ Dyeing _id add
-    });
-  }}
-  placeholder="Select Dyeing Name"
-  options={data?.dyeings?.map((item) => ({
-    value: item.name,
-    label: item.name,
-  }))}
-/>
-
-
+            <SearchableSelect
+              id="dyeingName"
+              value={formData.dyeingId}
+              onChange={(e) => {
+                const selected = data.dyeings.find(
+                  (d) => d.name === e.target.value
+                );
+                setFormData({
+                  ...formData,
+                  dyeingName: selected?.name, // name optional
+                  dyeingId: selected?._id, // ✅ Dyeing _id add
+                });
+              }}
+              placeholder="Select Dyeing Name"
+              options={data?.dyeings?.map((item) => ({
+                value: item.name,
+                label: item.name,
+              }))}
+            />
           </div>
 
           {/* Transporter Name */}
@@ -461,20 +452,20 @@ const Page = () => {
         )}
 
         {/* Buttons */}
-        <div className="flex justify-end mt-8 gap-2">
-          <Link href={"/dashboard/order"}>
+        <div className="flex justify-between mt-8 gap-2">
+          <button onClick={() => router.back()}>
             <button
               type="button"
               className="bg-red-500 hover:bg-red-700 text-white font-medium px-6 py-3 cursor-pointer rounded-lg"
             >
-              Cancel Order
+              Back
             </button>
-          </Link>
+          </button>
           <button
             type="submit"
             className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg"
           >
-            Submit Order
+            Create Order
           </button>
         </div>
       </form>

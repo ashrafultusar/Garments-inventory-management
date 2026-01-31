@@ -3,10 +3,19 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Link from "next/link";
+import { 
+  Plus, 
+  Search, 
+  Eye, 
+  Pencil, 
+  Trash2, 
+  Users 
+} from "lucide-react";
 
 const CustomerPage = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchCustomers = async () => {
     try {
@@ -40,87 +49,139 @@ const CustomerPage = () => {
     }
   };
 
-  return (
-    <div className="py-6 mt-10 md:-mt-4 space-y-8">
-      {/* Create Button */}
-      <div className="flex justify-end">
-        <Link
-          href="/dashboard/customer/createCustomer"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
-        >
-          + Create Customer
-        </Link>
-      </div>
+  // Filter for search functionality
+  const filteredData = customers.filter(c => 
+    c.companyName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    c.ownerName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-      {/* Table Section */}
-      <section className="bg-white p-6 rounded-2xl shadow-md overflow-x-auto">
-        <h2 className="text-2xl font-bold mb-4">Customers</h2>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">#</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Company</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Owner</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Phone</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Employees</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {loading ? (
-              /* Loading Spinner Row */
-              <tr>
-                <td colSpan={6} className="py-20">
-                  <div className="flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 border-solid "></div>
-                  </div>
-                </td>
-              </tr>
-            ) : customers.length > 0 ? (
-              customers.map((c, index) => (
-                <tr key={c._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 text-sm">{index + 1}</td>
-                  <td className="px-4 py-2 text-sm font-medium text-gray-900">{c.companyName}</td>
-                  <td className="px-4 py-2 text-sm text-gray-600">{c.ownerName}</td>
-                  <td className="px-4 py-2 text-sm text-gray-600">{c.phoneNumber}</td>
-                  <td className="px-4 py-2 text-sm text-gray-600">
-                    {c.employeeList?.join(", ") || "N/A"}
-                  </td>
-                  <td className="px-4 py-2 text-sm">
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/dashboard/customer/profile/${c?._id}`}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition"
-                      >
-                        View
-                      </Link>
-                      <Link
-                        href={`/dashboard/customer/edit/${c._id}`}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded transition"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(c._id)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+  return (
+    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* HEADER SECTION */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 mt-6 lg:mt-0">
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-50 p-2.5 rounded-lg border border-indigo-100">
+              <Users className="text-indigo-600" size={28} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-[#1e293b]">Customer Management</h1>
+              <p className="text-sm text-gray-500 font-medium">Manage your client base and company details</p>
+            </div>
+          </div>
+          <Link 
+            href="/dashboard/customer/createCustomer" 
+            className="inline-flex items-center justify-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-5 py-2.5 rounded-lg font-semibold transition shadow-sm shadow-blue-200"
+          >
+            <Plus size={18} /> Create Customer
+          </Link>
+        </div>
+
+        {/* SEARCH BAR */}
+        <div className="relative mb-6 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <input
+            type="text"
+            placeholder="Search by company or owner..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition shadow-sm"
+          />
+        </div>
+
+        {/* STATS CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Clients</p>
+            <p className="text-3xl font-extrabold text-gray-900 mt-1">{customers.length}</p>
+          </div>
+          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">Active Companies</p>
+            <p className="text-3xl font-extrabold text-indigo-600 mt-1">{customers.length}</p>
+          </div>
+          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">Growth</p>
+            <p className="text-3xl font-extrabold text-green-600 mt-1">+12%</p>
+          </div>
+        </div>
+
+        {/* TABLE SECTION */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-[#f8fafc] border-b border-gray-200">
+                  <th className="px-6 py-4 text-xs font-bold text-[#475569] uppercase tracking-wider">Company</th>
+                  <th className="px-6 py-4 text-xs font-bold text-[#475569] uppercase tracking-wider">Owner</th>
+                  <th className="px-6 py-4 text-xs font-bold text-[#475569] uppercase tracking-wider">Contact</th>
+                  <th className="px-6 py-4 text-xs font-bold text-[#475569] uppercase tracking-wider">Employees</th>
+                  <th className="px-6 py-4 text-xs font-bold text-[#475569] uppercase tracking-wider text-right">Action</th>
                 </tr>
-              ))
-            ) : (
-              /* Empty State Row */
-              <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-500">
-                  No customers found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </section>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                   <tr>
+                    <td colSpan={5} className="py-20 text-center">
+                      <div className="flex justify-center">
+                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-600"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredData.length > 0 ? (
+                  filteredData.map((c) => (
+                    <tr key={c._id} className="hover:bg-gray-50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-semibold text-[#1e293b]">{c.companyName}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-[#475569] font-medium">{c.ownerName}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-[#475569]">{c.phoneNumber}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-[150px] truncate text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md inline-block">
+                          {c.employeeList?.join(", ") || "N/A"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <Link
+                            href={`/dashboard/customer/profile/${c?._id}`}
+                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition"
+                            title="View Profile"
+                          >
+                            <Eye size={19} />
+                          </Link>
+                          <Link
+                            href={`/dashboard/customer/edit/${c._id}`}
+                            className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition"
+                            title="Edit"
+                          >
+                            <Pencil size={19} />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(c._id)}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition cursor-pointer"
+                            title="Delete"
+                          >
+                            <Trash2 size={19} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="text-center py-12 text-gray-400 font-medium">No customers found</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

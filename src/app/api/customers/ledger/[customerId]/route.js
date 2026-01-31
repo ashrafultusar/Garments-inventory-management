@@ -1,53 +1,27 @@
-// import connectDB from "@/lib/db";
-// import BillingSummary from "@/models/BillingSummary";
-// import { NextResponse } from "next/server";
-
-
-// export async function GET(req, { params }) {
-//   try {
-//     await connectDB();
-//     const { customerId } = await params;
-
-//     // Sudhu BillingSummary fetch kora hobe 
-//     // summaryType: "client" filter deya holo jate sudhu client-er bill gulo ase
-//     const summaries = await BillingSummary.find({ 
-//       customerId: customerId,
-//       summaryType: "client" 
-//     }).sort({ createdAt: 1 }); // Purono theke natun (Ascending)
-
-//     return NextResponse.json({
-//       success: true,
-//       data: summaries,
-//     });
-//   } catch (error) {
-//     console.error("Billing Summary Fetch Error:", error);
-//     return NextResponse.json(
-//       { success: false, message: error.message },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-
-
-
-
 import { NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import BillingSummary from "@/models/BillingSummary";
 import Payment from "@/models/Payment";
 import customers from "@/models/customers";
-import BillingSummary from "@/models/BillingSummary";
-import connectDB from "@/lib/db";
+import mongoose from "mongoose";
 
 export async function GET(req, { params }) {
   try {
     await connectDB();
-    const { customerId } = await params;
+    const resolvedParams = await params;
+    const { customerId } = resolvedParams;
 
-    // ৩টি ডাটা একসাথে ফেচ করা হচ্ছে
+    if (!mongoose.Types.ObjectId.isValid(customerId)) {
+      return NextResponse.json({ success: false, message: "Invalid ID" }, { status: 400 });
+    }
+
+    const objId = new mongoose.Types.ObjectId(customerId);
+
+
     const [customer, billings, payments] = await Promise.all([
-      customers.findById(customerId).lean(),
-      BillingSummary.find({ customerId, summaryType: "client" }).sort({ createdAt: 1 }).lean(),
-      Payment.find({ user: customerId }).sort({ date: 1 }).lean()
+      customers.findById(objId),
+      BillingSummary.find({ customerId: objId }).sort({ createdAt: 1 }),
+      Payment.find({ user: objId }).sort({ date: 1 }) 
     ]);
 
     if (!customer) {
@@ -56,14 +30,9 @@ export async function GET(req, { params }) {
 
     return NextResponse.json({
       success: true,
-      data: {
-        customer,
-        billings,
-        payments
-      }
+      data: { customer, billings, payments }
     });
   } catch (error) {
-    console.error("Ledger API Error:", error);
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

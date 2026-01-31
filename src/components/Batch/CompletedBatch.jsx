@@ -1,231 +1,18 @@
-// "use client";
-
-// import React, { useEffect, useMemo, useState } from "react";
-// import { FaRegEdit, FaSave } from "react-icons/fa";
-// import { toast } from "react-toastify";
-
-// const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
-//   const [summaries, setSummaries] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   // Edit state
-//   const [editingId, setEditingId] = useState(null);
-//   const [editValues, setEditValues] = useState({
-//     price: "",
-//     total: "",
-//   });
-
-//   // Fetch summaries
-//   useEffect(() => {
-//     const fetchSummaries = async () => {
-//       try {
-//         const res = await fetch(
-//           `/api/batch/completed/billing-summary/${orderId}`
-//         );
-//         const data = await res.json();
-
-//         if (!res.ok) throw new Error();
-
-//         setSummaries(data.data);
-//       } catch {
-//         toast.error("Failed to load billing summaries");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     if (orderId) fetchSummaries();
-//   }, [orderId]);
-
-//   // Group by summaryType
-//   const groupedSummaries = useMemo(() => {
-//     return summaries?.reduce((acc, item) => {
-//       if (!acc[item.summaryType]) acc[item.summaryType] = [];
-//       acc[item.summaryType].push(item);
-//       return acc;
-//     }, {});
-//   }, [summaries]);
-
-//   // Edit handlers
-//   const handleEdit = (item) => {
-//     setEditingId(item._id);
-//     setEditValues({
-//       price: item.price,
-//       total: item.total,
-//     });
-//   };
-
-//   const handleSave = async (id) => {
-//     try {
-//       const res = await fetch(`/api/batch/completed/update-billing/${id}`, {
-//         method: "PUT",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(editValues),
-//       });
-
-//       if (!res.ok) throw new Error();
-
-//       setSummaries((prev) =>
-//         prev?.map((item) =>
-//           item._id === id ? { ...item, ...editValues } : item
-//         )
-//       );
-
-//       setEditingId(null);
-//       toast.success("Billing updated successfully");
-//     } catch {
-//       toast.error("Failed to update billing");
-//     }
-//   };
-
-//   return (
-//     <div className="p-6 min-h-screen">
-//       <div className="max-w-6xl mx-auto">
-//         {/* Header */}
-//         <h1 className="text-xl mb-6">Client (Name ex: {clientName}) Billing</h1>
-
-//         {loading && <p className="text-center">Loading summaries...</p>}
-
-//         {!loading && summaries.length === 0 && (
-//           <p className="text-center text-gray-500">
-//             No billing summaries found.
-//           </p>
-//         )}
-
-//         {!loading &&
-//           Object.entries(groupedSummaries).map(([type, items]) => (
-//             <div key={type} className="mb-10">
-//               {/* Section Header */}
-//               <h2 className="text-lg font-semibold mb-4 capitalize border-b pb-2">
-//                 {type} Billing
-//               </h2>
-
-//               <div className="overflow-x-auto">
-//                 <div className="space-y-4 min-w-[700px] w-max">
-//                   {items?.map((item) => (
-//                  <div
-//                  key={item._id}
-//                  className="flex items-center gap-2 bg-[#f9f3d1] px-3 py-2 rounded-xl border border-gray-300 w-fit min-w-[520px]"
-//                >
-               
-                 
-//                       {/* Batch Info */}
-//                       <div className="flex-1 bg-[#b0b4b8] p-3 rounded-2xl border min-h-[60px] flex items-center">
-//                         <p className="text-sm font-medium">
-//                           {item.batchName} + {item.summaryType} + {item.colour}{" "}
-//                           + {item.finishingType}
-//                         </p>
-//                       </div>
-
-//                       {/* Qty */}
-//                       <div className="w-20 bg-[#b0b4b8] p-2 rounded-xl border text-center min-h-[60px] flex flex-col justify-center">
-//                         <span className="text-xs">গজ</span>
-//                         <span className="font-bold text-sm">
-//                           {item.totalQty}
-//                         </span>
-//                       </div>
-
-//                       <div className="text-red-600 text-4xl font-bold">×</div>
-
-//                       {/* Price Input Section */}
-//                       <div className="w-20 bg-[#b0b4b8] p-2 rounded-xl border text-center min-h-[60px] flex flex-col justify-center">
-//                         <span className="text-xs">Price</span>
-//                         {editingId === item._id ? (
-//                           <input
-//                             type="number"
-//                             value={editValues.price}
-//                             onChange={(e) => {
-//                               const val = e.target.value;
-//                               const newPrice = parseFloat(val);
-//                               // Price চেঞ্জ করলে Total অটো আপডেট হবে এবং ১ ঘর দশমিক থাকবে
-//                               const calculatedTotal = isNaN(newPrice)
-//                                 ? ""
-//                                 : (newPrice * item.totalQty).toFixed(1);
-
-//                               setEditValues({
-//                                 price: val, // ইনপুট যেমন আছে তেমনই থাকবে (টাইপিং এর সুবিধার জন্য)
-//                                 total: calculatedTotal,
-//                               });
-//                             }}
-//                             className="w-full text-sm text-center rounded"
-//                           />
-//                         ) : (
-//                           <span className="font-bold text-sm">
-//                             {item.price}
-//                           </span>
-//                         )}
-//                       </div>
-
-//                       {/* Equals */}
-//                       <div className="space-y-1">
-//                         <div className="w-6 h-1 bg-red-600"></div>
-//                         <div className="w-6 h-1 bg-red-600"></div>
-//                       </div>
-
-//                       {/* Total Input Section */}
-//                       <div className="w-20 bg-[#b0b4b8] p-2 rounded-2xl border text-center min-h-[60px] flex flex-col justify-center">
-//                         <span className="text-xs">Total</span>
-//                         {editingId === item._id ? (
-//                           <input
-//                             type="number"
-//                             value={editValues.total}
-//                             onChange={(e) => {
-//                               const val = e.target.value;
-//                               const newTotal = parseFloat(val);
-//                               const calculatedPrice =
-//                                 isNaN(newTotal) || !item.totalQty
-//                                   ? ""
-//                                   : (newTotal / item.totalQty).toFixed(1);
-
-//                               setEditValues({
-//                                 total: val,
-//                                 price: calculatedPrice,
-//                               });
-//                             }}
-//                             className="w-full text-sm text-center rounded"
-//                           />
-//                         ) : (
-//                           <span className="font-bold text-sm">
-//                             {item.total}
-//                           </span>
-//                         )}
-//                       </div>
-
-//                       {/* Action */}
-//                       <button
-//                         onClick={() =>
-//                           editingId === item._id
-//                             ? handleSave(item._id)
-//                             : handleEdit(item)
-//                         }
-//                         className="bg-[#8cc48c] px-4 py-2 rounded-2xl border h-[60px] w-24 flex items-center justify-center"
-//                       >
-//                         {editingId === item._id ? <FaSave /> : <FaRegEdit />}
-//                       </button>
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div>
-//             </div>
-//           ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default CompletedBatch;
-
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { FaRegEdit, FaSave, FaTimes } from "react-icons/fa";
+import { FaRegEdit, FaSave, FaTimes, FaSearch } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
+const CompletedBatch = ({ orderId }) => {
   const [summaries, setSummaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editValues, setEditValues] = useState({ price: "", total: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  
+  const BILLING_CATEGORIES = ["client", "dyeing", "calender"];
 
   useEffect(() => {
     const fetchSummaries = async () => {
@@ -233,7 +20,7 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
         const res = await fetch(`/api/batch/completed/billing-summary/${orderId}`);
         const data = await res.json();
         if (!res.ok) throw new Error();
-        setSummaries(data.data);
+        setSummaries(data.data || []);
       } catch {
         toast.error("Failed to load billing summaries");
       } finally {
@@ -243,13 +30,21 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
     if (orderId) fetchSummaries();
   }, [orderId]);
 
-  const groupedSummaries = useMemo(() => {
-    return summaries?.reduce((acc, item) => {
+ 
+  const processedData = useMemo(() => {
+
+    const filtered = summaries?.filter((item) => {
+      if (!searchTerm) return true;
+      return item.invoiceNumber?.toString().toLowerCase().includes(searchTerm.toLowerCase());
+    });
+
+  
+    return filtered?.reduce((acc, item) => {
       if (!acc[item.summaryType]) acc[item.summaryType] = [];
       acc[item.summaryType].push(item);
       return acc;
     }, {});
-  }, [summaries]);
+  }, [summaries, searchTerm]);
 
   const handleEdit = (item) => {
     setEditingId(item._id);
@@ -264,7 +59,9 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
         body: JSON.stringify(editValues),
       });
       if (!res.ok) throw new Error();
-      setSummaries((prev) => prev?.map((item) => (item._id === id ? { ...item, ...editValues } : item)));
+      setSummaries((prev) =>
+        prev?.map((item) => (item._id === id ? { ...item, ...editValues } : item))
+      );
       setEditingId(null);
       toast.success("Billing updated");
     } catch {
@@ -273,111 +70,133 @@ const CompletedBatch = ({ orderId, clientName = "J.M Fabrics" }) => {
   };
 
   return (
-    <div className="w-full bg-white">
-      <div className="p-4 border-b">
-        <h1 className="text-md font-bold text-gray-700">
-          Client ({clientName}) Billing
-        </h1>
+    <div className="w-full bg-gray-50 min-h-screen">
+      {/* search section*/}
+      <div className="p-4 bg-white border-b sticky top-0 z-10 shadow-sm">
+        <h1 className="text-md font-bold text-gray-700 mb-3">Client Billing</h1>
+        <div className="relative max-w-md">
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <FaSearch className="text-gray-400" size={14} />
+          </span>
+          <input
+            type="text"
+            placeholder="Search by Invoice ID..."
+            className="w-full pl-10 pr-4 py-2 bg-gray-100 border border-transparent rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="p-3">
         {loading ? (
-          <p className="text-center text-sm py-4">Loading...</p>
-        ) : summaries.length === 0 ? (
-          <p className="text-center text-sm text-gray-400">No summaries found.</p>
+          <p className="text-center text-sm py-10 text-gray-500">Loading...</p>
         ) : (
-          Object.entries(groupedSummaries).map(([type, items]) => (
-            <div key={type} className="mb-6">
-              <h2 className="text-xs font-bold uppercase text-gray-500 mb-3 border-l-4 border-blue-500 pl-2">
-                {type} Billing
-              </h2>
+          //service sequience wise loop 
+          BILLING_CATEGORIES.map((type) => {
+            const items = processedData?.[type] || [];
+            return (
+              <div key={type} className="mb-6">
+                <h2 className="text-[11px] font-black uppercase text-gray-500 mb-3 border-l-4 border-blue-500 pl-2 tracking-wider">
+                  {type} Billing
+                </h2>
 
-              <div className="space-y-3">
-                {items?.map((item) => (
-                  <div key={item._id} className="bg-[#fdf8e1] border border-gray-200 rounded-lg p-2 shadow-sm">
-                    {/* Top Section: Batch Info */}
-                    <div className="bg-[#b0b4b8] p-2 rounded-lg mb-2 border border-gray-300">
-                      <p className="text-[14px] font-bold text-gray-800 leading-tight uppercase">
-                        {item?.batchName} • {item?.colour} • {item?.finishingType}
-                      </p>
+                <div className="space-y-3">
+                  {items?.length > 0 ? (
+                    items?.map((item) => (
+                      <div key={item._id} className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
+                        {/* Batch Info Card */}
+                        <div className="bg-gray-100 p-2 rounded-lg mb-2 border border-gray-200">
+                          <p className="text-[13px] font-bold text-gray-800 leading-tight uppercase">
+                            {item?.batchName} • {item?.colour} • {item?.finishingType} • 
+                            <span className="text-blue-600 ml-1">{item?.invoiceNumber}</span>
+                          </p>
+                        </div>
+
+                        {/* Calculation Area */}
+                        <div className="flex items-center justify-between gap-1">
+                          {/* Qty */}
+                          <div className="flex-1 bg-gray-50 rounded-lg py-1 text-center border border-gray-200">
+                            <p className="text-[10px] text-gray-500 font-bold">Goj</p>
+                            <p className="text-xs font-black">{item.totalQty}</p>
+                          </div>
+
+                          <span className="text-red-400 font-bold text-xs">×</span>
+
+                          {/* Price Input/Text */}
+                          <div className={`flex-1 rounded-lg py-1 text-center border ${editingId === item._id ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50'}`}>
+                            <p className="text-[10px] text-gray-500 font-bold uppercase">Price</p>
+                            {editingId === item._id ? (
+                              <input
+                                type="number"
+                                className="w-full bg-transparent text-center font-bold text-xs outline-none"
+                                value={editValues.price}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const newPrice = parseFloat(val);
+                                  const total = isNaN(newPrice) ? "" : (newPrice * item.totalQty).toFixed(1);
+                                  setEditValues({ ...editValues, price: val, total });
+                                }}
+                              />
+                            ) : (
+                              <p className="text-xs font-black">৳{item.price || "0"}</p>
+                            )}
+                          </div>
+
+                          <div className="flex flex-col gap-[2px]">
+                            <div className="w-3 h-[1.5px] bg-gray-400"></div>
+                            <div className="w-3 h-[1.5px] bg-gray-400"></div>
+                          </div>
+
+                          {/* Total Input/Text */}
+                          <div className={`flex-1 rounded-lg py-1 text-center border ${editingId === item._id ? 'border-blue-400 bg-green-50' : 'border-gray-200 bg-gray-50'}`}>
+                            <p className="text-[10px] text-gray-500 font-bold uppercase">Total</p>
+                            {editingId === item._id ? (
+                              <input
+                                type="number"
+                                className="w-full bg-transparent text-center font-bold text-xs outline-none"
+                                value={editValues.total}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const newTotal = parseFloat(val);
+                                  const price = (isNaN(newTotal) || !item.totalQty) ? "" : (newTotal / item.totalQty).toFixed(1);
+                                  setEditValues({ ...editValues, total: val, price });
+                                }}
+                              />
+                            ) : (
+                              <p className="text-xs font-black text-gray-700">৳{item.total || "0"}</p>
+                            )}
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-1 pl-1">
+                            <button
+                              onClick={() => (editingId === item._id ? handleSave(item._id) : handleEdit(item))}
+                              className={`p-2 rounded-lg border transition-all ${
+                                editingId === item._id ? "bg-blue-600 text-white" : "bg-blue-500 text-white"
+                              }`}
+                            >
+                              {editingId === item._id ? <FaSave size={12} /> : <FaRegEdit size={12} />}
+                            </button>
+                            {editingId === item._id && (
+                              <button onClick={() => setEditingId(null)} className="p-2 bg-gray-200 rounded-lg text-gray-600">
+                                <FaTimes size={12} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    
+                    <div className="py-4 text-center border border-dashed border-gray-300 rounded-xl bg-gray-50/50">
+                      <p className="text-[10px] text-gray-400 italic">No {type} records found.</p>
                     </div>
-
-                    {/* Calculation Section */}
-                    <div className="flex items-center justify-between gap-1">
-                      {/* Qty */}
-                      <div className="flex-1 bg-[#b0b4b8] rounded-lg py-1 text-center border border-gray-300 min-w-[50px]">
-                        <p className="text-[12px] text-gray-600 uppercase">গজ</p>
-                        <p className="text-xs font-bold">{item.totalQty}</p>
-                      </div>
-
-                      <span className="text-red-500 font-bold text-sm">×</span>
-
-                      {/* Price */}
-                      <div className="flex-1 bg-[#b0b4b8] rounded-lg py-1 text-center border border-gray-300 min-w-[50px]">
-                        <p className="text-[12px] text-gray-600 uppercase">Price</p>
-                        {editingId === item._id ? (
-                          <input
-                            type="number"
-                            className="w-full bg-transparent text-center font-bold text-[12px] outline-none border-b border-blue-600"
-                            value={editValues.price}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              const newPrice = parseFloat(val);
-                              const calculatedTotal = isNaN(newPrice) ? "" : (newPrice * item.totalQty).toFixed(1);
-                              setEditValues({ ...editValues, price: val, total: calculatedTotal });
-                            }}
-                          />
-                        ) : (
-                          <p className="text-xs font-bold">{item.price || "0"}</p>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col gap-[2px]">
-                         <div className="w-3 h-[2px] bg-red-600"></div>
-                         <div className="w-3 h-[2px] bg-red-600"></div>
-                      </div>
-
-                      {/* Total */}
-                      <div className="flex-1 bg-[#b0b4b8] rounded-lg py-1 text-center border border-gray-300 min-w-[60px]">
-                        <p className="text-[12px] text-gray-600 uppercase">Total</p>
-                        {editingId === item._id ? (
-                          <input
-                            type="number"
-                            className="w-full bg-transparent text-center font-bold text-xs outline-none border-b border-blue-600"
-                            value={editValues.total}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              const newTotal = parseFloat(val);
-                              const calculatedPrice = isNaN(newTotal) || !item.totalQty ? "" : (newTotal / item.totalQty).toFixed(1);
-                              setEditValues({ ...editValues, total: val, price: calculatedPrice });
-                            }}
-                          />
-                        ) : (
-                          <p className="text-xs font-bold">{item.total || "0"}</p>
-                        )}
-                      </div>
-
-                      {/* Action */}
-                      <button
-                        onClick={() => (editingId === item._id ? handleSave(item._id) : handleEdit(item))}
-                        className={`p-2 rounded-lg border transition-colors ${
-                          editingId === item._id ? "bg-blue-500 text-white" : "bg-[#8cc48c] text-gray-800"
-                        }`}
-                      >
-                        {editingId === item._id ? <FaSave size={12} /> : <FaRegEdit size={12} />}
-                      </button>
-                      
-                      {editingId === item._id && (
-                        <button onClick={() => setEditingId(null)} className="text-gray-400">
-                          <FaTimes size={12} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

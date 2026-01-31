@@ -33,7 +33,7 @@ const OrderFilters = ({
       {/* Search */}
       <input
         type="text"
-        placeholder="Search anything..."
+        placeholder="Search order or and coustomer name..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="w-full sm:w-96 border border-gray-300 rounded px-4 py-2"

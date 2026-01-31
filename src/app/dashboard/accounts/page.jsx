@@ -149,7 +149,7 @@ export default function Page() {
   const currentCustomer = users.find((u) => u._id === selectedUserId);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="py-14 md:py-16 lg:py-6 max-w-4xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold border-b pb-2">Accounts Ledger (Credit Only)</h1>
 
       {/* ✅ Searchable Dropdown */}
