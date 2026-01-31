@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import OrderStatus from "../OrderStatus/OrderStatus";
 import OrderInvoicePrint from "../Print/OrderInvoicePrint/OrderInvoicePrint";
 
-
 const OrderSideModal = ({
   isModalOpen,
   loadingOrder,
