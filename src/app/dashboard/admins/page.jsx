@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
@@ -87,6 +88,8 @@ const AdminPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto py-16">
+ <Link href={'/dashboard/signup'}>
+ Create Admin</Link>
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">
         Admin List
       </h1>
