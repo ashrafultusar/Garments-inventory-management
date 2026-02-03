@@ -303,7 +303,7 @@ export default function Page() {
             <div className="md:col-span-2 flex gap-3">
               <button
                 type="submit"
-                className={`flex-1 py-3 rounded-xl font-bold text-white shadow-lg transition-all ${
+                className={`flex-1 cursor-pointer py-3 rounded-xl font-bold text-white shadow-lg transition-all ${
                   form.id
                     ? "bg-orange-500 hover:bg-orange-600"
                     : "bg-blue-600 hover:bg-blue-700"

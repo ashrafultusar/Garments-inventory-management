@@ -273,12 +273,12 @@ const Sidebar = () => {
     <>
       {/* ===== MOBILE HEADER ===== */}
       <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#1e2634] text-white fixed top-0 left-0 right-0 z-50">
-        <div className="flex items-center gap-2">
+        <Link href={'/'} className="flex items-center gap-2">
           <div className="bg-blue-600 p-1.5 rounded-md">
              <Image src="/Image/logo.png" alt="Logo" width={20} height={20} className="brightness-200" />
           </div>
           <span className="text-sm font-semibold">Admin Panel</span>
-        </div>
+        </Link>
         <button className="cursor-pointer" onClick={() => setIsMobileOpen(!isMobileOpen)}>
           {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
