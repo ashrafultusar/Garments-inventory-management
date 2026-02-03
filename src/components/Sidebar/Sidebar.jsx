@@ -298,7 +298,7 @@ const Sidebar = () => {
         <div className="flex flex-col h-full">
           
           {/* ===== LOGO SECTION ===== */}
-          <div className="relative flex items-center gap-3 px-4 py-6">
+          <Link href={'/'} className="relative flex items-center gap-3 px-4 py-6">
             <div className="bg-blue-600 p-2 rounded-md shrink-0">
                <Image src="/Image/logo.png" alt="Logo" width={24} height={24} className="brightness-200" />
             </div>
@@ -318,7 +318,7 @@ const Sidebar = () => {
             >
               {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
             </button>
-          </div>
+          </Link>
 
           {/* ===== NAVIGATION MENU ===== */}
           <div className="flex-1 overflow-y-auto px-3">

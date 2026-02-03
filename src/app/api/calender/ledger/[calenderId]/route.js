@@ -15,18 +15,18 @@ export async function GET(req, { params }) {
     }
 
     const billings = await BillingSummary.find({
-      calenderId,
+      calenderId: calenderId,
       summaryType: "calender",
     });
 
     const payments = await Payment.find({
-      calenderId,
+      calenderId: calenderId,
     });
 
     return NextResponse.json({
       success: true,
       data: {
-        customer: calender,
+        calender: calender,
         billings,
         payments,
       },

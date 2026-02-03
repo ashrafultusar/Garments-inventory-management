@@ -13,11 +13,11 @@ export async function GET(req) {
     let query = {};
     if (type === "customer") query = { userId: id };
     else if (type === "dyeing") query = { dyeingId: id };
-    else if (type === "calendar") query = { calendarId: id };
-    else query = { user: id }; // আগের ডাটার জন্য ব্যাকআপ
+    else if (type === "calendar") query = { calenderId: id }; 
+    else query = { user: id };
 
-    const payments = await Payment.find(query).sort({ date: -1 });
-    return NextResponse.json(payments, { status: 200 });
+    const payments = await Payment.find(query).sort({ date: -1 }).lean();
+    return NextResponse.json(payments);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -33,7 +33,6 @@ export async function POST(req) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    // টাইপ অনুযায়ী ডাইনামিক অবজেক্ট তৈরি
     const paymentData = {
       amount: Number(amount),
       method,
@@ -41,15 +40,12 @@ export async function POST(req) {
       date: date || new Date(),
     };
 
-   
-    const validId = new mongoose.Types.ObjectId(userId);
-
+    // ✅ Using 'calenderId' to match the updated Model
     if (type === "customer") paymentData.userId = userId;
     else if (type === "dyeing") paymentData.dyeingId = userId;
-    else if (type === "calendar") paymentData.calendarId = userId;
+    else if (type === "calendar") paymentData.calenderId = userId; 
 
     const payment = await Payment.create(paymentData);
-
     return NextResponse.json(payment, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

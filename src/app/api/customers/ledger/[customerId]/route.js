@@ -21,7 +21,7 @@ export async function GET(req, { params }) {
     const [customer, billings, payments] = await Promise.all([
       customers.findById(objId),
       BillingSummary.find({ customerId: objId }).sort({ createdAt: 1 }),
-      Payment.find({ user: objId }).sort({ date: 1 }) 
+      Payment.find({ userId: objId }).sort({ date: 1 }) 
     ]);
 
     if (!customer) {
