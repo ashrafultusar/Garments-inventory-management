@@ -1,22 +1,25 @@
 import connectDB from "@/lib/db";
 import Payment from "@/models/Payment";
-
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 
 export async function GET(req) {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const id = searchParams.get("userId");
+    const type = searchParams.get("type");
 
-    if (!userId) {
-      return new Response(JSON.stringify({ error: "User ID missing" }), { status: 400 });
-    }
+    let query = {};
+    if (type === "customer") query = { userId: id };
+    else if (type === "dyeing") query = { dyeingId: id };
+    else if (type === "calendar") query = { calendarId: id };
+    else query = { user: id }; // আগের ডাটার জন্য ব্যাকআপ
 
-    const payments = await Payment.find({ user: userId }).sort({ date: -1 });
-    return new Response(JSON.stringify(payments), { status: 200 });
-
+    const payments = await Payment.find(query).sort({ date: -1 });
+    return NextResponse.json(payments, { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -24,23 +27,32 @@ export async function POST(req) {
   try {
     await connectDB();
     const body = await req.json();
-   
-    if (!body.userId || !body.amount) {
-       return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400 });
+    const { userId, type, amount, method, description, date } = body;
+
+    if (!userId || !amount) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const payment = await Payment.create({
-      user: body.userId,
-      amount: body.amount,
-      method: body.method,
-      description: body.description,
-      date: body.date || new Date(),
-    });
+    // টাইপ অনুযায়ী ডাইনামিক অবজেক্ট তৈরি
+    const paymentData = {
+      amount: Number(amount),
+      method,
+      description,
+      date: date || new Date(),
+    };
 
-    return new Response(JSON.stringify(payment), { status: 201 });
+   
+    const validId = new mongoose.Types.ObjectId(userId);
+
+    if (type === "customer") paymentData.userId = userId;
+    else if (type === "dyeing") paymentData.dyeingId = userId;
+    else if (type === "calendar") paymentData.calendarId = userId;
+
+    const payment = await Payment.create(paymentData);
+
+    return NextResponse.json(payment, { status: 201 });
   } catch (error) {
-    console.error("POST Error:", error); 
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -50,12 +62,14 @@ export async function PUT(req) {
     const body = await req.json();
     const { id, ...updateData } = body;
 
-    if (!id) return new Response(JSON.stringify({ error: "ID missing" }), { status: 400 });
+    if (!id) return NextResponse.json({ error: "ID missing" }, { status: 400 });
 
-    const updatedPayment = await Payment.findByIdAndUpdate(id, updateData, { new: true });
-    return new Response(JSON.stringify(updatedPayment), { status: 200 });
+    const updatedPayment = await Payment.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+    return NextResponse.json(updatedPayment, { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -65,11 +79,11 @@ export async function DELETE(req) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    if (!id) return new Response(JSON.stringify({ error: "ID missing" }), { status: 400 });
+    if (!id) return NextResponse.json({ error: "ID missing" }, { status: 400 });
 
     await Payment.findByIdAndDelete(id);
-    return new Response(JSON.stringify({ message: "Deleted" }), { status: 200 });
+    return NextResponse.json({ message: "Deleted" }, { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

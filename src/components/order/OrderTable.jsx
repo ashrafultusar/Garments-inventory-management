@@ -2,17 +2,30 @@ import React from "react";
 import { LuTrash2 } from "react-icons/lu";
 
 const getStatusColor = (status) => {
-  switch (status) {
-    case "Delivered":
-      return "bg-purple-100 text-purple-700";
-    case "Billing":
-      return "bg-yellow-100 text-yellow-700";
-    case "Pending":
-      return "bg-orange-100 text-orange-700";
-    case "In Process":
-      return "bg-blue-100 text-blue-700";
+  
+  const s = status?.toLowerCase();
+
+  switch (s) {
+    case "delivered":
+    case "completed":
+      return "bg-green-200 text-green-900 border-green-300";
+    case "canceled":
+    case "cancelled":
+      return "bg-red-100 text-red-700 border-red-200";
+    case "pending":
+      return "bg-orange-100 text-orange-700 border-orange-200";
+    case "inprocess":
+    case "in process":
+    case "processing":
+      return "bg-blue-100 text-blue-700 border-blue-200";
+    case "batch":
+      return "bg-cyan-100 text-cyan-700 border-cyan-200";
+    case "calender":
+      return "bg-indigo-100 text-indigo-700 border-indigo-200";
+    case "billing":
+      return "bg-purple-100 text-purple-700 border-purple-200";
     default:
-      return "bg-gray-100 text-gray-700";
+      return "bg-gray-100 text-gray-600 border-gray-200";
   }
 };
 
@@ -30,7 +43,6 @@ const OrderTable = ({ orders, handleOrderClick, confirmDelete }) => {
       </div>
     );
   }
- 
 
   return (
     <div className="overflow-x-auto rounded-lg shadow bg-white">
